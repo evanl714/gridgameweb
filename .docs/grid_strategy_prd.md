@@ -13,19 +13,23 @@
 ## Game Overview
 
 ### Genre
+
 Turn-based strategy with resource management and tactical combat
 
 ### Platform Priority
+
 1. **Primary**: web browser
 2. **Secondary**: iOS
 3. **Future**: Desktop/Steam
 
 ### Session Length
+
 5-15 minutes per game
 
 ### Core Gameplay Loop
+
 1. **Resource Phase**: Workers automatically collect resources when positioned
-2. **Action Phase**: Move units, engage in combat, position strategically  
+2. **Action Phase**: Move units, engage in combat, position strategically
 3. **Build Phase**: Spend resources on new units
 4. **Turn Resolution**: End turn, switch to opponent
 
@@ -34,12 +38,14 @@ Turn-based strategy with resource management and tactical combat
 ## Core Mechanics
 
 ### Map & Board
+
 - **Grid Size**: 25x25 squares
 - **Visual Style**: Chess-board alternating light/dark squares
 - **Resource Nodes**: 9 symmetrically placed nodes with finite resources (100 each)
 - **Starting Positions**: Opposing corners with bases and 2 workers each
 
 ### Resource System
+
 - **Single Resource Type**: Energy/Crystals
 - **Collection Method**: Workers must physically move to resource nodes
 - **Transport Required**: Workers carry 10 resources per trip back to base
@@ -48,14 +54,15 @@ Turn-based strategy with resource management and tactical combat
 
 ### Unit Types & Stats
 
-| Unit Type | Cost | HP | Damage | Role | Symbol |
-|-----------|------|----|----|------|--------|
-| Worker | 10 | 1 | 0 | Resource gathering | ♦ |
-| Scout | 15 | 1 | 1 | Fast reconnaissance | ♙ |
-| Infantry | 25 | 3 | 2 | Main battle unit | ♗ |
-| Heavy | 40 | 5 | 3 | Elite combat unit | ♖ |
+| Unit Type | Cost | HP  | Damage | Role                | Symbol |
+| --------- | ---- | --- | ------ | ------------------- | ------ |
+| Worker    | 10   | 1   | 0      | Resource gathering  | ♦     |
+| Scout     | 15   | 1   | 1      | Fast reconnaissance | ♙      |
+| Infantry  | 25   | 3   | 2      | Main battle unit    | ♗      |
+| Heavy     | 40   | 5   | 3      | Elite combat unit   | ♖      |
 
 ### Combat System
+
 - **Deterministic**: No randomness, pure calculation
 - **Damage Resolution**: Attacking unit deals full damage to target
 - **HP System**: Units destroyed when HP reaches 0
@@ -63,6 +70,7 @@ Turn-based strategy with resource management and tactical combat
 - **Range**: All combat is melee (adjacent squares)
 
 ### Building System
+
 - **Single Building Type**: Base (starting structure)
 - **Production**: All units built adjacent to base
 - **Build Limitations**: Requires empty adjacent square
@@ -73,16 +81,18 @@ Turn-based strategy with resource management and tactical combat
 ## User Interface Requirements
 
 ### Visual Design
+
 - **Minimalist Aesthetic**: Clean, chess-like appearance
 - **High Contrast**: Clear distinction between players, units, and terrain
 - **Mobile Optimized**: Large enough touch targets, readable at small sizes
-- **Color Scheme**: 
+- **Color Scheme**:
   - Player 1: Blue (#4169e1)
   - Player 2: Red (#dc143c)
   - Resources: Green (#32cd32)
   - Board: Light/dark squares like chess
 
 ### Control Scheme
+
 - **Primary Interaction**: Touch/click to select and move
 - **Selection Feedback**: Yellow border around selected unit
 - **Move Preview**: Green borders show valid destinations
@@ -90,6 +100,7 @@ Turn-based strategy with resource management and tactical combat
 - **Build Interface**: Clear buttons with costs and availability
 
 ### UI Elements
+
 - **Resource Counter**: Always visible for both players
 - **Unit Count**: Live count of active units
 - **Turn Indicator**: Clear display of active player
@@ -101,6 +112,7 @@ Turn-based strategy with resource management and tactical combat
 ## Game Flow
 
 ### Match Setup
+
 1. Generate symmetric 25x25 board
 2. Place resource nodes in predetermined locations
 3. Position player bases in opposite corners
@@ -108,7 +120,8 @@ Turn-based strategy with resource management and tactical combat
 5. Set starting resources (20 per player)
 
 ### Turn Structure
-1. **Player Action Phase**: 
+
+1. **Player Action Phase**:
    - Select and move units (unlimited moves per turn)
    - Build new units from base
    - All actions completed before ending turn
@@ -118,6 +131,7 @@ Turn-based strategy with resource management and tactical combat
    - Turn passes to opponent
 
 ### Victory Conditions
+
 - **Primary Win**: Destroy enemy base
 - **Secondary Win**: Opponent forfeit/disconnect
 - **Draw Conditions**: Mutual agreement or stalemate detection
@@ -127,6 +141,7 @@ Turn-based strategy with resource management and tactical combat
 ## Technical Requirements
 
 ### Performance Targets
+
 - **Load Time**: <3 seconds on mobile
 - **Frame Rate**: 60 FPS UI, smooth animations
 - **Memory Usage**: <100MB RAM on mobile devices
@@ -135,17 +150,20 @@ Turn-based strategy with resource management and tactical combat
 ### Platform Specifications
 
 #### Mobile (Primary)
+
 - **iOS**: 12.0+ (iPhone 6s and newer)
 - **Android**: API 23+ (Android 6.0+)
 - **Screen Support**: 4.7" to 6.7" phones, responsive design
 - **Input**: Touch-optimized with haptic feedback
 
 #### Web (Secondary)
+
 - **Browsers**: Chrome 80+, Safari 13+, Firefox 75+
 - **Technologies**: HTML5, Canvas/WebGL, responsive CSS
 - **Input**: Mouse and keyboard support
 
 ### Data Requirements
+
 - **Offline Play**: Full functionality without internet
 - **Save States**: Local game state preservation
 - **Multiplayer**: Future online capability preparation
@@ -156,18 +174,21 @@ Turn-based strategy with resource management and tactical combat
 ## User Experience
 
 ### Onboarding
+
 1. **Interactive Tutorial**: 3-5 minute guided first game
 2. **Core Concepts**: Resource gathering, unit movement, combat
 3. **Strategy Hints**: Basic opening principles and unit roles
 4. **Practice Mode**: vs. AI before multiplayer
 
 ### Accessibility
+
 - **Visual**: High contrast mode, colorblind-friendly options
 - **Audio**: Sound effects with visual alternatives
 - **Motor**: Large touch targets, gesture alternatives
 - **Cognitive**: Clear visual hierarchy, undo functionality
 
 ### Quality of Life
+
 - **Move Confirmation**: Optional tap-to-confirm for important moves
 - **Game Speed**: Adjustable animation speeds
 - **Auto-Save**: Continuous state preservation
@@ -178,11 +199,13 @@ Turn-based strategy with resource management and tactical combat
 ## AI & Single Player
 
 ### AI Difficulty Levels
+
 1. **Beginner**: Basic resource gathering and random unit movement
 2. **Intermediate**: Focused economy with simple tactical awareness
 3. **Advanced**: Strategic planning, timing attacks, resource optimization
 
 ### AI Behavior Priorities
+
 1. **Economy**: Maintain 2-3 workers, expand to new resource nodes
 2. **Military**: Build balanced army composition
 3. **Strategy**: Control center resources, pressure enemy expansion
@@ -193,16 +216,19 @@ Turn-based strategy with resource management and tactical combat
 ## Multiplayer & Social
 
 ### Phase 1 (Launch)
+
 - **Local Multiplayer**: Pass-and-play on single device
 - **AI Opponents**: Three difficulty levels
 
 ### Phase 2 (Post-Launch)
+
 - **Online Multiplayer**: Real-time turn-based matches
 - **Matchmaking**: Skill-based rating system
 - **Friends**: Add friends, private matches
 - **Spectating**: Watch ongoing games
 
 ### Phase 3 (Future)
+
 - **Tournaments**: Organized competitive events
 - **Replays**: Save and share game recordings
 - **Community**: Forums, strategy guides, leaderboards
@@ -212,11 +238,13 @@ Turn-based strategy with resource management and tactical combat
 ## Monetization Strategy
 
 ### Free-to-Play Model
+
 - **Core Game**: Completely free
 - **No Pay-to-Win**: All gameplay features available to everyone
 - **Cosmetic Only**: Visual themes, unit skins, board designs
 
 ### Premium Options
+
 - **Theme Packs**: $1.99 - Alternative visual styles (medieval, sci-fi, etc.)
 - **Advanced AI**: $2.99 - Additional difficulty levels and personalities
 - **Pro Features**: $4.99 - Advanced statistics, replay analysis, tournament mode
@@ -226,20 +254,23 @@ Turn-based strategy with resource management and tactical combat
 ## Success Metrics
 
 ### Engagement
+
 - **Session Length**: Target 8-12 minutes average
 - **Games Per Session**: Target 2-3 games per app open
-- **Retention**: 
+- **Retention**:
   - Day 1: 40%
   - Day 7: 25%
   - Day 30: 15%
 
 ### Quality
+
 - **Game Completion Rate**: >85% of started games finished
 - **Crash Rate**: <1% of sessions
 - **Load Time**: <3 seconds average
 - **User Rating**: >4.2 stars across app stores
 
 ### Growth
+
 - **Organic Discovery**: 60% of installs from search/recommendation
 - **Word of Mouth**: 30% from social sharing
 - **Marketing**: 10% from paid acquisition
@@ -249,6 +280,7 @@ Turn-based strategy with resource management and tactical combat
 ## Development Phases
 
 ### Phase 1: Core Game (8 weeks)
+
 - ✅ Basic gameplay mechanics
 - ✅ AI opponent (beginner level)
 - ✅ Local multiplayer
@@ -256,6 +288,7 @@ Turn-based strategy with resource management and tactical combat
 - Polish and bug fixes
 
 ### Phase 2: Enhancement (6 weeks)
+
 - Advanced AI levels
 - Improved graphics and animations
 - Tutorial system
@@ -263,6 +296,7 @@ Turn-based strategy with resource management and tactical combat
 - Platform optimization
 
 ### Phase 3: Multiplayer (8 weeks)
+
 - Online multiplayer infrastructure
 - Matchmaking system
 - Friend system
@@ -270,6 +304,7 @@ Turn-based strategy with resource management and tactical combat
 - Leaderboards
 
 ### Phase 4: Growth (Ongoing)
+
 - Community features
 - Content updates
 - Platform expansion
@@ -281,16 +316,19 @@ Turn-based strategy with resource management and tactical combat
 ## Risk Assessment
 
 ### Technical Risks
+
 - **Performance**: 25x25 grid rendering on older mobile devices
 - **Battery**: Optimization required for extended play sessions
 - **Network**: Multiplayer synchronization and latency handling
 
 ### Design Risks
+
 - **Complexity**: Balance between depth and accessibility
 - **Session Length**: Ensuring games stay within 5-15 minute target
 - **Learning Curve**: Strategic depth without overwhelming new players
 
 ### Market Risks
+
 - **Competition**: Differentiation from existing strategy games
 - **Monetization**: Sustainable revenue without compromising gameplay
 - **Platform**: Apple/Google policy changes affecting distribution
@@ -300,18 +338,21 @@ Turn-based strategy with resource management and tactical combat
 ## Future Vision
 
 ### Year 1
+
 - Stable core game with active player base
 - Multiple AI difficulty levels
 - Robust online multiplayer
 - First cosmetic content packs
 
 ### Year 2
+
 - Tournament and esports features
 - Advanced replay and analysis tools
 - Community-generated content
 - Platform expansion (Steam, consoles)
 
 ### Year 3+
+
 - Map editor and custom scenarios
 - Campaign mode with story
 - Team-based multiplayer modes
@@ -319,7 +360,7 @@ Turn-based strategy with resource management and tactical combat
 
 ---
 
-*Document Version: 1.0*  
-*Last Updated: December 2024*  
-*Product Owner: [Name]*  
-*Development Team: [Team Name]*
+_Document Version: 1.0_  
+_Last Updated: December 2024_  
+_Product Owner: [Name]_  
+_Development Team: [Team Name]_

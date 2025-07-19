@@ -16,7 +16,7 @@ describe('Movement System Performance Tests', () => {
   describe('Large Scale Performance', () => {
     test('should handle 100+ units efficiently', () => {
       const startTime = performance.now();
-      
+
       // Create 100 units across the grid
       const units = [];
       for (let i = 0; i < 100; i++) {
@@ -34,7 +34,7 @@ describe('Movement System Performance Tests', () => {
 
       // Test movement range calculations for all units
       const rangeStartTime = performance.now();
-      units.forEach(unit => {
+      units.forEach((unit) => {
         gameState.getValidMovePositions(unit.id);
       });
       const rangeTime = performance.now() - rangeStartTime;
@@ -52,20 +52,22 @@ describe('Movement System Performance Tests', () => {
       }
 
       const startTime = performance.now();
-      
+
       // Perform 1000 movement-related operations
       for (let i = 0; i < 1000; i++) {
         const unit = units[i % units.length];
         if (unit) {
           // Mix of operations
           gameState.getValidMovePositions(unit.id);
-          gameState.calculateMovementCost(unit.id, 
-            Math.floor(Math.random() * 25), 
-            Math.floor(Math.random() * 25)
+          gameState.calculateMovementCost(
+            unit.id,
+            Math.floor(Math.random() * 25),
+            Math.floor(Math.random() * 25),
           );
-          gameState.canUnitMoveTo(unit.id, 
-            Math.floor(Math.random() * 25), 
-            Math.floor(Math.random() * 25)
+          gameState.canUnitMoveTo(
+            unit.id,
+            Math.floor(Math.random() * 25),
+            Math.floor(Math.random() * 25),
           );
         }
       }
@@ -85,7 +87,7 @@ describe('Movement System Performance Tests', () => {
       // Create and remove units multiple times
       for (let cycle = 0; cycle < 10; cycle++) {
         const createdUnits = [];
-        
+
         // Create units
         for (let i = 0; i < 10; i++) {
           const x = (i % 5) + (cycle % 3);
@@ -97,7 +99,7 @@ describe('Movement System Performance Tests', () => {
         }
 
         // Remove all created units
-        createdUnits.forEach(unitId => {
+        createdUnits.forEach((unitId) => {
           gameState.removeUnit(unitId);
         });
       }
@@ -120,7 +122,7 @@ describe('Movement System Performance Tests', () => {
 
     test('should handle movement state efficiently', () => {
       const unit = gameState.createUnit('scout', 1, 12, 12);
-      
+
       // Simulate many movement state changes
       const stateChanges = 1000;
       const startTime = performance.now();
@@ -129,10 +131,10 @@ describe('Movement System Performance Tests', () => {
         // Change movement state
         unit.resetActions();
         unit.useAction();
-        
+
         // Calculate ranges (common UI operation)
         gameState.getValidMovePositions(unit.id);
-        
+
         // Test movement validation
         gameState.canUnitMoveTo(unit.id, 12 + (i % 3) - 1, 12 + (i % 3) - 1);
       }
@@ -150,21 +152,33 @@ describe('Movement System Performance Tests', () => {
     test('should handle edge positions efficiently', () => {
       // Test performance at grid boundaries
       const edgePositions = [
-        { x: 0, y: 0 }, { x: 24, y: 0 }, { x: 0, y: 24 }, { x: 24, y: 24 },
-        { x: 0, y: 12 }, { x: 24, y: 12 }, { x: 12, y: 0 }, { x: 12, y: 24 }
+        { x: 0, y: 0 },
+        { x: 24, y: 0 },
+        { x: 0, y: 24 },
+        { x: 24, y: 24 },
+        { x: 0, y: 12 },
+        { x: 24, y: 12 },
+        { x: 12, y: 0 },
+        { x: 12, y: 24 },
       ];
 
       const startTime = performance.now();
 
       edgePositions.forEach((pos, index) => {
-        const unit = gameState.createUnit('worker', (index % 2) + 1, pos.x, pos.y);
+        const unit = gameState.createUnit(
+          'worker',
+          (index % 2) + 1,
+          pos.x,
+          pos.y,
+        );
         if (unit) {
           // Test movement calculations from edge positions
           for (let i = 0; i < 100; i++) {
             gameState.getValidMovePositions(unit.id);
-            gameState.calculateMovementCost(unit.id, 
-              Math.floor(Math.random() * 25), 
-              Math.floor(Math.random() * 25)
+            gameState.calculateMovementCost(
+              unit.id,
+              Math.floor(Math.random() * 25),
+              Math.floor(Math.random() * 25),
             );
           }
         }
@@ -191,7 +205,7 @@ describe('Movement System Performance Tests', () => {
       const startTime = performance.now();
 
       // Test movement calculations with dense grid
-      units.slice(0, 50).forEach(unit => {
+      units.slice(0, 50).forEach((unit) => {
         gameState.getValidMovePositions(unit.id);
       });
 
@@ -205,7 +219,7 @@ describe('Movement System Performance Tests', () => {
   describe('Event System Performance', () => {
     test('should handle movement events efficiently', () => {
       const eventsFired = [];
-      
+
       // Listen to movement events
       gameState.on('unitMoved', (data) => {
         eventsFired.push(data);
@@ -218,12 +232,14 @@ describe('Movement System Performance Tests', () => {
       for (let i = 0; i < 50; i++) {
         const targetX = 10 + (i % 3) - 1;
         const targetY = 10 + (Math.floor(i / 3) % 3) - 1;
-        
-        if (gameState.isValidPosition(targetX, targetY) && 
-            gameState.isPositionEmpty(targetX, targetY)) {
+
+        if (
+          gameState.isValidPosition(targetX, targetY) &&
+          gameState.isPositionEmpty(targetX, targetY)
+        ) {
           gameState.moveUnit(unit.id, targetX, targetY);
         }
-        
+
         // Reset actions occasionally
         if (i % 5 === 0) {
           unit.resetActions();
@@ -252,14 +268,15 @@ describe('Movement System Performance Tests', () => {
 
       // Simulate concurrent operations
       const promises = units.map(async (unit, index) => {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           setTimeout(() => {
             // Simulate user interactions
             for (let i = 0; i < 10; i++) {
               gameState.getValidMovePositions(unit.id);
-              gameState.calculateMovementCost(unit.id, 
-                Math.floor(Math.random() * 25), 
-                Math.floor(Math.random() * 25)
+              gameState.calculateMovementCost(
+                unit.id,
+                Math.floor(Math.random() * 25),
+                Math.floor(Math.random() * 25),
               );
             }
             resolve();
@@ -281,13 +298,15 @@ describe('Movement System Performance Tests', () => {
       const unit = gameState.createUnit('heavy', 1, 12, 12);
       let operationCount = 0;
       const startTime = performance.now();
-      
+
       // Extreme usage pattern
-      while (performance.now() - startTime < 100) { // 100ms stress test
+      while (performance.now() - startTime < 100) {
+        // 100ms stress test
         gameState.getValidMovePositions(unit.id);
-        gameState.canUnitMoveTo(unit.id, 
-          Math.floor(Math.random() * 25), 
-          Math.floor(Math.random() * 25)
+        gameState.canUnitMoveTo(
+          unit.id,
+          Math.floor(Math.random() * 25),
+          Math.floor(Math.random() * 25),
         );
         operationCount++;
       }
@@ -310,7 +329,7 @@ describe('Movement System Performance Tests', () => {
 
       // All results should be identical (deterministic)
       const firstResult = results[0];
-      const allSame = results.every(result => result === firstResult);
+      const allSame = results.every((result) => result === firstResult);
       expect(allSame).toBe(true);
 
       // Result should be reasonable for worker (2 movement)
@@ -324,20 +343,25 @@ describe('Movement System Resource Management', () => {
   test('should not accumulate unnecessary data structures', () => {
     const gameState = new GameState();
     gameState.startGame();
-    
+
     const initialMemoryEstimate = JSON.stringify(gameState.serialize()).length;
-    
+
     // Perform many operations that might accumulate data
     for (let i = 0; i < 100; i++) {
-      const unit = gameState.createUnit('worker', 1, 5 + (i % 3), 5 + Math.floor(i % 3));
+      const unit = gameState.createUnit(
+        'worker',
+        1,
+        5 + (i % 3),
+        5 + Math.floor(i % 3),
+      );
       if (unit) {
         gameState.getValidMovePositions(unit.id);
         gameState.removeUnit(unit.id);
       }
     }
-    
+
     const finalMemoryEstimate = JSON.stringify(gameState.serialize()).length;
-    
+
     // Memory usage should not grow significantly
     const memoryGrowth = finalMemoryEstimate - initialMemoryEstimate;
     expect(memoryGrowth).toBeLessThan(initialMemoryEstimate * 0.1); // Less than 10% growth

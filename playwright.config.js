@@ -7,10 +7,20 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: 1, // Use single worker to prevent multiple browser instances
-  reporter: 'html',
+  reporter: [
+    ['html'],
+    ['json', { outputFile: 'playwright-report/results.json' }],
+    ['junit', { outputFile: 'playwright-report/results.xml' }],
+  ],
+  timeout: 60000,
+  expect: {
+    timeout: 10000,
+  },
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
     // Browser context options to prevent multiple tabs
     contextOptions: {
       ignoreHTTPSErrors: true,
@@ -25,7 +35,7 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
         // Prevent multiple tabs in Chrome
         launchOptions: {
@@ -39,9 +49,39 @@ export default defineConfig({
             '--disable-default-apps',
             '--no-first-run',
             '--disable-extensions',
-            '--start-maximized'
-          ]
-        }
+            '--start-maximized',
+          ],
+        },
+      },
+    },
+    {
+      name: 'firefox',
+      use: {
+        ...devices['Desktop Firefox'],
+        launchOptions: {
+          firefoxUserPrefs: {
+            'dom.webnotifications.enabled': false,
+            'dom.push.enabled': false,
+          },
+        },
+      },
+    },
+    {
+      name: 'webkit',
+      use: {
+        ...devices['Desktop Safari'],
+      },
+    },
+    {
+      name: 'mobile-chrome',
+      use: {
+        ...devices['Pixel 5'],
+      },
+    },
+    {
+      name: 'mobile-safari',
+      use: {
+        ...devices['iPhone 12'],
       },
     },
   ],

@@ -5,12 +5,13 @@ This document provides a high-level overview of all development tasks for the Gr
 ## Task Phases & Priorities
 
 ### Phase 1: Core Game Foundation (High Priority)
+
 **Tasks 1-10** - Essential for basic playable game
 
 1. **Task 01: Project Initialization & Setup** (2-4h)
    - Create lean project structure, package.json, basic files
 
-2. **Task 02: Canvas Grid Foundation** (4-6h)  
+2. **Task 02: Canvas Grid Foundation** (4-6h)
    - 25x25 grid rendering, resource nodes, mouse interaction
 
 3. **Task 03: Game State Management** (6-8h)
@@ -39,7 +40,8 @@ This document provides a high-level overview of all development tasks for the Gr
 
 **Phase 1 Total: ~49-65 hours**
 
-### Phase 2: Multiplayer & Persistence (Medium Priority)  
+### Phase 2: Multiplayer & Persistence (Medium Priority)
+
 **Tasks 11-13** - Local multiplayer and data persistence
 
 11. **Task 11: Local Multiplayer** (4-6h)
@@ -54,6 +56,7 @@ This document provides a high-level overview of all development tasks for the Gr
 **Phase 2 Total: ~18-24 hours**
 
 ### Phase 3: User Experience (Medium Priority)
+
 **Tasks 14-16** - Polish and accessibility
 
 14. **Task 14: Mobile Optimization** (6-8h)
@@ -68,6 +71,7 @@ This document provides a high-level overview of all development tasks for the Gr
 **Phase 3 Total: ~24-32 hours**
 
 ### Phase 4: Advanced Features (Low Priority)
+
 **Tasks 17-20** - AI, online multiplayer, production
 
 17. **Task 17: AI Opponent System** (15-20h)
@@ -87,15 +91,18 @@ This document provides a high-level overview of all development tasks for the Gr
 ## Development Strategy
 
 ### MVP Target (Phase 1)
+
 The minimum viable product includes all Phase 1 tasks, resulting in a fully playable local strategy game with all core mechanics implemented.
 
 ### Iterative Development
+
 - Complete each task before moving to the next
 - Test thoroughly after each phase
 - Gather user feedback after Phase 1 and Phase 2
 - Adjust priorities based on feedback
 
 ### Dependencies
+
 - Tasks within each phase have sequential dependencies
 - Some cross-phase dependencies exist (e.g., Task 18 builds on Task 11)
 - Mobile optimization (Task 14) should be done before animations (Task 15)
@@ -103,7 +110,7 @@ The minimum viable product includes all Phase 1 tasks, resulting in a fully play
 ## Estimated Timeline
 
 - **Phase 1 (Core Game)**: 7-9 weeks (assuming 8h/week)
-- **Phase 2 (Multiplayer)**: 3-4 weeks  
+- **Phase 2 (Multiplayer)**: 3-4 weeks
 - **Phase 3 (UX)**: 4-5 weeks
 - **Phase 4 (Advanced)**: 6-8 weeks
 
@@ -112,13 +119,13 @@ The minimum viable product includes all Phase 1 tasks, resulting in a fully play
 ## Success Metrics
 
 - **Phase 1**: Playable local multiplayer game
-- **Phase 2**: Persistent game sessions, pass-and-play works smoothly  
+- **Phase 2**: Persistent game sessions, pass-and-play works smoothly
 - **Phase 3**: Mobile-friendly with great user experience
 - **Phase 4**: Production-ready with AI and online capabilities
 
 ## Notes
 
 - Follow lean development principles - build what's needed, when it's needed
-- Prioritize user feedback and iteration over perfect first implementations  
+- Prioritize user feedback and iteration over perfect first implementations
 - Each phase should result in a demonstrable improvement to the game
 - Performance and quality should be maintained throughout
