@@ -251,6 +251,20 @@ class Game {
                     this.updateStatus(this.showMovementRange ? 'Movement range shown' : 'Movement range hidden');
                 }
                 break;
+            case 'g':
+            case 'G':
+                // Gather resources with selected worker
+                if (this.selectedUnit && this.selectedUnit.type === 'worker' && 
+                    this.gameState.currentPhase === 'resource') {
+                    this.gatherResources();
+                } else if (!this.selectedUnit) {
+                    this.updateStatus('Select a worker unit first to gather resources');
+                } else if (this.selectedUnit.type !== 'worker') {
+                    this.updateStatus('Only worker units can gather resources');
+                } else if (this.gameState.currentPhase !== 'resource') {
+                    this.updateStatus('Can only gather during Resource phase');
+                }
+                break;
             case 'Escape':
                 // Deselect unit
                 this.selectedUnit = null;
@@ -389,6 +403,25 @@ class Game {
             const centerY = node.y * this.cellSize + this.cellSize / 2;
             const radius = this.cellSize * 0.3;
             
+            // Check if this node is gatherable by selected worker
+            const isGatherable = this.selectedUnit && 
+                               this.selectedUnit.type === 'worker' &&
+                               this.gameState.currentPhase === 'resource' &&
+                               nodeInfo.value > 0 &&
+                               Math.abs(node.x - this.selectedUnit.position.x) <= 1 &&
+                               Math.abs(node.y - this.selectedUnit.position.y) <= 1;
+            
+            // Highlight gatherable nodes
+            if (isGatherable) {
+                this.ctx.fillStyle = 'rgba(255, 215, 0, 0.3)'; // Gold highlight
+                this.ctx.fillRect(
+                    node.x * this.cellSize,
+                    node.y * this.cellSize,
+                    this.cellSize,
+                    this.cellSize
+                );
+            }
+            
             // Color based on resource availability
             const efficiency = nodeInfo.efficiency;
             const alpha = 0.3 + (efficiency * 0.7); // More transparent when depleted
@@ -397,9 +430,9 @@ class Game {
             this.ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
             this.ctx.fill();
             
-            // Add darker border
-            this.ctx.strokeStyle = '#228B22';
-            this.ctx.lineWidth = 2;
+            // Add border - gold for gatherable, dark green for normal
+            this.ctx.strokeStyle = isGatherable ? '#FFD700' : '#228B22';
+            this.ctx.lineWidth = isGatherable ? 3 : 2;
             this.ctx.stroke();
             
             // Draw resource value text
@@ -650,6 +683,32 @@ class Game {
                 `;
             } else {
                 selectedUnitElement.innerHTML = 'No unit selected';
+            }
+        }
+
+        // Update gather button state
+        const gatherBtn = document.getElementById('gatherBtn');
+        if (gatherBtn) {
+            const canGather = this.selectedUnit && 
+                             this.selectedUnit.type === 'worker' && 
+                             this.gameState.currentPhase === 'resource' &&
+                             this.selectedUnit.canAct() &&
+                             this.resourceManager.canGatherAtPosition(this.selectedUnit.id);
+            
+            gatherBtn.disabled = !canGather;
+            
+            if (canGather) {
+                gatherBtn.textContent = 'Gather Resources (G)';
+            } else if (!this.selectedUnit) {
+                gatherBtn.textContent = 'Select Worker';
+            } else if (this.selectedUnit.type !== 'worker') {
+                gatherBtn.textContent = 'Worker Only';
+            } else if (this.gameState.currentPhase !== 'resource') {
+                gatherBtn.textContent = 'Resource Phase Only';
+            } else if (!this.selectedUnit.canAct()) {
+                gatherBtn.textContent = 'No Actions Left';
+            } else {
+                gatherBtn.textContent = 'No Resources Nearby';
             }
         }
     }

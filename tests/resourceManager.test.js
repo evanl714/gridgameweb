@@ -27,13 +27,13 @@ describe('ResourceManager', () => {
     // Check specific nodes
     const centerNode = resourceManager.getResourceNodeAt(12, 12);
     expect(centerNode).toBeTruthy();
-    expect(centerNode.value).toBe(25);
-    expect(centerNode.maxValue).toBe(25);
-    expect(centerNode.regenerationRate).toBe(4);
+    expect(centerNode.value).toBe(100);
+    expect(centerNode.maxValue).toBe(100);
+    expect(centerNode.regenerationRate).toBe(5);
     
-    const cornerNode = resourceManager.getResourceNodeAt(5, 5);
+    const cornerNode = resourceManager.getResourceNodeAt(4, 4);
     expect(cornerNode).toBeTruthy();
-    expect(cornerNode.value).toBe(15);
+    expect(cornerNode.value).toBe(100);
   });
 
   test('should find resource nodes in range correctly', () => {
@@ -90,6 +90,30 @@ describe('ResourceManager', () => {
     expect(result.reason).toBe('Unit cannot gather');
   });
 
+  test('should only allow gathering during Resource phase', () => {
+    const worker = gameState.createUnit('worker', 1, 11, 12);
+    
+    // Test gathering during resource phase (should work)
+    gameState.currentPhase = 'resource';
+    const result1 = resourceManager.gatherResources(worker.id);
+    expect(result1.success).toBe(true);
+    
+    // Reset worker actions for next test
+    worker.resetActions();
+    
+    // Test gathering during action phase (should fail)
+    gameState.currentPhase = 'action';
+    const result2 = resourceManager.gatherResources(worker.id);
+    expect(result2.success).toBe(false);
+    expect(result2.reason).toBe('Can only gather during Resource phase. Current phase: action');
+    
+    // Test gathering during build phase (should fail)
+    gameState.currentPhase = 'build';
+    const result3 = resourceManager.gatherResources(worker.id);
+    expect(result3.success).toBe(false);
+    expect(result3.reason).toBe('Can only gather during Resource phase. Current phase: build');
+  });
+
   test('should enforce gathering cooldown', () => {
     const worker = gameState.createUnit('worker', 1, 11, 12);
     
@@ -141,29 +165,29 @@ describe('ResourceManager', () => {
     const node1 = resourceManager.resourceNodes[0];
     const node2 = resourceManager.resourceNodes[4]; // Center node
     
-    node1.value = 10; // Was 15, should regen 2
-    node2.value = 20; // Was 25, should regen 4
+    node1.value = 95; // Was 100, should regen 5
+    node2.value = 95; // Was 100, should regen 5
     
     const totalRegenerated = resourceManager.regenerateResources();
     
-    expect(totalRegenerated).toBe(6); // 2 + 4
-    expect(node1.value).toBe(12);
-    expect(node2.value).toBe(24);
+    expect(totalRegenerated).toBe(10); // 5 + 5
+    expect(node1.value).toBe(100);
+    expect(node2.value).toBe(100);
   });
 
   test('should not regenerate beyond max value', () => {
     const node = resourceManager.resourceNodes[0];
-    node.value = 14; // 1 below max of 15, regen rate is 2
+    node.value = 98; // 2 below max of 100, regen rate is 5
     
     resourceManager.regenerateResources();
     
-    expect(node.value).toBe(15); // Should cap at max, not go to 16
+    expect(node.value).toBe(100); // Should cap at max, not go to 103
   });
 
   test('should calculate gathering potential correctly', () => {
-    // Position adjacent to center node (value 25)
+    // Position adjacent to center node (value 100)
     const potential1 = resourceManager.getGatheringPotential(11, 12, 'worker');
-    expect(potential1).toBe(25);
+    expect(potential1).toBe(100);
     
     // Position not near any nodes
     const potential2 = resourceManager.getGatheringPotential(0, 0, 'worker');
@@ -210,7 +234,7 @@ describe('ResourceManager', () => {
 
   test('should calculate total resources available', () => {
     const total = resourceManager.getTotalResourcesAvailable();
-    const expectedTotal = 15*4 + 20*4 + 25; // 4 corners + 4 edges + 1 center
+    const expectedTotal = 100 * 9; // 9 nodes with 100 resources each
     expect(total).toBe(expectedTotal);
   });
 
@@ -222,7 +246,7 @@ describe('ResourceManager', () => {
     
     const income = resourceManager.calculatePlayerResourceIncome(1);
     expect(income).toBeGreaterThan(0);
-    expect(income).toBe(25 + 15); // Center node + corner node values
+    expect(income).toBe(100 + 100); // Center node + corner node values
   });
 
   test('should get resource statistics', () => {
@@ -284,12 +308,12 @@ describe('ResourceManager', () => {
     
     // Test regeneration event
     const node = resourceManager.resourceNodes[0];
-    node.value = 10; // Partially deplete
+    node.value = 95; // Partially deplete
     resourceManager.regenerateResources();
     
     expect(regenCallback).toHaveBeenCalledWith(expect.objectContaining({
       nodeId: node.id,
-      regeneratedAmount: 2
+      regeneratedAmount: 5
     }));
   });
 });

@@ -108,6 +108,60 @@ button:active {
     transform: translateY(1px);
 }
 
+button:disabled {
+    background-color: var(--border-color);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+button:disabled:hover {
+    background-color: var(--border-color);
+    transform: none;
+}
+
+/* Game Status Panel */
+.game-status {
+    background-color: var(--grid-bg-color);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+    min-width: 300px;
+    margin-top: 10px;
+}
+
+.status-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+
+.status-row:last-child {
+    margin-bottom: 0;
+}
+
+#gamePhase {
+    font-weight: bold;
+    color: var(--secondary-color);
+}
+
+#playerEnergy {
+    color: #27ae60;
+    font-weight: bold;
+}
+
+#playerActions {
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+#selectedUnit {
+    font-style: italic;
+    color: var(--hover-color);
+    text-align: center;
+    width: 100%;
+}
+
 /* Footer */
 footer {
     text-align: center;
