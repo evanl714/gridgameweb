@@ -1,8 +1,8 @@
 # ISSUE-005: Basic Movement System
 
-**Status:** Open
+**Status:** WIP
 **Created:** 2025-07-18
-**Assignee:** Unassigned
+**Assignee:** Claude
 **Priority:** High
 **Labels:** movement, interaction, phase-1
 
