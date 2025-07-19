@@ -95,3 +95,13 @@ out/
 test-results/
 playwright-report/
 playwright/.cache/
+
+# Security - Never commit tokens or secrets
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+**/settings.json
+**/*token*
+**/*secret*
