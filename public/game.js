@@ -23,6 +23,7 @@ import { ResourceDisplay } from './ui/resourceDisplay.js';
 import { TurnInterface } from './ui/turnInterface.js';
 import { GameStatus } from './ui/gameStatus.js';
 import { UnitDisplay } from './ui/unitDisplay.js';
+import { VictoryScreen } from './ui/victoryScreen.js';
 import { BuildPanel } from './ui/buildPanel.js';
 
 class Game {
@@ -47,6 +48,10 @@ class Game {
 
     // Initialize UI system
     this.uiManager = new UIManager(this.gameState, this.turnManager);
+    this.victoryScreen = new VictoryScreen(this.gameState);
+
+    // Make game accessible globally for victory screen buttons
+    window.game = this;
 
     this.init();
   }
@@ -121,6 +126,16 @@ class Game {
       gatherBtn.addEventListener('click', () => this.gatherResources());
     }
 
+    const surrenderBtn = document.getElementById('surrenderBtn');
+    if (surrenderBtn) {
+      surrenderBtn.addEventListener('click', () => this.surrender());
+    }
+
+    const drawBtn = document.getElementById('drawBtn');
+    if (drawBtn) {
+      drawBtn.addEventListener('click', () => this.offerDraw());
+    }
+
     const saveBtn = document.getElementById('saveBtn');
     if (saveBtn) {
       saveBtn.addEventListener('click', () => this.saveGame());
@@ -148,39 +163,67 @@ class Game {
   }
 
   handleCellClick(x, y) {
+    // Disable all actions if game has ended
+    if (this.gameState.status === GAME_STATES.ENDED) {
+      this.updateStatus(`Game Over! Player ${this.gameState.winner} wins!`);
+      return;
+    }
+
     const unit = this.gameState.getUnitAt(x, y);
 
     if (this.selectedUnit) {
-      // Try to move selected unit
+      // Try to attack or move selected unit
       if (this.selectedUnit.playerId === this.gameState.currentPlayer) {
-        const canMove = this.gameState.canUnitMoveTo(this.selectedUnit.id, x, y);
-        if (canMove) {
-          const movementCost = this.gameState.calculateMovementCost(this.selectedUnit.id, x, y);
-          const moved = this.gameState.moveUnit(this.selectedUnit.id, x, y);
-          if (moved) {
+        // Check if this is a valid attack (only during action phase)
+        const canAttack = this.gameState.currentPhase === 'action' && this.gameState.canUnitAttack(this.selectedUnit.id, x, y);
+        if (canAttack) {
+          const targetEntity = this.gameState.getEntityAt(x, y);
+          const attacked = this.gameState.attackUnit(this.selectedUnit.id, x, y);
+          if (attacked) {
             this.turnManager.usePlayerAction();
             this.selectedUnit = null;
             this.selectedCell = null;
             this.showMovementRange = false;
             this.movementPreview = null;
             this.gameState.emit('unitDeselected');
-            this.updateStatus(`Unit moved (cost: ${movementCost})`);
+            this.updateStatus(`Attack successful! Target: ${targetEntity.type}`);
           }
-        } else if (unit && unit.playerId === this.gameState.currentPlayer) {
-          // Select different unit
-          this.selectedUnit = unit;
-          this.selectedCell = { x, y };
-          this.showMovementRange = true;
-          this.gameState.emit('unitSelected', unit);
-          this.updateStatus(`Unit selected: ${unit.type} (${unit.maxActions - unit.actionsUsed} actions left)`);
         } else {
-          // Invalid move - provide feedback
-          const distance = this.gameState.getMovementDistance(this.selectedUnit.position.x, this.selectedUnit.position.y, x, y);
-          const remaining = this.selectedUnit.maxActions - this.selectedUnit.actionsUsed;
-          if (distance > remaining) {
-            this.updateStatus(`Cannot move: distance ${distance} > ${remaining} actions remaining`);
-          } else if (!this.gameState.isPositionEmpty(x, y)) {
-            this.updateStatus('Cannot move: position occupied');
+          // Try to move selected unit
+          const canMove = this.gameState.canUnitMoveTo(this.selectedUnit.id, x, y);
+          if (canMove) {
+            const movementCost = this.gameState.calculateMovementCost(this.selectedUnit.id, x, y);
+            const moved = this.gameState.moveUnit(this.selectedUnit.id, x, y);
+            if (moved) {
+              this.turnManager.usePlayerAction();
+              this.selectedUnit = null;
+              this.selectedCell = null;
+              this.showMovementRange = false;
+              this.movementPreview = null;
+              this.gameState.emit('unitDeselected');
+              this.updateStatus(`Unit moved (cost: ${movementCost})`);
+            }
+          } else if (unit && unit.playerId === this.gameState.currentPlayer) {
+            // Select different unit
+            this.selectedUnit = unit;
+            this.selectedCell = { x, y };
+            this.showMovementRange = true;
+            this.gameState.emit('unitSelected', unit);
+            this.updateStatus(`Unit selected: ${unit.type} (${unit.maxActions - unit.actionsUsed} actions left)`);
+          } else {
+            // Invalid move or attack - provide feedback
+            const distance = this.gameState.getMovementDistance(this.selectedUnit.position.x, this.selectedUnit.position.y, x, y);
+            const remaining = this.selectedUnit.maxActions - this.selectedUnit.actionsUsed;
+            if (distance > remaining) {
+              this.updateStatus(`Cannot move: distance ${distance} > ${remaining} actions remaining`);
+            } else if (!this.gameState.isPositionEmpty(x, y)) {
+              const targetEntity = this.gameState.getEntityAt(x, y);
+              if (targetEntity && targetEntity.entity.playerId === this.selectedUnit.playerId) {
+                this.updateStatus('Cannot attack: friendly unit/base');
+              } else {
+                this.updateStatus('Cannot attack: target out of range (must be adjacent)');
+              }
+            }
           }
         }
       }
@@ -249,6 +292,11 @@ class Game {
   }
 
   handleKeyDown(event) {
+    // Disable all keyboard actions if game has ended
+    if (this.gameState.status === GAME_STATES.ENDED) {
+      return;
+    }
+
     switch(event.key) {
     case 'r':
     case 'R':
@@ -791,6 +839,11 @@ class Game {
   }
 
   endTurn() {
+    // Disable turn actions if game has ended
+    if (this.gameState.status === GAME_STATES.ENDED) {
+      return;
+    }
+
     this.turnManager.forceEndTurn();
     this.selectedUnit = null;
     this.selectedCell = null;
@@ -799,11 +852,21 @@ class Game {
   }
 
   nextPhase() {
+    // Disable phase changes if game has ended
+    if (this.gameState.status === GAME_STATES.ENDED) {
+      return;
+    }
+
     this.turnManager.nextPhase();
     this.updateUI();
   }
 
   gatherResources() {
+    // Disable resource gathering if game has ended
+    if (this.gameState.status === GAME_STATES.ENDED) {
+      return;
+    }
+
     if (this.selectedUnit && this.selectedUnit.type === 'worker') {
       const result = this.resourceManager.gatherResources(this.selectedUnit.id);
       if (result.success) {
@@ -814,6 +877,40 @@ class Game {
       this.updateUI();
     } else {
       this.updateStatus('Select a worker unit to gather resources');
+    }
+  }
+
+  surrender() {
+    // Disable surrender if game has ended
+    if (this.gameState.status === GAME_STATES.ENDED) {
+      return;
+    }
+
+    // Confirm surrender action
+    if (confirm(`Player ${this.gameState.currentPlayer}, are you sure you want to surrender?`)) {
+      this.gameState.playerSurrender(this.gameState.currentPlayer);
+      this.updateStatus(`Player ${this.gameState.currentPlayer} surrendered!`);
+      this.updateUI();
+    }
+  }
+
+  offerDraw() {
+    // Disable draw offer if game has ended
+    if (this.gameState.status === GAME_STATES.ENDED) {
+      return;
+    }
+
+    // Confirm draw offer
+    if (confirm('Do you want to offer a draw to your opponent?')) {
+      // In a real multiplayer game, this would send the offer to the other player
+      // For now, we'll assume the other player accepts
+      if (confirm('The other player accepts the draw. End the game in a draw?')) {
+        this.gameState.declareDraw();
+        this.updateStatus('Game ended in a draw by mutual agreement');
+        this.updateUI();
+      } else {
+        this.updateStatus('Draw offer declined');
+      }
     }
   }
 

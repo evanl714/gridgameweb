@@ -1,8 +1,8 @@
 # ISSUE-009: Combat System
 
-**Status:** Open
+**Status:** WIP
 **Created:** 2025-07-18
-**Assignee:** Unassigned
+**Assignee:** Claude
 **Priority:** High
 **Labels:** combat, gameplay, phase-1
 

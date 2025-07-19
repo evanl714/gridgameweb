@@ -136,3 +136,15 @@ export const BASE_CONFIG = {
     2: { x: 19, y: 19 }, // Player 2 base (bottom-right area)
   },
 };
+
+// Combat Configuration
+export const COMBAT_CONFIG = {
+  ATTACK_RANGE: 1, // Adjacent attacks only
+  DAMAGE_VALUES: {
+    worker: 1,   // Workers can defend themselves
+    scout: 1,    // As per ISSUE-009 requirements
+    infantry: 2, // As per ISSUE-009 requirements  
+    heavy: 3,    // As per ISSUE-009 requirements
+  },
+  CAN_ATTACK_BASES: true, // Units can attack enemy bases
+};

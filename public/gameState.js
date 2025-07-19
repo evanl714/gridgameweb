@@ -3,7 +3,7 @@
  * Handles all game state, players, units, and turn management
  */
 
-import { GAME_CONFIG, UNIT_TYPES, TURN_CONFIG, GAME_STATES, BASE_CONFIG } from '../shared/constants.js';
+import { GAME_CONFIG, UNIT_TYPES, TURN_CONFIG, GAME_STATES, BASE_CONFIG, COMBAT_CONFIG } from '../shared/constants.js';
 
 // Utility function to generate unique IDs
 function generateId() {
@@ -645,6 +645,10 @@ export class GameState {
     this.units.delete(unitId);
 
     this.emit('unitRemoved', { unitId, playerId: unit.playerId });
+
+    // Check victory conditions after unit removal (for elimination victories)
+    this.checkVictoryCondition();
+    
     return true;
   }
 
@@ -653,6 +657,247 @@ export class GameState {
      */
   getPlayerUnits(playerId) {
     return Array.from(this.units.values()).filter(unit => unit.playerId === playerId);
+  }
+
+  /**
+     * Check if a unit can attack a target at given position
+     */
+  canUnitAttack(attackerUnitId, targetX, targetY) {
+    // Get attacker unit
+    const attackerUnit = this.units.get(attackerUnitId);
+    if (!attackerUnit) {
+      return false;
+    }
+
+    // Check if attacker can act
+    if (!attackerUnit.canAct()) {
+      return false;
+    }
+
+    // Validate target position
+    if (!this.isValidPosition(targetX, targetY)) {
+      return false;
+    }
+
+    // Check attack range (adjacent only, including diagonals)
+    const dx = Math.abs(attackerUnit.position.x - targetX);
+    const dy = Math.abs(attackerUnit.position.y - targetY);
+    if (dx > COMBAT_CONFIG.ATTACK_RANGE || dy > COMBAT_CONFIG.ATTACK_RANGE) {
+      return false;
+    }
+
+    // Get target entity
+    const targetEntity = this.getEntityAt(targetX, targetY);
+    if (!targetEntity) {
+      return false;
+    }
+
+    // Cannot attack own units/bases
+    if (targetEntity.entity.playerId === attackerUnit.playerId) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+     * Execute attack from one unit to target at position
+     */
+  attackUnit(attackerUnitId, targetX, targetY) {
+    // Validate attack
+    if (!this.canUnitAttack(attackerUnitId, targetX, targetY)) {
+      return false;
+    }
+
+    const attackerUnit = this.units.get(attackerUnitId);
+    const targetEntity = this.getEntityAt(targetX, targetY);
+    
+    // Calculate damage based on attacker unit type
+    const damage = COMBAT_CONFIG.DAMAGE_VALUES[attackerUnit.type] || 1;
+
+    // Apply damage to target
+    const isDestroyed = targetEntity.entity.takeDamage(damage);
+
+    // Use attacker's action
+    attackerUnit.useAction();
+
+    // Emit combat event
+    this.emit('unitAttacked', {
+      attackerId: attackerUnitId,
+      targetId: targetEntity.entity.id,
+      targetType: targetEntity.type,
+      damage: damage,
+      targetHealth: targetEntity.entity.health,
+      destroyed: isDestroyed
+    });
+
+    // Handle unit destruction
+    if (isDestroyed) {
+      if (targetEntity.type === 'unit') {
+        this.removeUnit(targetEntity.entity.id);
+      } else if (targetEntity.type === 'base') {
+        this.emit('baseDestroyed', {
+          baseId: targetEntity.entity.id,
+          playerId: targetEntity.entity.playerId
+        });
+        // Check for victory condition
+        this.checkVictoryCondition();
+      }
+    }
+
+    return true;
+  }
+
+  /**
+     * Get valid attack targets for a unit
+     */
+  getValidAttackTargets(unitId) {
+    const unit = this.units.get(unitId);
+    if (!unit || !unit.canAct()) {
+      return [];
+    }
+
+    const targets = [];
+    const { x, y } = unit.position;
+
+    // Check adjacent positions (8 directions)
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        if (dx === 0 && dy === 0) continue; // Skip current position
+        
+        const targetX = x + dx;
+        const targetY = y + dy;
+        
+        if (this.canUnitAttack(unitId, targetX, targetY)) {
+          const targetEntity = this.getEntityAt(targetX, targetY);
+          targets.push({
+            x: targetX,
+            y: targetY,
+            targetType: targetEntity.type,
+            targetId: targetEntity.entity.id,
+            damage: COMBAT_CONFIG.DAMAGE_VALUES[unit.type] || 1
+          });
+        }
+      }
+    }
+
+    return targets;
+  }
+
+  /**
+     * Check victory condition - detects base destruction and other win conditions
+     */
+  checkVictoryCondition() {
+    // Skip victory check if game is already ended
+    if (this.status === GAME_STATES.ENDED) {
+      return;
+    }
+
+    // Check for base destruction victory (primary victory condition)
+    const player1Base = this.getPlayerBase(1);
+    const player2Base = this.getPlayerBase(2);
+
+    // Handle simultaneous base destruction (draw condition)
+    if (!player1Base && !player2Base) {
+      this.endGame(null); // null indicates a draw
+      return;
+    }
+
+    // Player 2 wins if Player 1's base is destroyed
+    if (!player1Base) {
+      this.endGame(2);
+      return;
+    }
+
+    // Player 1 wins if Player 2's base is destroyed  
+    if (!player2Base) {
+      this.endGame(1);
+      return;
+    }
+
+    // Emit victory check event for other systems to react
+    this.emit('victoryCheck', {
+      player1BaseHealth: player1Base ? player1Base.health : 0,
+      player2BaseHealth: player2Base ? player2Base.health : 0,
+      gameStatus: this.status,
+      turnNumber: this.turnNumber
+    });
+  }
+
+  /**
+     * Secondary victory conditions
+     */
+  
+  /**
+     * Player forfeits/surrenders the game
+     */
+  playerSurrender(playerId) {
+    if (this.status === GAME_STATES.ENDED) {
+      return false;
+    }
+
+    // Determine winner (the other player)
+    const winnerId = playerId === 1 ? 2 : 1;
+    
+    this.emit('playerSurrendered', {
+      surrenderedPlayer: playerId,
+      winner: winnerId
+    });
+
+    this.endGame(winnerId);
+    return true;
+  }
+
+  /**
+     * Players agree to a draw
+     */
+  declareDraw() {
+    if (this.status === GAME_STATES.ENDED) {
+      return false;
+    }
+
+    this.emit('drawDeclared', {
+      turnNumber: this.turnNumber
+    });
+
+    this.endGame(null); // null indicates draw
+    return true;
+  }
+
+  /**
+     * Check for stalemate condition (no valid moves available)
+     */
+  checkStalemate() {
+    if (this.status === GAME_STATES.ENDED) {
+      return false;
+    }
+
+    const currentPlayer = this.getCurrentPlayer();
+    const playerUnits = this.getPlayerUnits(currentPlayer.id);
+    
+    // Check if current player has any valid moves
+    for (const unit of playerUnits) {
+      // Check for valid movement
+      const validMoves = this.getValidMoves(unit.id);
+      if (validMoves.length > 0) {
+        return false; // Found valid moves, not stalemate
+      }
+      
+      // Check for valid attacks
+      const validAttacks = this.getValidAttackTargets(unit.id);
+      if (validAttacks.length > 0) {
+        return false; // Found valid attacks, not stalemate
+      }
+    }
+    
+    // No valid moves found - this is a stalemate
+    this.emit('stalemateDetected', {
+      player: currentPlayer.id,
+      turnNumber: this.turnNumber
+    });
+    
+    this.declareDraw();
+    return true;
   }
 
   /**
