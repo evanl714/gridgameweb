@@ -15,6 +15,14 @@ import { TurnManager } from './turnManager.js';
 import { ResourceManager } from './resourceManager.js';
 import { PersistenceManager } from './persistence.js';
 
+// Import UI components
+import { UIManager } from './ui/uiManager.js';
+import { ResourceDisplay } from './ui/resourceDisplay.js';
+import { TurnInterface } from './ui/turnInterface.js';
+import { GameStatus } from './ui/gameStatus.js';
+import { UnitDisplay } from './ui/unitDisplay.js';
+import { BuildPanel } from './ui/buildPanel.js';
+
 class Game {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
@@ -34,6 +42,9 @@ class Game {
         this.turnManager = new TurnManager(this.gameState);
         this.resourceManager = new ResourceManager(this.gameState);
         this.persistenceManager = new PersistenceManager();
+        
+        // Initialize UI system
+        this.uiManager = new UIManager(this.gameState, this.turnManager);
         
         this.init();
     }
@@ -150,6 +161,7 @@ class Game {
                         this.selectedCell = null;
                         this.showMovementRange = false;
                         this.movementPreview = null;
+                        this.gameState.emit('unitDeselected');
                         this.updateStatus(`Unit moved (cost: ${movementCost})`);
                     }
                 } else if (unit && unit.playerId === this.gameState.currentPlayer) {
@@ -157,6 +169,7 @@ class Game {
                     this.selectedUnit = unit;
                     this.selectedCell = { x, y };
                     this.showMovementRange = true;
+                    this.gameState.emit('unitSelected', unit);
                     this.updateStatus(`Unit selected: ${unit.type} (${unit.maxActions - unit.actionsUsed} actions left)`);
                 } else {
                     // Invalid move - provide feedback
@@ -174,6 +187,7 @@ class Game {
             this.selectedUnit = unit;
             this.selectedCell = { x, y };
             this.showMovementRange = true;
+            this.gameState.emit('unitSelected', unit);
             this.updateStatus(`Unit selected: ${unit.type} (${unit.maxActions - unit.actionsUsed} actions left)`);
         } else {
             // Deselect or try to create unit
@@ -184,6 +198,7 @@ class Game {
                 this.selectedUnit = null;
                 this.showMovementRange = false;
                 this.movementPreview = null;
+                this.gameState.emit('unitDeselected');
                 this.updateStatus(`Selected cell: (${x}, ${y})`);
             }
         }
@@ -193,16 +208,10 @@ class Game {
     }
 
     showUnitCreationDialog(x, y) {
-        const player = this.gameState.getCurrentPlayer();
-        const unitTypes = ['worker', 'scout', 'infantry', 'heavy'];
-        
-        // Simple dialog for unit creation
-        const unitType = prompt('Create unit type (worker/scout/infantry/heavy):');
-        if (unitType && unitTypes.includes(unitType.toLowerCase())) {
-            const unit = this.gameState.createUnit(unitType.toLowerCase(), player.id, x, y);
-            if (!unit) {
-                alert('Cannot create unit - insufficient energy or invalid position');
-            }
+        // Use the new build panel instead of prompt dialog
+        const buildPanel = this.uiManager.getComponent('build');
+        if (buildPanel) {
+            buildPanel.show({ x, y });
         }
     }
     
@@ -271,6 +280,7 @@ class Game {
                 this.selectedCell = null;
                 this.showMovementRange = false;
                 this.movementPreview = null;
+                this.gameState.emit('unitDeselected');
                 this.render();
                 this.updateStatus('Unit deselected');
                 break;
@@ -609,6 +619,7 @@ class Game {
         this.selectedUnit = null;
         this.movementPreview = null;
         this.showMovementRange = false;
+        this.gameState.emit('unitDeselected');
         
         // Setup event listeners for new game state
         this.setupGameEventListeners();
@@ -629,8 +640,12 @@ class Game {
     }
     
     updateUI() {
+        // Legacy UI update - keeping for compatibility
         this.updatePlayerDisplay();
         this.updateGameInfo();
+        
+        // New UI system updates are handled automatically via event listeners
+        // UI components subscribe to game state events and update themselves
     }
 
     updatePlayerDisplay() {
@@ -724,6 +739,7 @@ class Game {
         this.turnManager.forceEndTurn();
         this.selectedUnit = null;
         this.selectedCell = null;
+        this.gameState.emit('unitDeselected');
         this.updateUI();
     }
 
