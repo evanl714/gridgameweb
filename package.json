@@ -1,0 +1,28 @@
+{
+  "name": "grid-game-web",
+  "version": "0.1.0",
+  "description": "Grid-based strategy game web application",
+  "type": "module",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "nodemon server/index.js"
+  },
+  "keywords": [
+    "game",
+    "strategy",
+    "grid",
+    "canvas",
+    "multiplayer"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@playwright/test": "^1.54.1",
+    "better-sqlite3": "^11.3.0",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}
