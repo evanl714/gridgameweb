@@ -1,0 +1,44 @@
+{
+  "mcpServers": {
+    "github": {
+      "type": "docker",
+      "image": "github-mcp-server",
+      "build": {
+        "dockerfile": "Dockerfile",
+        "context": ".",
+        "args": {}
+      },
+      "restart": "onFailure",
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      }
+    },
+    "github-docker": {
+      "type": "docker",
+      "args": [
+        "-e",
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      }
+    },
+    "claude-historian": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@anthropic/claude-historian"]
+    },
+    "playwright": {
+      "type": "stdio", 
+      "command": "npx",
+      "args": ["@anthropic/mcp-playwright"]
+    },
+    "Ref": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@anthropic/mcp-ref"]
+    }
+  },
+  "tools": []
+}

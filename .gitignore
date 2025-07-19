@@ -102,6 +102,8 @@ playwright/.cache/
 .env.*.local
 *.key
 *.pem
-**/settings.json
 **/*token*
 **/*secret*
+
+# Claude settings with tokens (but allow template)
+.claude/settings.json.local
