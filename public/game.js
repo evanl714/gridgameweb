@@ -77,6 +77,11 @@ class Game {
       console.log(`Turn ${data.turnNumber} started for Player ${data.player}`);
     });
 
+    this.gameState.on('turnEnded', (data) => {
+      this.updateUI();
+      console.log(`Turn ended: Player ${data.previousPlayer} → Player ${data.nextPlayer}`);
+    });
+
     this.gameState.on('phaseChanged', (data) => {
       this.updateUI();
       console.log(`Phase changed to ${data.phase} for Player ${data.player}`);
@@ -711,6 +716,14 @@ class Game {
   }
 
   newGame() {
+    // Clean up existing UI components
+    if (this.uiManager) {
+      this.uiManager.destroy();
+    }
+    if (this.victoryScreen) {
+      this.victoryScreen.destroy();
+    }
+
     // Reset state management
     this.gameState = new GameState();
     this.turnManager = new TurnManager(this.gameState);
@@ -723,6 +736,10 @@ class Game {
     this.movementPreview = null;
     this.showMovementRange = false;
     this.gameState.emit('unitDeselected');
+
+    // Reinitialize UI system with new game state
+    this.uiManager = new UIManager(this.gameState, this.turnManager);
+    this.victoryScreen = new VictoryScreen(this.gameState);
 
     // Setup event listeners for new game state
     this.setupGameEventListeners();
@@ -743,6 +760,11 @@ class Game {
   }
 
   updateUI() {
+    // Ensure we have valid game state before updating
+    if (!this.gameState || this.gameState.status === 'ended') {
+      return;
+    }
+
     // Legacy UI update - keeping for compatibility
     this.updatePlayerDisplay();
     this.updateGameInfo();
@@ -753,13 +775,23 @@ class Game {
 
   updatePlayerDisplay() {
     const playerElement = document.getElementById('currentPlayer');
-    if (playerElement) {
+    if (playerElement && this.gameState) {
       const currentPlayer = this.gameState.getCurrentPlayer();
-      playerElement.textContent = `Player ${currentPlayer.id}'s Turn`;
+      if (currentPlayer) {
+        playerElement.textContent = `Player ${currentPlayer.id}'s Turn`;
+        // Add visual indication for current player
+        playerElement.className = `current-player player-${currentPlayer.id}`;
+      }
     }
   }
 
   updateGameInfo() {
+    // Update turn number display
+    const turnElement = document.getElementById('turnNumber');
+    if (turnElement) {
+      turnElement.textContent = `Turn: ${this.gameState.turnNumber}`;
+    }
+
     // Update phase display
     const phaseElement = document.getElementById('gamePhase');
     if (phaseElement) {
@@ -768,25 +800,21 @@ class Game {
 
     // Update player info
     const player = this.gameState.getCurrentPlayer();
-    const energyElement = document.getElementById('playerEnergy');
-    if (energyElement) {
-      energyElement.textContent = `Energy: ${player.energy}`;
-    }
+    if (player) {
+      const energyElement = document.getElementById('playerEnergy');
+      if (energyElement) {
+        energyElement.textContent = `Energy: ${player.energy}`;
+      }
 
-    const actionsElement = document.getElementById('playerActions');
-    if (actionsElement) {
-      actionsElement.textContent = `Actions: ${player.actionsRemaining}`;
-    }
+      const actionsElement = document.getElementById('playerActions');
+      if (actionsElement) {
+        actionsElement.textContent = `Actions: ${player.actionsRemaining}`;
+      }
 
-    const unitsElement = document.getElementById('playerUnits');
-    if (unitsElement) {
-      unitsElement.textContent = `Units: ${player.unitsOwned.size}`;
-    }
-
-    // Update turn info
-    const turnElement = document.getElementById('turnNumber');
-    if (turnElement) {
-      turnElement.textContent = `Turn: ${this.gameState.turnNumber}`;
+      const unitsElement = document.getElementById('playerUnits');
+      if (unitsElement) {
+        unitsElement.textContent = `Units: ${player.unitsOwned.size}`;
+      }
     }
 
     // Update selected unit info

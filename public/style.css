@@ -197,3 +197,36 @@ footer {
         justify-content: center;
     }
 }
+
+/* Local Multiplayer Player Visual Indicators */
+.current-player {
+    font-weight: bold;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.current-player.player-1 {
+    background-color: #3498db;
+    color: white;
+    border-color: #2980b9;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+}
+
+.current-player.player-2 {
+    background-color: #e74c3c;
+    color: white;
+    border-color: #c0392b;
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+}
+
+/* Player indicator animation */
+.current-player {
+    animation: playerPulse 2s ease-in-out infinite;
+}
+
+@keyframes playerPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}

@@ -1,6 +1,6 @@
 # ISSUE-014: Mobile Optimization & Responsive Design
 
-**Status:** Open
+**Status:** Pending review for necessity, skip for now
 **Created:** 2025-07-18
 **Assignee:** Unassigned
 **Priority:** Medium

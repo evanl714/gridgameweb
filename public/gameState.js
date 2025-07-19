@@ -395,6 +395,13 @@ export class GameState {
   }
 
   /**
+     * Get player by ID
+     */
+  getPlayerById(playerId) {
+    return this.players.get(playerId);
+  }
+
+  /**
      * Get all players as array
      */
   getAllPlayers() {
