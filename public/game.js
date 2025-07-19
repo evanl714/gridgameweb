@@ -6,7 +6,8 @@ import {
     GAME_STATES,
     PLAYER_COLORS,
     UNIT_TYPES,
-    UNIT_CHARACTERS
+    UNIT_CHARACTERS,
+    MOVEMENT_COLORS
 } from '../shared/constants.js';
 
 import { GameState } from './gameState.js';
@@ -25,6 +26,8 @@ class Game {
         this.selectedCell = null;
         this.hoveredCell = null;
         this.selectedUnit = null;
+        this.movementPreview = null; // Stores {x, y, cost} for hover preview
+        this.showMovementRange = false; // Toggle for movement range display
         
         // Initialize game state management
         this.gameState = new GameState();
@@ -83,6 +86,9 @@ class Game {
         this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
         this.canvas.addEventListener('mouseleave', () => this.handleMouseLeave());
         
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => this.handleKeyDown(e));
+        
         document.getElementById('newGameBtn').addEventListener('click', () => this.newGame());
         document.getElementById('resetBtn').addEventListener('click', () => this.reset());
         
@@ -134,34 +140,56 @@ class Game {
         if (this.selectedUnit) {
             // Try to move selected unit
             if (this.selectedUnit.playerId === this.gameState.currentPlayer) {
-                const moved = this.gameState.moveUnit(this.selectedUnit.id, x, y);
-                if (moved) {
-                    this.turnManager.usePlayerAction();
-                    this.selectedUnit = null;
-                    this.selectedCell = null;
+                const canMove = this.gameState.canUnitMoveTo(this.selectedUnit.id, x, y);
+                if (canMove) {
+                    const movementCost = this.gameState.calculateMovementCost(this.selectedUnit.id, x, y);
+                    const moved = this.gameState.moveUnit(this.selectedUnit.id, x, y);
+                    if (moved) {
+                        this.turnManager.usePlayerAction();
+                        this.selectedUnit = null;
+                        this.selectedCell = null;
+                        this.showMovementRange = false;
+                        this.movementPreview = null;
+                        this.updateStatus(`Unit moved (cost: ${movementCost})`);
+                    }
                 } else if (unit && unit.playerId === this.gameState.currentPlayer) {
                     // Select different unit
                     this.selectedUnit = unit;
                     this.selectedCell = { x, y };
+                    this.showMovementRange = true;
+                    this.updateStatus(`Unit selected: ${unit.type} (${unit.maxActions - unit.actionsUsed} actions left)`);
+                } else {
+                    // Invalid move - provide feedback
+                    const distance = this.gameState.getMovementDistance(this.selectedUnit.position.x, this.selectedUnit.position.y, x, y);
+                    const remaining = this.selectedUnit.maxActions - this.selectedUnit.actionsUsed;
+                    if (distance > remaining) {
+                        this.updateStatus(`Cannot move: distance ${distance} > ${remaining} actions remaining`);
+                    } else if (!this.gameState.isPositionEmpty(x, y)) {
+                        this.updateStatus(`Cannot move: position occupied`);
+                    }
                 }
             }
         } else if (unit && unit.playerId === this.gameState.currentPlayer) {
-            // Select unit
+            // Select unit and show movement range
             this.selectedUnit = unit;
             this.selectedCell = { x, y };
+            this.showMovementRange = true;
+            this.updateStatus(`Unit selected: ${unit.type} (${unit.maxActions - unit.actionsUsed} actions left)`);
         } else {
-            // Try to create unit (if in build phase)
+            // Deselect or try to create unit
             if (this.gameState.currentPhase === 'build' && this.gameState.isPositionEmpty(x, y)) {
                 this.showUnitCreationDialog(x, y);
             } else {
                 this.selectedCell = { x, y };
                 this.selectedUnit = null;
+                this.showMovementRange = false;
+                this.movementPreview = null;
+                this.updateStatus(`Selected cell: (${x}, ${y})`);
             }
         }
         
         this.render();
         this.updateUI();
-        this.updateStatus(`Selected cell: (${x}, ${y})`);
     }
 
     showUnitCreationDialog(x, y) {
@@ -183,6 +211,19 @@ class Game {
         if (coords) {
             if (!this.hoveredCell || this.hoveredCell.x !== coords.x || this.hoveredCell.y !== coords.y) {
                 this.hoveredCell = coords;
+                
+                // Update movement preview
+                if (this.selectedUnit && this.showMovementRange) {
+                    const movementCost = this.gameState.calculateMovementCost(this.selectedUnit.id, coords.x, coords.y);
+                    if (movementCost > 0) {
+                        this.movementPreview = { x: coords.x, y: coords.y, cost: movementCost };
+                    } else {
+                        this.movementPreview = null;
+                    }
+                } else {
+                    this.movementPreview = null;
+                }
+                
                 this.render();
             }
         }
@@ -191,7 +232,34 @@ class Game {
     handleMouseLeave() {
         if (this.hoveredCell) {
             this.hoveredCell = null;
+            this.movementPreview = null;
             this.render();
+        }
+    }
+
+    handleKeyDown(event) {
+        switch(event.key) {
+            case 'r':
+            case 'R':
+                // Toggle movement range display
+                if (this.selectedUnit) {
+                    this.showMovementRange = !this.showMovementRange;
+                    if (!this.showMovementRange) {
+                        this.movementPreview = null;
+                    }
+                    this.render();
+                    this.updateStatus(this.showMovementRange ? 'Movement range shown' : 'Movement range hidden');
+                }
+                break;
+            case 'Escape':
+                // Deselect unit
+                this.selectedUnit = null;
+                this.selectedCell = null;
+                this.showMovementRange = false;
+                this.movementPreview = null;
+                this.render();
+                this.updateStatus('Unit deselected');
+                break;
         }
     }
     
@@ -228,6 +296,8 @@ class Game {
         this.drawGrid();
         this.drawHover();
         this.drawSelection();
+        this.drawMovementRange();
+        this.drawMovementPreview();
         this.drawResourceNodes();
         this.drawUnits();
         this.drawUnitSelection();
@@ -433,6 +503,66 @@ class Game {
             this.ctx.setLineDash([]);
         }
     }
+
+    drawMovementRange() {
+        if (this.selectedUnit && this.showMovementRange) {
+            const validMoves = this.gameState.getValidMovePositions(this.selectedUnit.id);
+            
+            for (const move of validMoves) {
+                const x = move.x * this.cellSize;
+                const y = move.y * this.cellSize;
+                
+                // Draw valid move highlight
+                this.ctx.fillStyle = MOVEMENT_COLORS.VALID_MOVE;
+                this.ctx.fillRect(x, y, this.cellSize, this.cellSize);
+                
+                // Draw border
+                this.ctx.strokeStyle = MOVEMENT_COLORS.VALID_MOVE_BORDER;
+                this.ctx.lineWidth = 2;
+                this.ctx.strokeRect(x, y, this.cellSize, this.cellSize);
+                
+                // Draw movement cost indicator
+                if (move.cost > 1) {
+                    this.ctx.fillStyle = MOVEMENT_COLORS.MOVEMENT_COST;
+                    this.ctx.font = '12px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.textBaseline = 'middle';
+                    this.ctx.fillText(
+                        move.cost.toString(),
+                        x + this.cellSize / 2,
+                        y + this.cellSize / 2
+                    );
+                }
+            }
+        }
+    }
+
+    drawMovementPreview() {
+        if (this.movementPreview && this.selectedUnit) {
+            const x = this.movementPreview.x * this.cellSize;
+            const y = this.movementPreview.y * this.cellSize;
+            
+            // Draw preview highlight
+            this.ctx.fillStyle = MOVEMENT_COLORS.PATH_PREVIEW;
+            this.ctx.fillRect(x, y, this.cellSize, this.cellSize);
+            
+            // Draw border
+            this.ctx.strokeStyle = MOVEMENT_COLORS.PATH_PREVIEW_BORDER;
+            this.ctx.lineWidth = 3;
+            this.ctx.strokeRect(x, y, this.cellSize, this.cellSize);
+            
+            // Draw movement cost
+            this.ctx.fillStyle = MOVEMENT_COLORS.MOVEMENT_COST;
+            this.ctx.font = 'bold 14px Arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            this.ctx.fillText(
+                `${this.movementPreview.cost}`,
+                x + this.cellSize / 2,
+                y + this.cellSize / 2 + 8
+            );
+        }
+    }
     
     newGame() {
         // Reset state management
@@ -444,6 +574,8 @@ class Game {
         this.selectedCell = null;
         this.hoveredCell = null;
         this.selectedUnit = null;
+        this.movementPreview = null;
+        this.showMovementRange = false;
         
         // Setup event listeners for new game state
         this.setupGameEventListeners();

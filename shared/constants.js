@@ -80,6 +80,15 @@ export const UI_COLORS = {
     RESOURCE_NODE: '#32cd32'
 };
 
+// Movement Colors
+export const MOVEMENT_COLORS = {
+    VALID_MOVE: 'rgba(0, 255, 0, 0.3)',
+    VALID_MOVE_BORDER: '#00aa00',
+    PATH_PREVIEW: 'rgba(255, 255, 0, 0.4)',
+    PATH_PREVIEW_BORDER: '#ffaa00',
+    MOVEMENT_COST: '#666666'
+};
+
 // Action Types
 export const ACTION_TYPES = {
     MOVE: 'move',
