@@ -56,8 +56,16 @@ export const GAME_STATES = {
 
 // Player Colors
 export const PLAYER_COLORS = {
-    1: '#3498db',  // Blue
-    2: '#e74c3c'   // Red
+    1: '#4169e1',  // Blue
+    2: '#dc143c'   // Red
+};
+
+// Unit Unicode Characters
+export const UNIT_CHARACTERS = {
+    worker: '♦',    // Diamond
+    scout: '♙',     // Pawn
+    infantry: '♗',  // Bishop
+    heavy: '♖'      // Rook
 };
 
 // UI Constants

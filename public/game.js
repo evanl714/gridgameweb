@@ -5,7 +5,8 @@ import {
     RESOURCE_CONFIG, 
     GAME_STATES,
     PLAYER_COLORS,
-    UNIT_TYPES 
+    UNIT_TYPES,
+    UNIT_CHARACTERS
 } from '../shared/constants.js';
 
 import { GameState } from './gameState.js';
@@ -348,45 +349,44 @@ class Game {
         Array.from(this.gameState.units.values()).forEach(unit => {
             const centerX = unit.position.x * this.cellSize + this.cellSize / 2;
             const centerY = unit.position.y * this.cellSize + this.cellSize / 2;
-            const radius = this.cellSize * 0.25;
             
-            // Get player color
+            // Get player color and Unicode character
             const color = PLAYER_COLORS[unit.playerId] || '#666666';
+            const character = UNIT_CHARACTERS[unit.type] || '?';
             
-            // Draw unit circle
-            this.ctx.fillStyle = color;
-            this.ctx.beginPath();
-            this.ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-            this.ctx.fill();
-            
-            // Add border
-            this.ctx.strokeStyle = '#ffffff';
-            this.ctx.lineWidth = 2;
-            this.ctx.stroke();
-            
-            // Draw unit type indicator
-            this.ctx.fillStyle = '#ffffff';
-            this.ctx.font = '10px Arial';
+            // Set font for Unicode character rendering
+            const fontSize = this.cellSize * 0.6; // Slightly smaller than full cell
+            this.ctx.font = `${fontSize}px serif`; // Serif fonts typically have better Unicode support
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
             
-            const typeIndicator = {
-                'worker': 'W',
-                'scout': 'S',
-                'infantry': 'I',
-                'heavy': 'H'
-            }[unit.type] || '?';
+            // Add subtle text shadow for better visibility
+            this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            this.ctx.shadowOffsetX = 1;
+            this.ctx.shadowOffsetY = 1;
+            this.ctx.shadowBlur = 2;
             
-            this.ctx.fillText(typeIndicator, centerX, centerY);
+            // Draw Unicode character
+            this.ctx.fillStyle = color;
+            this.ctx.fillText(character, centerX, centerY);
             
-            // Draw health bar
-            this.drawUnitHealthBar(unit, centerX, centerY - radius - 5);
+            // Reset shadow
+            this.ctx.shadowColor = 'transparent';
+            this.ctx.shadowOffsetX = 0;
+            this.ctx.shadowOffsetY = 0;
+            this.ctx.shadowBlur = 0;
+            
+            // Draw health bar above the unit
+            const healthBarY = centerY - fontSize / 2 - 8;
+            this.drawUnitHealthBar(unit, centerX, healthBarY);
             
             // Draw action indicator
+            const indicatorX = centerX + fontSize / 2;
+            const indicatorY = centerY - fontSize / 2;
             if (unit.actionsUsed >= unit.maxActions) {
-                this.drawActionIndicator(centerX + radius, centerY - radius, 'exhausted');
+                this.drawActionIndicator(indicatorX, indicatorY, 'exhausted');
             } else if (unit.actionsUsed > 0) {
-                this.drawActionIndicator(centerX + radius, centerY - radius, 'partial');
+                this.drawActionIndicator(indicatorX, indicatorY, 'partial');
             }
         });
     }

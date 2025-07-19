@@ -1,8 +1,8 @@
 # ISSUE-004: Unit Rendering System
 
-**Status:** Open
+**Status:** WIP
 **Created:** 2025-07-18
-**Assignee:** Unassigned
+**Assignee:** Claude
 **Priority:** High
 **Labels:** rendering, units, visual, phase-1
 
