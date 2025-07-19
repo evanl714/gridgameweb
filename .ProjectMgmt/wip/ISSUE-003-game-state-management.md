@@ -1,8 +1,8 @@
 # ISSUE-003: Game State Management
 
-**Status:** Open
+**Status:** WIP
 **Created:** 2025-07-18
-**Assignee:** Unassigned
+**Assignee:** evanl714
 **Priority:** High
 **Labels:** state-management, architecture, phase-1
 

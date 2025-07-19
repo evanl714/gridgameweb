@@ -3,7 +3,7 @@ export const GAME_CONFIG = {
     GRID_SIZE: 25,
     CELL_SIZE: 32,
     MAX_PLAYERS: 2,
-    INITIAL_ENERGY: 100
+    STARTING_ENERGY: 100
 };
 
 // Unit Types
