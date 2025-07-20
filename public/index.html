@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grid Strategy Game</title>
+    <link rel="stylesheet" href="styles/design-system.css">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="ui/ui-styles.css">
 </head>
-<body>
+<body class="chess-sc2-theme">
     <div class="game-container">
         <header>
             <h1>Grid Strategy Game</h1>
@@ -18,31 +19,51 @@
         </header>
         
         <main>
-            <div class="game-board">
-                <canvas id="gameCanvas" width="800" height="800"></canvas>
-            </div>
-            
-            <div class="game-controls">
-                <button id="newGameBtn">New Game</button>
-                <button id="resetBtn">Reset</button>
-                <button id="nextPhaseBtn">Next Phase</button>
-                <button id="endTurnBtn">End Turn</button>
-                <button id="gatherBtn" disabled>Gather Resources</button>
-                <button id="surrenderBtn">Surrender</button>
-                <button id="drawBtn">Offer Draw</button>
-            </div>
-            
-            <div class="game-status">
-                <div class="status-row">
-                    <div id="gamePhase">Phase: Ready</div>
-                    <div id="turnNumber">Turn: 0</div>
+            <!-- Tactical Sidebar Panel -->
+            <aside class="tactical-sidebar">
+                <div class="sidebar-section tactical-panel">
+                    <div class="game-card-header">Build Units</div>
+                    <div id="buildPanelSidebar" class="build-panel-sidebar">
+                        <!-- Build panel content will be inserted here -->
+                    </div>
                 </div>
-                <div class="status-row">
-                    <div id="playerEnergy">Energy: 100</div>
-                    <div id="playerActions">Actions: 3</div>
+                
+                <div class="sidebar-section tactical-panel">
+                    <div class="game-card-header">Unit Info</div>
+                    <div id="unitInfoSidebar" class="unit-info-sidebar">
+                        <div id="selectedUnit">No unit selected</div>
+                    </div>
                 </div>
-                <div class="status-row">
-                    <div id="selectedUnit">No unit selected</div>
+                
+                <div class="sidebar-section tactical-panel">
+                    <div class="game-card-header">Game Status</div>
+                    <div class="game-status">
+                        <div class="status-row">
+                            <div id="gamePhase">Phase: Ready</div>
+                            <div id="turnNumber">Turn: 0</div>
+                        </div>
+                        <div class="status-row">
+                            <div id="playerEnergy">Energy: 100</div>
+                            <div id="playerActions">Actions: 3</div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+            
+            <!-- Main Game Area -->
+            <div class="game-main">
+                <div class="game-board">
+                    <canvas id="gameCanvas" width="800" height="800"></canvas>
+                </div>
+                
+                <div class="game-controls">
+                    <button id="newGameBtn" class="angular-button">New Game</button>
+                    <button id="resetBtn" class="angular-button">Reset</button>
+                    <button id="nextPhaseBtn" class="angular-button primary">Next Phase</button>
+                    <button id="endTurnBtn" class="angular-button primary">End Turn</button>
+                    <button id="gatherBtn" class="angular-button" disabled>Gather Resources</button>
+                    <button id="surrenderBtn" class="angular-button">Surrender</button>
+                    <button id="drawBtn" class="angular-button">Offer Draw</button>
                 </div>
             </div>
         </main>

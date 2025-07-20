@@ -54,10 +54,10 @@ export const GAME_STATES = {
   ENDED: 'ended',
 };
 
-// Player Colors
+// Player Colors - Updated for Chess.com + StarCraft 2 Theme
 export const PLAYER_COLORS = {
-  1: '#4169e1', // Blue
-  2: '#dc143c', // Red
+  1: '#00aaff', // StarCraft 2 Blue
+  2: '#F44336', // Strategic Red
 };
 
 // Entity Unicode Characters
@@ -72,25 +72,29 @@ export const ENTITY_CHARACTERS = {
 // Backward compatibility
 export const UNIT_CHARACTERS = ENTITY_CHARACTERS;
 
-// UI Constants
+// UI Constants - StarCraft 2 Aesthetic
 export const UI_COLORS = {
-  GRID_LINE: '#95a5a6',
-  GRID_BG: '#ffffff',
-  GRID_LIGHT: '#f8f9fa',
-  GRID_DARK: '#e9ecef',
-  SELECTION: 'rgba(52, 152, 219, 0.3)',
-  SELECTION_BORDER: '#3498db',
-  HOVER: 'rgba(52, 152, 219, 0.1)',
-  RESOURCE_NODE: '#32cd32',
+  GRID_LINE: '#333333',
+  GRID_BG: '#1a1a1a',
+  GRID_LIGHT: '#2a2a2a',
+  GRID_DARK: '#1f1f1f',
+  SELECTION: 'rgba(0, 170, 255, 0.3)',
+  SELECTION_BORDER: '#00aaff',
+  HOVER: 'rgba(0, 170, 255, 0.1)',
+  RESOURCE_NODE: '#7CB342',
+  GRID_ACCENT: 'rgba(0, 170, 255, 0.15)',
+  GRID_BORDER_GLOW: 'rgba(0, 170, 255, 0.3)',
 };
 
-// Movement Colors
+// Movement Colors - Tactical Display
 export const MOVEMENT_COLORS = {
-  VALID_MOVE: 'rgba(0, 255, 0, 0.3)',
-  VALID_MOVE_BORDER: '#00aa00',
-  PATH_PREVIEW: 'rgba(255, 255, 0, 0.4)',
-  PATH_PREVIEW_BORDER: '#ffaa00',
-  MOVEMENT_COST: '#666666',
+  VALID_MOVE: 'rgba(123, 179, 66, 0.3)',
+  VALID_MOVE_BORDER: '#7CB342',
+  PATH_PREVIEW: 'rgba(0, 255, 255, 0.4)',
+  PATH_PREVIEW_BORDER: '#00ffff',
+  MOVEMENT_COST: '#cccccc',
+  ATTACK_RANGE: 'rgba(244, 67, 54, 0.3)',
+  ATTACK_RANGE_BORDER: '#F44336',
 };
 
 // Action Types

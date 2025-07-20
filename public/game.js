@@ -24,7 +24,8 @@ import { TurnInterface } from './ui/turnInterface.js';
 import { GameStatus } from './ui/gameStatus.js';
 import { UnitDisplay } from './ui/unitDisplay.js';
 import { VictoryScreen } from './ui/victoryScreen.js';
-import { BuildPanel } from './ui/buildPanel.js';
+import { BuildPanelSidebar } from './ui/buildPanelSidebar.js';
+import { UnitInfoSidebar } from './ui/unitInfoSidebar.js';
 
 class Game {
   constructor() {
@@ -388,26 +389,43 @@ class Game {
   }
 
   drawGrid() {
-    // Draw alternating chess-like pattern first
+    // Fill entire canvas with dark tactical background
+    this.ctx.fillStyle = UI_COLORS.GRID_BG;
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    
+    // Draw alternating tactical grid pattern with StarCraft 2 aesthetic
     for (let x = 0; x < this.gridSize; x++) {
       for (let y = 0; y < this.gridSize; y++) {
         // Determine if this square should be light or dark
         const isLight = (x + y) % 2 === 0;
         this.ctx.fillStyle = isLight ? UI_COLORS.GRID_LIGHT : UI_COLORS.GRID_DARK;
-
+        
+        // Draw base cell
         this.ctx.fillRect(
           x * this.cellSize,
           y * this.cellSize,
           this.cellSize,
           this.cellSize
         );
+        
+        // Add subtle inner glow effect for strategic feel
+        if (isLight) {
+          this.ctx.fillStyle = UI_COLORS.GRID_ACCENT;
+          this.ctx.fillRect(
+            x * this.cellSize + 1,
+            y * this.cellSize + 1,
+            this.cellSize - 2,
+            this.cellSize - 2
+          );
+        }
       }
     }
-
-    // Draw grid lines for clarity
+    
+    // Draw tactical grid lines with enhanced visibility
     this.ctx.strokeStyle = UI_COLORS.GRID_LINE;
-    this.ctx.lineWidth = 1;
-
+    this.ctx.lineWidth = 0.5;
+    this.ctx.globalAlpha = 0.8;
+    
     // Draw vertical lines
     for (let i = 0; i <= this.gridSize; i++) {
       const x = i * this.cellSize;
@@ -416,7 +434,7 @@ class Game {
       this.ctx.lineTo(x, this.canvas.height);
       this.ctx.stroke();
     }
-
+    
     // Draw horizontal lines
     for (let i = 0; i <= this.gridSize; i++) {
       const y = i * this.cellSize;
@@ -425,6 +443,30 @@ class Game {
       this.ctx.lineTo(this.canvas.width, y);
       this.ctx.stroke();
     }
+    
+    // Draw enhanced border lines every 5 cells for tactical reference
+    this.ctx.strokeStyle = UI_COLORS.GRID_BORDER_GLOW;
+    this.ctx.lineWidth = 1;
+    this.ctx.globalAlpha = 0.6;
+    
+    for (let i = 0; i <= this.gridSize; i += 5) {
+      const pos = i * this.cellSize;
+      
+      // Vertical tactical lines
+      this.ctx.beginPath();
+      this.ctx.moveTo(pos, 0);
+      this.ctx.lineTo(pos, this.canvas.height);
+      this.ctx.stroke();
+      
+      // Horizontal tactical lines
+      this.ctx.beginPath();
+      this.ctx.moveTo(0, pos);
+      this.ctx.lineTo(this.canvas.width, pos);
+      this.ctx.stroke();
+    }
+    
+    // Reset alpha for other drawing operations
+    this.ctx.globalAlpha = 1.0;
   }
 
   drawHover() {

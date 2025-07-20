@@ -1,0 +1,539 @@
+/* Chess.com + StarCraft 2 Design System */
+/* Professional gaming aesthetic with tactical interface elements */
+
+:root {
+  /* === Chess.com Color Palette === */
+  --chess-bg-primary: #1a1a1a;
+  --chess-bg-secondary: #2c2c2c;
+  --chess-bg-panel: #3a3a3a;
+  --chess-green: #7CB342;
+  --chess-blue: #2196F3;
+  --chess-text-primary: #ffffff;
+  --chess-text-secondary: #cccccc;
+  --chess-text-muted: #999999;
+
+  /* === StarCraft 2 Color Palette === */
+  --sc2-bg-primary: #0d0d0d;
+  --sc2-bg-secondary: #1a1a1a;
+  --sc2-bg-panel: #252525;
+  --sc2-accent-blue: #00aaff;
+  --sc2-accent-cyan: #00ffff;
+  --sc2-border: #333333;
+  --sc2-border-glow: rgba(0, 170, 255, 0.3);
+
+  /* === Unified Design System === */
+  --primary-bg: var(--chess-bg-primary);
+  --secondary-bg: var(--chess-bg-secondary);
+  --panel-bg: var(--chess-bg-panel);
+  --accent-primary: var(--sc2-accent-blue);
+  --accent-secondary: var(--chess-green);
+  --accent-warning: #FF9800;
+  --accent-danger: #F44336;
+  --accent-success: var(--chess-green);
+
+  /* === Text Colors === */
+  --text-primary: var(--chess-text-primary);
+  --text-secondary: var(--chess-text-secondary);
+  --text-muted: var(--chess-text-muted);
+  --text-accent: var(--sc2-accent-blue);
+
+  /* === Border and Effects === */
+  --border-primary: var(--sc2-border);
+  --border-accent: var(--sc2-accent-blue);
+  --border-glow: var(--sc2-border-glow);
+  --shadow-panel: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-glow: 0 0 15px rgba(0, 170, 255, 0.5);
+
+  /* === Typography === */
+  --font-family-primary: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+  --font-family-condensed: 'Roboto Condensed', 'Arial Narrow', sans-serif;
+  --font-size-xs: 10px;
+  --font-size-sm: 12px;
+  --font-size-base: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 32px;
+
+  /* === Spacing === */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+  --spacing-2xl: 32px;
+
+  /* === Border Radius === */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+
+  /* === Z-Index Layers === */
+  --z-background: 0;
+  --z-panel: 10;
+  --z-overlay: 20;
+  --z-sidebar: 30;
+  --z-tooltip: 40;
+  --z-modal: 50;
+
+  /* === Game-Specific Colors === */
+  --player-1-color: var(--sc2-accent-blue);
+  --player-2-color: #F44336;
+  --grid-light: #f8f9fa;
+  --grid-dark: #e9ecef;
+  --grid-hover: rgba(0, 170, 255, 0.1);
+  --grid-selection: rgba(0, 170, 255, 0.3);
+}
+
+/* === Base Theme Application === */
+.chess-sc2-theme {
+  background: var(--primary-bg);
+  color: var(--text-primary);
+  font-family: var(--font-family-primary);
+  line-height: 1.4;
+}
+
+/* === Angular/Sci-Fi Design Elements === */
+.angular-panel {
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  background: rgba(37, 37, 37, 0.85);
+  backdrop-filter: blur(4px);
+  border: 1px solid var(--border-glow);
+  border-radius: var(--radius-sm);
+}
+
+.angular-button {
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  background: linear-gradient(135deg, var(--panel-bg), var(--secondary-bg));
+  border: 1px solid var(--border-primary);
+  color: var(--text-primary);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.angular-button:hover {
+  background: linear-gradient(135deg, var(--accent-primary), var(--panel-bg));
+  border-color: var(--border-accent);
+  box-shadow: var(--shadow-glow);
+}
+
+.angular-button:active {
+  background: var(--accent-primary);
+  transform: translateY(1px);
+}
+
+/* === Semi-Transparent Panels === */
+.tactical-panel {
+  background: rgba(26, 26, 26, 0.85);
+  backdrop-filter: blur(4px);
+  border: 1px solid var(--border-glow);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-panel);
+  position: relative;
+}
+
+.tactical-panel-solid {
+  background: rgba(37, 37, 37, 0.95);
+  backdrop-filter: blur(6px);
+}
+
+.tactical-panel-overlay {
+  background: rgba(13, 13, 13, 0.75);
+  backdrop-filter: blur(2px);
+}
+
+/* === Glow Effects === */
+.glow-blue {
+  box-shadow: 
+    0 0 5px rgba(0, 170, 255, 0.5),
+    0 0 10px rgba(0, 170, 255, 0.3),
+    0 0 20px rgba(0, 170, 255, 0.2),
+    inset 0 0 10px rgba(0, 170, 255, 0.1);
+}
+
+.glow-pulse {
+  animation: pulse-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 
+      0 0 5px rgba(0, 170, 255, 0.3),
+      0 0 10px rgba(0, 170, 255, 0.2),
+      0 0 20px rgba(0, 170, 255, 0.1);
+  }
+  100% {
+    box-shadow: 
+      0 0 8px rgba(0, 170, 255, 0.6),
+      0 0 15px rgba(0, 170, 255, 0.4),
+      0 0 30px rgba(0, 170, 255, 0.3);
+  }
+}
+
+.text-glow {
+  color: var(--accent-primary);
+  text-shadow: 
+    0 0 4px var(--accent-primary),
+    0 0 8px var(--accent-primary),
+    0 0 12px var(--accent-primary);
+}
+
+/* === Card-Based Layout System === */
+.game-card {
+  background: var(--panel-bg);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-panel);
+  transition: all 0.2s ease;
+}
+
+.game-card:hover {
+  border-color: var(--border-accent);
+  box-shadow: var(--shadow-glow);
+  transform: translateY(-2px);
+}
+
+.game-card-header {
+  color: var(--text-accent);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-md);
+  text-shadow: 0 0 6px var(--accent-primary);
+}
+
+.game-card-content {
+  color: var(--text-secondary);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+}
+
+/* === Professional Typography === */
+.heading-primary {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-lg);
+}
+
+.heading-secondary {
+  font-size: var(--font-size-2xl);
+  font-weight: 600;
+  color: var(--text-accent);
+  margin-bottom: var(--spacing-md);
+  text-shadow: 0 0 6px var(--accent-primary);
+}
+
+.heading-tertiary {
+  font-size: var(--font-size-xl);
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.text-small {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.text-accent {
+  color: var(--text-accent);
+  font-weight: 500;
+}
+
+/* === Tactical Information Display === */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  line-height: 1.2;
+}
+
+.info-item {
+  background: rgba(0, 0, 0, 0.3);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  border-left: 2px solid var(--accent-primary);
+}
+
+.info-label {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.info-value {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: var(--font-size-base);
+}
+
+/* === Scanner Line Effect === */
+.scanner-line {
+  position: relative;
+  overflow: hidden;
+}
+
+.scanner-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(0, 170, 255, 0.4), 
+    transparent);
+  animation: scanner-sweep 2s ease-in-out infinite;
+}
+
+@keyframes scanner-sweep {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* === Status Indicators === */
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: var(--spacing-xs);
+}
+
+.status-active {
+  background: var(--accent-success);
+  box-shadow: 0 0 8px var(--accent-success);
+}
+
+.status-warning {
+  background: var(--accent-warning);
+  box-shadow: 0 0 8px var(--accent-warning);
+}
+
+.status-danger {
+  background: var(--accent-danger);
+  box-shadow: 0 0 8px var(--accent-danger);
+}
+
+.status-inactive {
+  background: var(--text-muted);
+}
+
+/* === Responsive Design === */
+@media (max-width: 768px) {
+  .angular-panel {
+    clip-path: polygon(0 0, calc(100% - 5px) 0, 100% 5px, 100% 100%, 5px 100%, 0 calc(100% - 5px));
+  }
+  
+  .angular-button {
+    clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%);
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+  
+  .tactical-panel {
+    padding: var(--spacing-md);
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* === Build Panel Sidebar Styles === */
+.build-unit-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+}
+
+.build-unit-card {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.build-unit-card:hover {
+  border-color: var(--border-accent);
+  background: rgba(0, 170, 255, 0.1);
+  box-shadow: 0 0 10px rgba(0, 170, 255, 0.3);
+}
+
+.build-unit-card:active {
+  transform: scale(0.98);
+}
+
+.build-unit-card.insufficient-energy {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: var(--accent-danger);
+}
+
+.build-unit-card.insufficient-energy:hover {
+  border-color: var(--accent-danger);
+  background: rgba(244, 67, 54, 0.1);
+  box-shadow: none;
+  transform: none;
+}
+
+.build-unit-icon {
+  font-size: var(--font-size-2xl);
+  color: var(--text-accent);
+  min-width: 32px;
+  text-align: center;
+}
+
+.build-unit-info {
+  flex: 1;
+}
+
+.build-unit-name {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.build-unit-cost {
+  font-size: var(--font-size-sm);
+  color: var(--accent-success);
+  font-weight: 500;
+}
+
+.build-unit-stats {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* === Unit Info Sidebar Styles === */
+.unit-details {
+  padding: var(--spacing-md);
+}
+
+.unit-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.unit-icon-large {
+  font-size: var(--font-size-3xl);
+  color: var(--text-accent);
+}
+
+.unit-name-large {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.unit-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.unit-stat-item {
+  background: rgba(0, 0, 0, 0.2);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+.unit-stat-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.unit-stat-value {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.unit-abilities {
+  margin-top: var(--spacing-md);
+}
+
+.unit-abilities-title {
+  font-size: var(--font-size-sm);
+  color: var(--text-accent);
+  font-weight: 600;
+  margin-bottom: var(--spacing-sm);
+  text-transform: uppercase;
+}
+
+.unit-ability-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.unit-ability-tag {
+  background: rgba(0, 170, 255, 0.2);
+  color: var(--text-accent);
+  padding: 2px var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+}
+
+/* === Sidebar Scrollbars === */
+.build-panel-sidebar::-webkit-scrollbar,
+.unit-info-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.build-panel-sidebar::-webkit-scrollbar-track,
+.unit-info-sidebar::-webkit-scrollbar-track {
+  background: var(--secondary-bg);
+  border-radius: 3px;
+}
+
+.build-panel-sidebar::-webkit-scrollbar-thumb,
+.unit-info-sidebar::-webkit-scrollbar-thumb {
+  background: var(--accent-primary);
+  border-radius: 3px;
+}
+
+.build-panel-sidebar::-webkit-scrollbar-thumb:hover,
+.unit-info-sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--text-accent);
+}
+
+/* === Animation Performance Optimization === */
+@media (prefers-reduced-motion: reduce) {
+  .glow-pulse,
+  .scanner-line::after {
+    animation: none;
+  }
+  
+  .angular-button,
+  .game-card,
+  .build-unit-card {
+    transition: none;
+  }
+}

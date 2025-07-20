@@ -1,8 +1,8 @@
 # ISSUE-030: UI Redesign with Chess.com + StarCraft 2 Aesthetic
 
-**Status:** Open
+**Status:** WIP
 **Created:** 2025-07-19
-**Assignee:** Unassigned
+**Assignee:** Claude
 **Priority:** High
 **Labels:** ui, ux, redesign, visual-polish, phase-2
 
@@ -78,6 +78,10 @@ Redesign the entire UI to blend Chess.com's professional aesthetic with StarCraf
 
 **Target Aesthetic:**
 A sophisticated strategy gaming interface that feels both professional (like Chess.com) and tactically engaging (like StarCraft 2), creating an immersive experience that enhances strategic gameplay without overwhelming the user.
+
+**Implementation Notes:**
+- Avoid use of emojis in the UI design - maintain professional aesthetic
+- Focus on clean iconography and visual elements instead
 
 ## Comments
 
