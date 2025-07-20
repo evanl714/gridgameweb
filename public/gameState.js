@@ -804,6 +804,14 @@ export class GameState {
     const player1Base = this.getPlayerBase(1);
     const player2Base = this.getPlayerBase(2);
 
+    // Emit victory check event for other systems to react (before ending game)
+    this.emit('victoryCheck', {
+      player1BaseHealth: player1Base ? player1Base.health : 0,
+      player2BaseHealth: player2Base ? player2Base.health : 0,
+      gameStatus: this.status,
+      turnNumber: this.turnNumber
+    });
+
     // Handle simultaneous base destruction (draw condition)
     if (!player1Base && !player2Base) {
       this.endGame(null); // null indicates a draw
@@ -821,14 +829,6 @@ export class GameState {
       this.endGame(1);
       return;
     }
-
-    // Emit victory check event for other systems to react
-    this.emit('victoryCheck', {
-      player1BaseHealth: player1Base ? player1Base.health : 0,
-      player2BaseHealth: player2Base ? player2Base.health : 0,
-      gameStatus: this.status,
-      turnNumber: this.turnNumber
-    });
   }
 
   /**
