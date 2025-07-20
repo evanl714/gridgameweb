@@ -1,8 +1,8 @@
 # ISSUE-015: Game Polish & Animation System
 
-**Status:** Open
+**Status:** WIP
 **Created:** 2025-07-18
-**Assignee:** Unassigned
+**Assignee:** Claude
 **Priority:** Low
 **Labels:** polish, animations, visual-effects, phase-3
 
@@ -11,7 +11,7 @@
 Add visual polish, animations, and quality-of-life improvements that enhance the player experience without changing core gameplay.
 
 **Time Estimate:** 8-12 hours
-**Dependencies:** [[ISSUE-014-mobile-optimization]]
+**Dependencies:** [[ISSUE-014-mobile-optimization]], [[ISSUE-030-ui-redesign-chess-starcraft-aesthetic]]
 **Task Reference:** [[task-15-game-polish-animations]]
 
 ## Tasks
@@ -32,7 +32,7 @@ Add visual polish, animations, and quality-of-life improvements that enhance the
 
 ## Related Issues
 
-- Depends on: [[ISSUE-014-mobile-optimization]]
+- Depends on: [[ISSUE-014-mobile-optimization]], [[ISSUE-030-ui-redesign-chess-starcraft-aesthetic]]
 - Blocks: [[ISSUE-016-tutorial-onboarding]]
 
 ## Relationships

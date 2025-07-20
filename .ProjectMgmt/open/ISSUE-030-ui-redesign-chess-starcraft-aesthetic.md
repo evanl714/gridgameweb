@@ -1,4 +1,4 @@
-# ISSUE-016: UI Redesign with Chess.com + StarCraft 2 Aesthetic
+# ISSUE-030: UI Redesign with Chess.com + StarCraft 2 Aesthetic
 
 **Status:** Open
 **Created:** 2025-07-19
@@ -29,15 +29,15 @@ Redesign the entire UI to blend Chess.com's professional aesthetic with StarCraf
 
 ## Subtasks
 
-- [ ] [[ISSUE-016-ui-redesign-chess-starcraft-aesthetic-a]] - Design system and color palette
-- [ ] [[ISSUE-016-ui-redesign-chess-starcraft-aesthetic-b]] - Dark theme foundation
-- [ ] [[ISSUE-016-ui-redesign-chess-starcraft-aesthetic-c]] - Game board visual redesign
-- [ ] [[ISSUE-016-ui-redesign-chess-starcraft-aesthetic-d]] - Tactical UI components
-- [ ] [[ISSUE-016-ui-redesign-chess-starcraft-aesthetic-e]] - Strategic visual effects
-- [ ] [[ISSUE-016-ui-redesign-chess-starcraft-aesthetic-f]] - Card-based layout system
-- [ ] [[ISSUE-016-ui-redesign-chess-starcraft-aesthetic-g]] - Gaming typography and icons
-- [ ] [[ISSUE-016-ui-redesign-chess-starcraft-aesthetic-h]] - Responsive testing
-- [ ] [[ISSUE-016-ui-redesign-chess-starcraft-aesthetic-i]] - Performance optimization
+- [ ] [[ISSUE-030-ui-redesign-chess-starcraft-aesthetic-a]] - Design system and color palette
+- [ ] [[ISSUE-030-ui-redesign-chess-starcraft-aesthetic-b]] - Dark theme foundation
+- [ ] [[ISSUE-030-ui-redesign-chess-starcraft-aesthetic-c]] - Game board visual redesign
+- [ ] [[ISSUE-030-ui-redesign-chess-starcraft-aesthetic-d]] - Tactical UI components
+- [ ] [[ISSUE-030-ui-redesign-chess-starcraft-aesthetic-e]] - Strategic visual effects
+- [ ] [[ISSUE-030-ui-redesign-chess-starcraft-aesthetic-f]] - Card-based layout system
+- [ ] [[ISSUE-030-ui-redesign-chess-starcraft-aesthetic-g]] - Gaming typography and icons
+- [ ] [[ISSUE-030-ui-redesign-chess-starcraft-aesthetic-h]] - Responsive testing
+- [ ] [[ISSUE-030-ui-redesign-chess-starcraft-aesthetic-i]] - Performance optimization
 
 ## Related Issues
 
