@@ -1,8 +1,8 @@
 # ISSUE-012: Database Integration (SQLite)
 
-**Status:** Open
+**Status:** WIP
 **Created:** 2025-07-18
-**Assignee:** Unassigned
+**Assignee:** Claude
 **Priority:** Medium
 **Labels:** database, persistence, backend, phase-2
 
