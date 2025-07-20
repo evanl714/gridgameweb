@@ -1,6 +1,6 @@
 # ISSUE-032: Critical UI Blocking Bugs
 
-**Status:** Open
+**Status:** WIP
 **Created:** 2025-07-20
 **Assignee:** evanl714
 **Priority:** High
