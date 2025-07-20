@@ -24,59 +24,20 @@ class UIManager {
   }
 
   createContainers() {
-    const gameContainer = document.querySelector('.game-container');
-    if (!gameContainer) {
-      console.error('Game container not found');
-      return;
+    // Use existing HTML structure instead of creating new containers
+    this.containers.set('build', document.getElementById('buildPanelSidebar'));
+    this.containers.set('unitInfo', document.getElementById('unitInfoSidebar'));
+    this.containers.set('status', document.querySelector('.game-status'));
+    
+    // Create minimal additional containers if needed
+    const gameInfo = document.querySelector('.game-info');
+    if (gameInfo) {
+      this.containers.set('gameInfo', gameInfo);
     }
-
-    const uiContainer = document.createElement('div');
-    uiContainer.className = 'ui-container';
-    uiContainer.innerHTML = `
-            <div class="ui-top-section">
-                <div class="ui-left-panel">
-                    <div id="resourceDisplayContainer" class="ui-component-container"></div>
-                    <div id="turnInterfaceContainer" class="ui-component-container"></div>
-                </div>
-                <div class="ui-right-panel">
-                    <div id="gameStatusContainer" class="ui-component-container"></div>
-                </div>
-            </div>
-            <div class="ui-bottom-section">
-                <div id="unitDisplayContainer" class="ui-component-container expandable"></div>
-            </div>
-        `;
-
-    const main = gameContainer.querySelector('main');
-    if (main) {
-      const gameBoard = main.querySelector('.game-board');
-      if (gameBoard) {
-        main.insertBefore(uiContainer, gameBoard);
-      } else {
-        main.appendChild(uiContainer);
-      }
-    } else {
-      gameContainer.appendChild(uiContainer);
-    }
-
-    this.containers.set('resource', document.getElementById('resourceDisplayContainer'));
-    this.containers.set('turn', document.getElementById('turnInterfaceContainer'));
-    this.containers.set('status', document.getElementById('gameStatusContainer'));
-    this.containers.set('unit', document.getElementById('unitDisplayContainer'));
-
-    this.setupToggleHandlers();
   }
 
   setupToggleHandlers() {
-    const unitContainer = this.containers.get('unit');
-    if (unitContainer) {
-      const toggleBtn = document.createElement('button');
-      toggleBtn.className = 'panel-toggle-btn';
-      toggleBtn.innerHTML = '<span class="toggle-icon">▼</span> Unit Information';
-      toggleBtn.addEventListener('click', () => this.togglePanel('unit'));
-
-      unitContainer.appendChild(toggleBtn);
-    }
+    // Simplified setup - no additional toggle handlers needed for existing layout
   }
 
   togglePanel(panelName) {
@@ -91,22 +52,30 @@ class UIManager {
   }
 
   initializeComponents() {
-    this.components.set('resource', new ResourceDisplay(this.gameState));
-    this.components.set('turn', new TurnInterface(this.gameState, this.turnManager));
-    this.components.set('status', new GameStatus(this.gameState));
-    this.components.set('unit', new UnitDisplay(this.gameState));
+    // Initialize components for existing sidebar elements
     this.components.set('build', new BuildPanelSidebar(this.gameState, this.turnManager));
     this.components.set('unitInfo', new UnitInfoSidebar(this.gameState));
+    this.components.set('status', new GameStatus(this.gameState));
     this.components.set('transition', new TurnTransition(this.gameState));
 
     this.renderComponents();
   }
 
   renderComponents() {
-    this.components.get('resource').render(this.containers.get('resource'));
-    this.components.get('turn').render(this.containers.get('turn'));
-    this.components.get('status').render(this.containers.get('status'));
-    this.components.get('unit').render(this.containers.get('unit'));
+    // Render components to existing containers
+    const buildContainer = this.containers.get('build');
+    const unitInfoContainer = this.containers.get('unitInfo');
+    const statusContainer = this.containers.get('status');
+    
+    if (buildContainer && this.components.get('build')) {
+      this.components.get('build').render(buildContainer);
+    }
+    if (unitInfoContainer && this.components.get('unitInfo')) {
+      this.components.get('unitInfo').render(unitInfoContainer);
+    }
+    if (statusContainer && this.components.get('status')) {
+      this.components.get('status').render(statusContainer);
+    }
   }
 
   setupEventListeners() {
@@ -322,11 +291,6 @@ class UIManager {
 
     this.components.clear();
     this.containers.clear();
-
-    const uiContainer = document.querySelector('.ui-container');
-    if (uiContainer && uiContainer.parentNode) {
-      uiContainer.parentNode.removeChild(uiContainer);
-    }
 
     const notificationContainer = document.getElementById('notificationContainer');
     if (notificationContainer && notificationContainer.parentNode) {

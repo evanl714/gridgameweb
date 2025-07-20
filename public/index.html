@@ -4,11 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grid Strategy Game</title>
-    <link rel="stylesheet" href="styles/design-system.css">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="ui/ui-styles.css">
+    <link rel="stylesheet" href="styles/chess-com-theme.css">
 </head>
-<body class="chess-sc2-theme">
+<body>
     <div class="game-container">
         <header>
             <h1>Grid Strategy Game</h1>
@@ -53,17 +51,17 @@
             <!-- Main Game Area -->
             <div class="game-main">
                 <div class="game-board">
-                    <canvas id="gameCanvas" width="800" height="800"></canvas>
+                    <canvas id="gameCanvas" width="600" height="600"></canvas>
                 </div>
                 
                 <div class="game-controls">
-                    <button id="newGameBtn" class="angular-button">New Game</button>
-                    <button id="resetBtn" class="angular-button">Reset</button>
-                    <button id="nextPhaseBtn" class="angular-button primary">Next Phase</button>
-                    <button id="endTurnBtn" class="angular-button primary">End Turn</button>
-                    <button id="gatherBtn" class="angular-button" disabled>Gather Resources</button>
-                    <button id="surrenderBtn" class="angular-button">Surrender</button>
-                    <button id="drawBtn" class="angular-button">Offer Draw</button>
+                    <button id="newGameBtn">New Game</button>
+                    <button id="resetBtn">Reset</button>
+                    <button id="nextPhaseBtn">Next Phase</button>
+                    <button id="endTurnBtn">End Turn</button>
+                    <button id="gatherBtn" disabled>Gather Resources</button>
+                    <button id="surrenderBtn">Surrender</button>
+                    <button id="drawBtn">Offer Draw</button>
                 </div>
             </div>
         </main>

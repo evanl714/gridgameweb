@@ -1,0 +1,425 @@
+/* Chess.com Inspired Theme */
+/* Based on Chess.com's professional dark interface with minimal StarCraft 2 accents */
+
+:root {
+  /* Chess.com Primary Colors */
+  --chess-bg-primary: #1a1a1a;    /* Main dark background */
+  --chess-bg-secondary: #2c2c2c;  /* Sidebar and panel backgrounds */
+  --chess-bg-tertiary: #3a3a3a;   /* Card/component backgrounds */
+  --chess-green: #7CB342;         /* Primary action buttons (Start Game, etc) */
+  --chess-green-hover: #689F35;   /* Hover state for green buttons */
+  --chess-text-primary: #ffffff;   /* Primary text */
+  --chess-text-secondary: #cccccc; /* Secondary text */
+  --chess-text-muted: #999999;    /* Muted/disabled text */
+  --chess-border: #404040;        /* Standard borders */
+  --chess-border-light: #555555;  /* Lighter borders for cards */
+  
+  /* StarCraft 2 Accent Colors (minimal usage) */
+  --sc2-blue: #00aaff;           /* Tactical accent color */
+  --sc2-blue-glow: rgba(0, 170, 255, 0.3); /* Subtle glow effects */
+  
+  /* Shadows and Effects */
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-button: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-glow: 0 0 10px var(--sc2-blue-glow);
+  
+  /* Typography */
+  --font-primary: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+}
+
+/* Base Reset and Typography */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-primary);
+  background: var(--chess-bg-primary);
+  color: var(--chess-text-primary);
+  font-weight: var(--font-weight-normal);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* Main Layout - Chess.com inspired structure */
+.game-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--chess-bg-primary);
+}
+
+/* Header */
+header {
+  background: var(--chess-bg-secondary);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--chess-border);
+}
+
+header h1 {
+  font-size: 24px;
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.game-info {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-lg);
+  font-size: 14px;
+  color: var(--chess-text-secondary);
+}
+
+.game-info span {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--chess-bg-tertiary);
+  border-radius: var(--radius-sm);
+}
+
+/* Main Content Layout */
+main {
+  flex: 1;
+  display: flex;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  min-height: 0; /* Important for flex children */
+}
+
+/* Left Sidebar - Chess.com style */
+.tactical-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.tactical-panel {
+  background: var(--chess-bg-secondary);
+  border: 1px solid var(--chess-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.game-card-header {
+  background: var(--chess-bg-tertiary);
+  color: var(--sc2-blue);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-weight: var(--font-weight-medium);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--chess-border);
+}
+
+/* Game Main Area */
+.game-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  min-width: 0;
+}
+
+/* Game Board */
+.game-board {
+  flex: 1;
+  background: var(--chess-bg-secondary);
+  border: 2px solid var(--chess-border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 600px;
+  position: relative;
+}
+
+.game-board::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(45deg, var(--sc2-blue-glow), transparent, var(--sc2-blue-glow));
+  border-radius: var(--radius-lg);
+  opacity: 0.5;
+  z-index: -1;
+}
+
+#gameCanvas {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  border-radius: var(--radius-md);
+  background: var(--chess-bg-tertiary);
+  border: 1px solid var(--chess-border);
+}
+
+/* Game Controls */
+.game-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: var(--chess-bg-secondary);
+  border: 1px solid var(--chess-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+
+/* Buttons - Chess.com inspired */
+.angular-button,
+button {
+  background: var(--chess-bg-tertiary);
+  color: var(--chess-text-primary);
+  border: 1px solid var(--chess-border);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-family: var(--font-primary);
+  font-size: 14px;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-button);
+  min-width: 80px;
+}
+
+.angular-button:hover,
+button:hover {
+  background: var(--chess-border-light);
+  border-color: var(--chess-border-light);
+  transform: translateY(-1px);
+}
+
+.angular-button:active,
+button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Primary Action Buttons - Chess.com Green */
+.angular-button.primary,
+button[id*="newGame"],
+button[id*="nextPhase"],
+button[id*="endTurn"] {
+  background: var(--chess-green);
+  color: white;
+  border-color: var(--chess-green);
+  font-weight: var(--font-weight-semibold);
+}
+
+.angular-button.primary:hover,
+button[id*="newGame"]:hover,
+button[id*="nextPhase"]:hover,
+button[id*="endTurn"]:hover {
+  background: var(--chess-green-hover);
+  border-color: var(--chess-green-hover);
+}
+
+/* Disabled Buttons */
+.angular-button:disabled,
+button:disabled {
+  background: var(--chess-bg-secondary);
+  color: var(--chess-text-muted);
+  border-color: var(--chess-border);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Sidebar Panel Content */
+.build-panel-sidebar,
+.unit-info-sidebar,
+.game-status {
+  padding: var(--spacing-md);
+}
+
+/* Build Units */
+.unit-option {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
+  background: var(--chess-bg-tertiary);
+  border: 1px solid var(--chess-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.unit-option:hover {
+  background: var(--chess-border);
+  border-color: var(--sc2-blue);
+  box-shadow: var(--shadow-glow);
+}
+
+.unit-icon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+  color: var(--sc2-blue);
+}
+
+.unit-details h4 {
+  font-size: 13px;
+  font-weight: var(--font-weight-medium);
+  margin-bottom: 2px;
+}
+
+.unit-cost,
+.unit-stats {
+  font-size: 11px;
+  color: var(--chess-text-secondary);
+}
+
+/* Game Status */
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-sm);
+}
+
+.status-row > div {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--chess-bg-tertiary);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+}
+
+/* Energy and Actions with color coding */
+#playerEnergy {
+  color: var(--chess-green) !important;
+}
+
+#playerActions {
+  color: var(--sc2-blue) !important;
+}
+
+#gamePhase {
+  color: var(--chess-text-secondary);
+}
+
+/* Unit Info */
+.unit-info-sidebar {
+  text-align: center;
+}
+
+#selectedUnit {
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--spacing-sm);
+  color: var(--chess-text-secondary);
+}
+
+/* Footer */
+footer {
+  background: var(--chess-bg-secondary);
+  border-top: 1px solid var(--chess-border);
+  padding: var(--spacing-md);
+  text-align: center;
+  color: var(--chess-text-muted);
+  font-size: 12px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .tactical-sidebar {
+    width: 250px;
+  }
+  
+  main {
+    padding: var(--spacing-md);
+    gap: var(--spacing-md);
+  }
+}
+
+@media (max-width: 768px) {
+  main {
+    flex-direction: column;
+  }
+  
+  .tactical-sidebar {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: var(--spacing-sm);
+  }
+  
+  .tactical-panel {
+    min-width: 200px;
+  }
+  
+  .game-controls {
+    justify-content: center;
+  }
+  
+  .game-board {
+    min-height: 400px;
+  }
+}
+
+/* Active/Selected States */
+.angular-button[active],
+button[active] {
+  background: var(--sc2-blue);
+  border-color: var(--sc2-blue);
+  color: white;
+  box-shadow: var(--shadow-glow);
+}
+
+/* Subtle Animations */
+.tactical-panel,
+.game-board,
+.game-controls {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Focus States for Accessibility */
+.angular-button:focus,
+button:focus {
+  outline: 2px solid var(--sc2-blue);
+  outline-offset: 2px;
+}
+
+/* High Contrast for Important Elements */
+.game-card-header {
+  background: linear-gradient(135deg, var(--chess-bg-tertiary), var(--chess-bg-secondary));
+}
+
+/* Subtle Depth */
+.tactical-sidebar {
+  background: linear-gradient(180deg, var(--chess-bg-primary) 0%, var(--chess-bg-secondary) 100%);
+}
