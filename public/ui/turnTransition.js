@@ -49,7 +49,7 @@ class TurnTransition {
             </div>
             
             <div class="privacy-notice">
-              <p>🔒 Game state will be hidden during handoff</p>
+              <p>Game state will be hidden during handoff</p>
             </div>
           </div>
         </div>

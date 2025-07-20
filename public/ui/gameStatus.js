@@ -18,7 +18,7 @@ class GameStatus {
             <div class="status-panel">
                 <div class="game-state-display">
                     <div class="state-indicator">
-                        <span class="state-icon">🎮</span>
+                        <span class="state-icon">GAME</span>
                         <span class="state-text">Ready</span>
                     </div>
                     <div class="game-mode">
@@ -30,12 +30,12 @@ class GameStatus {
                 <div class="victory-tracking">
                     <h4>Victory Conditions</h4>
                     <div class="victory-condition resource-victory">
-                        <span class="condition-icon">💰</span>
+                        <span class="condition-icon">RES</span>
                         <span class="condition-label">Resource Victory:</span>
                         <span class="condition-status">First to 500 resources</span>
                     </div>
                     <div class="victory-condition elimination-victory">
-                        <span class="condition-icon">⚔️</span>
+                        <span class="condition-icon">WAR</span>
                         <span class="condition-label">Elimination Victory:</span>
                         <span class="condition-status">Eliminate all enemy units</span>
                     </div>
@@ -45,7 +45,7 @@ class GameStatus {
                     <div class="player-summary" data-player="1">
                         <div class="player-header">
                             <span class="player-indicator player-1">Player 1</span>
-                            <span class="player-status-icon">✓</span>
+                            <span class="player-status-icon">OK</span>
                         </div>
                         <div class="player-stats">
                             <div class="stat">
@@ -62,7 +62,7 @@ class GameStatus {
                     <div class="player-summary" data-player="2">
                         <div class="player-header">
                             <span class="player-indicator player-2">Player 2</span>
-                            <span class="player-status-icon">✓</span>
+                            <span class="player-status-icon">OK</span>
                         </div>
                         <div class="player-stats">
                             <div class="stat">
@@ -79,15 +79,15 @@ class GameStatus {
 
                 <div class="game-controls">
                     <button id="pauseGameBtn" class="control-btn pause-btn">
-                        <span class="btn-icon">⏸️</span>
+                        <span class="btn-icon">||</span>
                         <span class="btn-text">Pause</span>
                     </button>
                     <button id="forfeitBtn" class="control-btn forfeit-btn">
-                        <span class="btn-icon">🏳️</span>
+                        <span class="btn-icon">FLAG</span>
                         <span class="btn-text">Forfeit</span>
                     </button>
                     <button id="saveGameBtn" class="control-btn save-btn">
-                        <span class="btn-icon">💾</span>
+                        <span class="btn-icon">SAVE</span>
                         <span class="btn-text">Save</span>
                     </button>
                 </div>
@@ -126,29 +126,29 @@ class GameStatus {
   }
 
   handleGameStarted() {
-    this.updateGameState('playing', '🎮', 'Playing');
+    this.updateGameState('playing', 'PLAY', 'Playing');
     this.enableControls();
     this.update();
   }
 
   handleGameEnded(data) {
     if (data && data.winner) {
-      this.updateGameState('ended', '🏆', `Player ${data.winner} Wins!`);
+      this.updateGameState('ended', 'WIN', `Player ${data.winner} Wins!`);
       this.markWinner(data.winner);
     } else {
-      this.updateGameState('ended', '🏁', 'Game Ended');
+      this.updateGameState('ended', 'END', 'Game Ended');
     }
     this.disableControls();
   }
 
   handleGamePaused() {
-    this.updateGameState('paused', '⏸️', 'Paused');
-    this.pauseBtn.innerHTML = '<span class="btn-icon">▶️</span><span class="btn-text">Resume</span>';
+    this.updateGameState('paused', '||', 'Paused');
+    this.pauseBtn.innerHTML = '<span class="btn-icon">></span><span class="btn-text">Resume</span>';
   }
 
   handleGameResumed() {
-    this.updateGameState('playing', '🎮', 'Playing');
-    this.pauseBtn.innerHTML = '<span class="btn-icon">⏸️</span><span class="btn-text">Pause</span>';
+    this.updateGameState('playing', 'PLAY', 'Playing');
+    this.pauseBtn.innerHTML = '<span class="btn-icon">||</span><span class="btn-text">Pause</span>';
   }
 
   handlePauseGame() {
@@ -208,10 +208,10 @@ class GameStatus {
       const statusIcon = summary.querySelector('.player-status-icon');
 
       if (playerId === winnerId) {
-        statusIcon.textContent = '👑';
+        statusIcon.textContent = 'WIN';
         summary.classList.add('winner');
       } else {
-        statusIcon.textContent = '💀';
+        statusIcon.textContent = 'LOST';
         summary.classList.add('loser');
       }
     });
@@ -239,13 +239,13 @@ class GameStatus {
     resourceTotal.textContent = player.resourcesGathered || 0;
 
     if (playerUnits.length === 0 && this.gameState.turnNumber > 5) {
-      statusIcon.textContent = '⚠️';
+      statusIcon.textContent = 'WARN';
       summary.classList.add('eliminated');
     } else if (player.resourcesGathered >= 500) {
-      statusIcon.textContent = '🎯';
+      statusIcon.textContent = 'GOAL';
       summary.classList.add('victory-condition-met');
     } else {
-      statusIcon.textContent = '✓';
+      statusIcon.textContent = 'OK';
       summary.classList.remove('eliminated', 'victory-condition-met');
     }
   }
@@ -278,7 +278,7 @@ class GameStatus {
 
     const status = this.gameState.status;
     if (status === 'ready' && this.stateText.textContent !== 'Ready') {
-      this.updateGameState('ready', '🎮', 'Ready');
+      this.updateGameState('ready', 'GAME', 'Ready');
     }
   }
 

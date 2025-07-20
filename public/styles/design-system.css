@@ -33,8 +33,8 @@
 
   /* === Text Colors === */
   --text-primary: var(--chess-text-primary);
-  --text-secondary: var(--chess-text-secondary);
-  --text-muted: var(--chess-text-muted);
+  --text-secondary: #e0e0e0;
+  --text-muted: #b8b8b8;
   --text-accent: var(--sc2-accent-blue);
 
   /* === Border and Effects === */

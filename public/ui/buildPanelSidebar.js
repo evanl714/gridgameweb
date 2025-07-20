@@ -8,7 +8,7 @@ class BuildPanelSidebar {
       {
         type: 'worker',
         name: 'Worker',
-        icon: '♦',
+        icon: 'WRK',
         cost: 10,
         health: 50,
         attack: 5,
@@ -19,7 +19,7 @@ class BuildPanelSidebar {
       {
         type: 'scout',
         name: 'Scout',
-        icon: '♙',
+        icon: 'SCT',
         cost: 15,
         health: 30,
         attack: 10,
@@ -30,7 +30,7 @@ class BuildPanelSidebar {
       {
         type: 'infantry',
         name: 'Infantry',
-        icon: '♗',
+        icon: 'INF',
         cost: 25,
         health: 100,
         attack: 20,
@@ -41,7 +41,7 @@ class BuildPanelSidebar {
       {
         type: 'heavy',
         name: 'Heavy',
-        icon: '♖',
+        icon: 'HVY',
         cost: 50,
         health: 200,
         attack: 40,
@@ -192,6 +192,10 @@ class BuildPanelSidebar {
   }
 
   update() {
+    this.renderBuildOptions();
+  }
+
+  render() {
     this.renderBuildOptions();
   }
 }

@@ -217,6 +217,14 @@ class UnitInfoSidebar {
       }
     }
   }
+
+  render() {
+    if (this.selectedUnit) {
+      this.renderUnitDetails(this.selectedUnit);
+    } else {
+      this.renderEmptyState();
+    }
+  }
 }
 
 export { UnitInfoSidebar };
