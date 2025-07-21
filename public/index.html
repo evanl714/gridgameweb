@@ -746,7 +746,13 @@
                     
                     // Hook up control buttons
                     document.getElementById('newGameBtn')?.addEventListener('click', () => window.game.newGame());
-                    // endTurnBtn is handled by turnInterface.js - removed duplicate handler
+                    // Add proper End Turn event listener to replace mysterious system
+                    document.getElementById('endTurnBtn')?.addEventListener('click', () => {
+                        console.log('🔧 End Turn button clicked - calling turnManager.forceEndTurn()');
+                        if (window.game && window.game.turnManager) {
+                            window.game.turnManager.forceEndTurn();
+                        }
+                    });
                     document.getElementById('nextPhaseBtn')?.addEventListener('click', () => window.game.nextPhase());
                     document.getElementById('gatherBtn')?.addEventListener('click', () => window.game.gatherResources());
                     document.getElementById('saveGameBtn')?.addEventListener('click', () => window.game.saveGame());
