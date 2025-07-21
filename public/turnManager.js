@@ -34,8 +34,7 @@ export class TurnManager {
       return;
     }
     
-    // Reset turn ending flag at start of new turn
-    this.endingTurn = false;
+    // Turn ending flag will be reset by endTurn() after startTurn() completes
 
     const currentPlayer = this.gameState.getCurrentPlayer();
     currentPlayer.resetActions();
