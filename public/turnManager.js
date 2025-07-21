@@ -33,6 +33,9 @@ export class TurnManager {
     if (this.gameState.status !== GAME_STATES.PLAYING) {
       return;
     }
+    
+    // Reset turn ending flag at start of new turn
+    this.endingTurn = false;
 
     const currentPlayer = this.gameState.getCurrentPlayer();
     currentPlayer.resetActions();
@@ -169,7 +172,8 @@ export class TurnManager {
 
     // Automatically advance to action phase after a short delay
     setTimeout(() => {
-      if (this.gameState.currentPhase === 'resource') {
+      // Only auto-advance if turn hasn't been manually ended
+      if (this.gameState.currentPhase === 'resource' && !this.endingTurn) {
         this.nextPhase();
       }
     }, 1000);
@@ -312,7 +316,12 @@ export class TurnManager {
       // Auto-advance if no actions remaining in action phase
       if (this.gameState.currentPhase === 'action' &&
                 currentPlayer.actionsRemaining === 0) {
-        setTimeout(() => this.nextPhase(), 500);
+        setTimeout(() => {
+          // Only auto-advance if turn hasn't been manually ended
+          if (!this.endingTurn) {
+            this.nextPhase();
+          }
+        }, 500);
       }
 
       return true;
