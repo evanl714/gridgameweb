@@ -621,19 +621,37 @@
                                 return;
                             }
                             
-                            // Clear all cells safely
-                            cells.forEach(cell => {
+                            console.log('🔧 DEBUG: renderToGrid called, found', cells.length, 'cells');
+                            
+                            // Clear all cells safely - preserve grid structure
+                            cells.forEach((cell, index) => {
                                 if (cell) {
+                                    // Preserve essential grid cell attributes
+                                    const originalClasses = cell.className;
+                                    const dataIndex = cell.dataset.index;
+                                    const dataX = cell.dataset.x;
+                                    const dataY = cell.dataset.y;
+                                    
                                     cell.classList.remove('selected', 'hovered', 'unit', 'base', 'player1', 'player2', 'player1-base', 'player2-base');
                                     const existingUnit = cell.querySelector('.unit-display');
                                     const existingBase = cell.querySelector('.base-display');
                                     if (existingUnit) existingUnit.remove();
                                     if (existingBase) existingBase.remove();
+                                    
                                     // Only clear background if it was explicitly set (for bases/units)
-                                    // Reset to default by removing the style attribute completely for base colors
                                     if (cell.style.background && (cell.style.background.includes('#4CAF50') || cell.style.background.includes('#F44336'))) {
                                         cell.style.background = '';
                                     }
+                                    
+                                    // Ensure grid-cell class is preserved
+                                    if (!cell.classList.contains('grid-cell')) {
+                                        cell.classList.add('grid-cell');
+                                    }
+                                    
+                                    // Restore data attributes if missing
+                                    if (!cell.dataset.index) cell.dataset.index = dataIndex || index;
+                                    if (!cell.dataset.x) cell.dataset.x = dataX || (index % 25);
+                                    if (!cell.dataset.y) cell.dataset.y = dataY || Math.floor(index / 25);
                                 }
                             });
                         
