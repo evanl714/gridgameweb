@@ -63,6 +63,12 @@ export class TurnManager {
      * End the current turn and move to next player
      */
   endTurn() {
+    // Prevent double calling of endTurn
+    if (this.endingTurn) {
+      return;
+    }
+    this.endingTurn = true;
+
     this.stopTurnTimer();
 
     const currentPlayer = this.gameState.getCurrentPlayer();
@@ -96,6 +102,9 @@ export class TurnManager {
 
     // Start next turn
     this.startTurn();
+    
+    // Reset the flag after turn processing is complete
+    this.endingTurn = false;
   }
 
   /**

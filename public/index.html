@@ -629,7 +629,11 @@
                                     const existingBase = cell.querySelector('.base-display');
                                     if (existingUnit) existingUnit.remove();
                                     if (existingBase) existingBase.remove();
-                                    cell.style.background = ''; // Clear any background color
+                                    // Only clear background if it was explicitly set (for bases/units)
+                                    // Reset to default by removing the style attribute completely for base colors
+                                    if (cell.style.background && (cell.style.background.includes('#4CAF50') || cell.style.background.includes('#F44336'))) {
+                                        cell.style.background = '';
+                                    }
                                 }
                             });
                         
