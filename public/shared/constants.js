@@ -136,8 +136,8 @@ export const BASE_CONFIG = {
   PLACEMENT_RADIUS: 3, // Units must be placed within 3 squares of base
   MAX_PLACEMENT_RADIUS: 5, // Maximum search radius when base area is crowded
   STARTING_POSITIONS: {
-    1: { x: 5, y: 5 }, // Player 1 base (top-left area)
-    2: { x: 19, y: 19 }, // Player 2 base (bottom-right area)
+    1: { x: 1, y: 23 }, // Player 1 base (bottom-left area)
+    2: { x: 23, y: 1 }, // Player 2 base (top-right area)
   },
 };
 
