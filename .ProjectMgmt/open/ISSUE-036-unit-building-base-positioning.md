@@ -1,8 +1,8 @@
 # ISSUE-036: Unit Building and Base Positioning Issues
 
-**Status:** Open
+**Status:** Completed
 **Created:** 2025-07-21
-**Assignee:** Unassigned
+**Assignee:** Claude
 **Priority:** High
 **Labels:** bug, gameplay, units, bases, positioning
 

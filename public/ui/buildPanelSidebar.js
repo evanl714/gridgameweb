@@ -324,7 +324,11 @@ class BuildPanelSidebar {
     this.renderBuildOptions();
   }
 
-  render() {
+  render(container) {
+    if (container) {
+      this.element = container;
+      this.isInitialized = true;
+    }
     this.renderBuildOptions();
   }
 }

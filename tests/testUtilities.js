@@ -174,25 +174,25 @@ export class TestDataFactory {
    */
   static getTestPositions() {
     return {
-      // Player 1 positions (base at 5,5)
+      // Player 1 positions (base at 1,23)
       player1: {
-        base: { x: 5, y: 5 },
+        base: { x: 1, y: 23 },
         nearBase: [
-          { x: 4, y: 5 }, { x: 6, y: 5 }, { x: 5, y: 4 }, { x: 5, y: 6 },
-          { x: 3, y: 4 }, { x: 7, y: 6 }, { x: 2, y: 5 }, { x: 8, y: 5 }
+          { x: 2, y: 23 }, { x: 1, y: 22 }, { x: 2, y: 22 }, { x: 3, y: 23 },
+          { x: 1, y: 21 }, { x: 4, y: 23 }, { x: 0, y: 23 }, { x: 3, y: 22 }
         ],
-        farFromResource: { x: 2, y: 5 }, // Within base radius but far from resources
-        nearResource: { x: 4, y: 5 }    // Near resource node at (4,4)
+        farFromResource: { x: 0, y: 23 }, // Within base radius but far from resources
+        nearResource: { x: 4, y: 21 }     // Closest to resource node at (4,20)
       },
-      // Player 2 positions (base at 19,19)
+      // Player 2 positions (base at 23,1)
       player2: {
-        base: { x: 19, y: 19 },
+        base: { x: 23, y: 1 },
         nearBase: [
-          { x: 18, y: 19 }, { x: 20, y: 19 }, { x: 19, y: 18 }, { x: 19, y: 20 },
-          { x: 17, y: 18 }, { x: 21, y: 20 }, { x: 16, y: 19 }, { x: 22, y: 19 }
+          { x: 22, y: 1 }, { x: 23, y: 2 }, { x: 22, y: 2 }, { x: 21, y: 1 },
+          { x: 23, y: 3 }, { x: 20, y: 1 }, { x: 24, y: 1 }, { x: 21, y: 2 }
         ],
-        farFromResource: { x: 16, y: 19 }, // Within base radius but far from resources
-        nearResource: { x: 20, y: 20 }     // Near resource node at (20,20)
+        farFromResource: { x: 24, y: 1 }, // Within base radius but far from resources
+        nearResource: { x: 21, y: 4 }     // Closest to resource node at (20,4)
       }
     };
   }

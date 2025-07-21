@@ -114,14 +114,14 @@ describe('Movement System Edge Cases', () => {
     });
 
     test('should prevent movement to occupied squares - different players', () => {
-      const unit1 = gameState.createUnit('worker', 1, 5, 5);
-      const unit2 = gameState.createUnit('infantry', 2, 6, 5);
+      const unit1 = gameState.createUnit('worker', 1, 2, 23);
+      const unit2 = gameState.createUnit('infantry', 2, 22, 1);
 
       // Unit1 cannot move to unit2's position
-      expect(gameState.canUnitMoveTo(unit1.id, 6, 5)).toBe(false);
-      expect(gameState.moveUnit(unit1.id, 6, 5)).toBe(false);
-      expect(unit1.position.x).toBe(5);
-      expect(unit1.position.y).toBe(5);
+      expect(gameState.canUnitMoveTo(unit1.id, 22, 1)).toBe(false);
+      expect(gameState.moveUnit(unit1.id, 22, 1)).toBe(false);
+      expect(unit1.position.x).toBe(2);
+      expect(unit1.position.y).toBe(23);
     });
 
     test('should handle multiple units clustering', () => {
@@ -149,26 +149,26 @@ describe('Movement System Edge Cases', () => {
     });
 
     test('should properly update board state after movement', () => {
-      const unit = gameState.createUnit('worker', 1, 5, 5);
+      const unit = gameState.createUnit('worker', 1, 2, 23);
 
       // Verify initial board state
-      expect(gameState.board[5][5]).toBe(unit.id);
-      expect(gameState.board[6][5]).toBe(null);
+      expect(gameState.board[2][23]).toBe(unit.id);
+      expect(gameState.board[3][23]).toBe(null);
 
       // Move unit
-      expect(gameState.moveUnit(unit.id, 6, 5)).toBe(true);
+      expect(gameState.moveUnit(unit.id, 3, 23)).toBe(true);
 
       // Verify board state updated correctly
-      expect(gameState.board[5][5]).toBe(null);
-      expect(gameState.board[6][5]).toBe(unit.id);
-      expect(gameState.getUnitAt(5, 5)).toBe(null);
-      expect(gameState.getUnitAt(6, 5)).toBe(unit);
+      expect(gameState.board[2][23]).toBe(null);
+      expect(gameState.board[3][23]).toBe(unit.id);
+      expect(gameState.getUnitAt(2, 23)).toBe(null);
+      expect(gameState.getUnitAt(3, 23)).toBe(unit);
     });
   });
 
   describe('Action System Integration', () => {
     test('should prevent movement when unit has no actions remaining', () => {
-      const unit = gameState.createUnit('worker', 1, 5, 5); // Worker has 2 actions
+      const unit = gameState.createUnit('worker', 1, 2, 23); // Worker has 2 actions
 
       // Use all actions
       unit.useAction();

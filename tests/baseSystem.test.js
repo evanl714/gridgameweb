@@ -9,13 +9,13 @@ describe('Base', () => {
   let base;
 
   beforeEach(() => {
-    base = new Base(1, 5, 5);
+    base = new Base(1, 1, 23);
   });
 
   test('should initialize with correct default values', () => {
     expect(base.playerId).toBe(1);
-    expect(base.position.x).toBe(5);
-    expect(base.position.y).toBe(5);
+    expect(base.position.x).toBe(1);
+    expect(base.position.y).toBe(23);
     expect(base.health).toBe(BASE_CONFIG.HEALTH);
     expect(base.maxHealth).toBe(BASE_CONFIG.HEALTH);
     expect(base.isDestroyed).toBe(false);
@@ -60,8 +60,8 @@ describe('Base', () => {
 
     expect(serialized.id).toBe(base.id);
     expect(serialized.playerId).toBe(1);
-    expect(serialized.position.x).toBe(5);
-    expect(serialized.position.y).toBe(5);
+    expect(serialized.position.x).toBe(1);
+    expect(serialized.position.y).toBe(23);
     expect(serialized.health).toBe(BASE_CONFIG.HEALTH - 50);
     expect(serialized.isDestroyed).toBe(false);
 
@@ -88,7 +88,7 @@ describe('Base', () => {
 
     // All positions should be within placement radius
     positions.forEach((pos) => {
-      const distance = Math.abs(pos.x - 5) + Math.abs(pos.y - 5);
+      const distance = Math.abs(pos.x - 1) + Math.abs(pos.y - 23);
       expect(distance).toBeLessThanOrEqual(BASE_CONFIG.PLACEMENT_RADIUS);
     });
   });
@@ -130,17 +130,17 @@ describe('GameState Base Management', () => {
   });
 
   test('should check base radius correctly', () => {
-    // Test position within radius of player 1 base (5,5)
-    expect(gameState.isWithinBaseRadius(1, 6, 6)).toBe(true); // Distance 2
-    expect(gameState.isWithinBaseRadius(1, 7, 6)).toBe(true); // Distance 3, within radius
-    expect(gameState.isWithinBaseRadius(1, 8, 8)).toBe(false); // Distance 6, outside radius
-    expect(gameState.isWithinBaseRadius(1, 10, 10)).toBe(false); // Distance 10, outside radius
+    // Test position within radius of player 1 base (1,23)
+    expect(gameState.isWithinBaseRadius(1, 2, 23)).toBe(true); // Distance 1
+    expect(gameState.isWithinBaseRadius(1, 4, 23)).toBe(true); // Distance 3, within radius
+    expect(gameState.isWithinBaseRadius(1, 6, 23)).toBe(false); // Distance 5, outside radius
+    expect(gameState.isWithinBaseRadius(1, 10, 10)).toBe(false); // Distance 22, outside radius
 
-    // Test position within radius of player 2 base (19,19)
-    expect(gameState.isWithinBaseRadius(2, 18, 18)).toBe(true); // Distance 2
-    expect(gameState.isWithinBaseRadius(2, 17, 18)).toBe(true); // Distance 3, within radius
-    expect(gameState.isWithinBaseRadius(2, 16, 16)).toBe(false); // Distance 6, outside radius
-    expect(gameState.isWithinBaseRadius(2, 10, 10)).toBe(false); // Distance 18, outside radius
+    // Test position within radius of player 2 base (23,1)
+    expect(gameState.isWithinBaseRadius(2, 22, 1)).toBe(true); // Distance 1
+    expect(gameState.isWithinBaseRadius(2, 20, 1)).toBe(true); // Distance 3, within radius
+    expect(gameState.isWithinBaseRadius(2, 18, 1)).toBe(false); // Distance 5, outside radius
+    expect(gameState.isWithinBaseRadius(2, 10, 10)).toBe(false); // Distance 22, outside radius
   });
 
   test('should find best placement near base', () => {
@@ -244,8 +244,8 @@ describe('Base Integration with Unit Creation', () => {
       expect(validUnit).toBeDefined();
 
       // Invalid position far from base
-      const invalidX = player1Base.position.x + 15;
-      const invalidY = player1Base.position.y + 15;
+      const invalidX = player1Base.position.x + 10;
+      const invalidY = player1Base.position.y - 10;
       const invalidUnit = gameState.createUnit(unitType, 1, invalidX, invalidY);
       expect(invalidUnit).toBeNull();
     });

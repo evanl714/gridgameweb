@@ -25,8 +25,8 @@ describe('Combat System', () => {
   const createTestUnit = (type, playerId, x, y) => {
     // Create unit near appropriate base to satisfy radius constraints
     const basePositions = {
-      1: { x: 6, y: 6 },   // Near player 1 base (5,5)
-      2: { x: 18, y: 18 }  // Near player 2 base (19,19)
+      1: { x: 2, y: 23 },   // Near player 1 base (1,23)
+      2: { x: 22, y: 1 }    // Near player 2 base (23,1)
     };
     
     const basePos = basePositions[playerId];
@@ -246,25 +246,25 @@ describe('Combat System', () => {
   describe('Base Combat', () => {
     test('should allow attacking enemy base', () => {
       // Create unit close to enemy base position
-      const attacker = createTestUnit('heavy', 1, 18, 18);
+      const attacker = createTestUnit('heavy', 1, 22, 2);
       
-      const canAttack = gameState.canUnitAttack(attacker.id, 19, 19);
+      const canAttack = gameState.canUnitAttack(attacker.id, 23, 1);
       expect(canAttack).toBe(true);
     });
 
     test('should damage enemy base', () => {
-      const attacker = createTestUnit('heavy', 1, 18, 18);
+      const attacker = createTestUnit('heavy', 1, 22, 2);
       // Find player 2's base
       const base = gameState.getPlayerBase(2);
       const initialHealth = base.health;
 
-      const result = gameState.attackUnit(attacker.id, 19, 19);
+      const result = gameState.attackUnit(attacker.id, 23, 1);
       expect(result).toBe(true);
       expect(base.health).toBe(initialHealth - 3); // Heavy does 3 damage
     });
 
     test('should emit baseDestroyed event when base is destroyed', () => {
-      const attacker = createTestUnit('heavy', 1, 18, 18);
+      const attacker = createTestUnit('heavy', 1, 22, 2);
       // Find player 2's base
       const base = gameState.getPlayerBase(2);
       base.health = 1; // Will be destroyed
@@ -274,7 +274,7 @@ describe('Combat System', () => {
       gameState.on('baseDestroyed', baseDestroyedCallback);
       gameState.on('victoryCheck', victoryCheckCallback);
 
-      const result = gameState.attackUnit(attacker.id, 19, 19);
+      const result = gameState.attackUnit(attacker.id, 23, 1);
       expect(result).toBe(true);
       
       expect(baseDestroyedCallback).toHaveBeenCalledWith({
