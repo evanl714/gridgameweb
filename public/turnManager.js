@@ -65,16 +65,11 @@ export class TurnManager {
      * End the current turn and move to next player
      */
   endTurn() {
-    // DEBUG: Log all endTurn() calls to trace double-calling
-    console.log('🔧 DEBUG: endTurn() called, stack trace:', new Error().stack);
-    
     // Prevent double calling of endTurn
     if (this.endingTurn) {
-      console.log('🔧 DEBUG: endTurn() blocked by endingTurn flag');
       return;
     }
     this.endingTurn = true;
-    console.log('🔧 DEBUG: endTurn() proceeding with turn end');
 
     this.stopTurnTimer();
 

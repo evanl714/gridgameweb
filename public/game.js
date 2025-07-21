@@ -777,15 +777,21 @@ class Game {
   }
 
   newGame() {
-    // Clean up existing UI components
+    // Clean up existing components
     if (this.uiManager) {
       this.uiManager.destroy();
     }
     if (this.victoryScreen) {
       this.victoryScreen.destroy();
     }
+    if (this.turnManager) {
+      this.turnManager.destroy();
+    }
+    if (this.resourceManager) {
+      // Add cleanup if resourceManager has destroy method
+    }
 
-    // Reset state management
+    // Reset state management - create new instances only after cleanup
     this.gameState = new GameState();
     this.turnManager = new TurnManager(this.gameState);
     this.resourceManager = new ResourceManager(this.gameState);
@@ -1025,6 +1031,11 @@ class Game {
   loadGame() {
     const result = this.persistenceManager.loadGame();
     if (result.success) {
+      // Clean up existing instances before loading
+      if (this.turnManager) {
+        this.turnManager.destroy();
+      }
+      
       this.gameState = result.gameState;
       this.turnManager = new TurnManager(this.gameState);
       this.resourceManager = result.resourceManager;
