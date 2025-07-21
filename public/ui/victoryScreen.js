@@ -81,7 +81,7 @@ export class VictoryScreen {
           <p class="victory-message">${message}</p>
         </div>
         
-        <div class="victory-stats">
+        <div class="victory-stats" style="display: none;">
           <h3>Game Statistics</h3>
           <div class="stats-grid">
             <div class="stat-item">
