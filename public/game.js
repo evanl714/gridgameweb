@@ -29,8 +29,9 @@ import { UnitInfoSidebar } from './ui/unitInfoSidebar.js';
 
 class Game {
   constructor() {
+    // Canvas is optional for grid-based UI
     this.canvas = document.getElementById('gameCanvas');
-    this.ctx = this.canvas.getContext('2d');
+    this.ctx = this.canvas ? this.canvas.getContext('2d') : null;
     this.gridSize = GAME_CONFIG.GRID_SIZE; // 25x25
     this.cellSize = GAME_CONFIG.CELL_SIZE; // 32 pixels per cell
 
@@ -106,9 +107,12 @@ class Game {
   }
 
   setupEventListeners() {
-    this.canvas.addEventListener('click', (e) => this.handleClick(e));
-    this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
-    this.canvas.addEventListener('mouseleave', () => this.handleMouseLeave());
+    // Only set up canvas listeners if canvas exists (grid UI doesn't use canvas)
+    if (this.canvas) {
+      this.canvas.addEventListener('click', (e) => this.handleClick(e));
+      this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+      this.canvas.addEventListener('mouseleave', () => this.handleMouseLeave());
+    }
 
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => this.handleKeyDown(e));
@@ -156,9 +160,11 @@ class Game {
   }
 
   updateCanvasSize() {
-    const totalSize = this.gridSize * this.cellSize;
-    this.canvas.width = totalSize;
-    this.canvas.height = totalSize;
+    if (this.canvas) {
+      const totalSize = this.gridSize * this.cellSize;
+      this.canvas.width = totalSize;
+      this.canvas.height = totalSize;
+    }
   }
 
   handleClick(event) {
@@ -243,9 +249,27 @@ class Game {
     } else {
       // Deselect or try to create unit
       if (this.gameState.currentPhase === 'build' && this.gameState.isPositionEmpty(x, y)) {
+        this.selectedCell = { x, y };
+        
+        // Notify BuildPanelSidebar of selected position for building
+        if (this.uiManager && this.uiManager.buildPanelSidebar) {
+          this.uiManager.buildPanelSidebar.setSelectedPosition({ x, y });
+        }
+        
+        // Emit event for other components
+        this.gameState.emit('cellSelected', { position: { x, y } });
+        
         this.showUnitCreationDialog(x, y);
       } else {
         this.selectedCell = { x, y };
+        
+        // Notify BuildPanelSidebar of selected position for building
+        if (this.gameState.isPositionEmpty(x, y) && this.uiManager && this.uiManager.buildPanelSidebar) {
+          this.uiManager.buildPanelSidebar.setSelectedPosition({ x, y });
+        }
+        
+        // Emit event for other components
+        this.gameState.emit('cellSelected', { position: { x, y } });
         this.selectedUnit = null;
         this.showMovementRange = false;
         this.movementPreview = null;
@@ -372,16 +396,20 @@ class Game {
   }
 
   render() {
-    this.clearCanvas();
-    this.drawGrid();
-    this.drawHover();
-    this.drawSelection();
-    this.drawMovementRange();
-    this.drawMovementPreview();
-    this.drawResourceNodes();
-    this.drawBases();
-    this.drawUnits();
-    this.drawUnitSelection();
+    // Only render to canvas if canvas exists
+    if (this.ctx) {
+      this.clearCanvas();
+      this.drawGrid();
+      this.drawHover();
+      this.drawSelection();
+      this.drawMovementRange();
+      this.drawMovementPreview();
+      this.drawResourceNodes();
+      this.drawBases();
+      this.drawUnits();
+      this.drawUnitSelection();
+    }
+    // Grid rendering will be handled by the adapter in HTML
   }
 
   clearCanvas() {

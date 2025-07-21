@@ -538,6 +538,21 @@ export class GameState {
   }
 
   /**
+   * Build a unit (alias for createUnit with additional validation)
+   */
+  buildUnit(type, x, y) {
+    // Validate current phase allows building
+    if (this.currentPhase !== 'build') {
+      console.warn('Cannot build units outside of build phase');
+      return false;
+    }
+
+    // Use current player
+    const unit = this.createUnit(type, this.currentPlayer, x, y);
+    return unit !== null;
+  }
+
+  /**
      * Calculate Manhattan distance between two points
      */
   getMovementDistance(x1, y1, x2, y2) {

@@ -1,19 +1,50 @@
 /* UI Interface System Styles */
 
+/* Z-Index Management System */
+:root {
+    --z-index-dropdown: 100;
+    --z-index-tooltip: 200;
+    --z-index-modal: 1000;
+    --z-index-overlay: 1500;
+    --z-index-notification: 2000;
+    --z-index-emergency: 9999;
+}
+
 /* Turn Transition Styles */
 .turn-transition-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(8px);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    animation: fadeIn 0.3s ease-in-out;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: rgba(0, 0, 0, 0.85) !important;
+    backdrop-filter: blur(8px) !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    z-index: 10000 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transition: opacity 0.3s ease, visibility 0.3s ease !important;
+    transform: translateZ(0) !important;
+}
+
+/* Ensure overlay is always properly centered */
+.turn-transition-overlay.visible {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+.turn-transition-overlay.hidden {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
 }
 
 .turn-transition-modal {
@@ -1083,18 +1114,24 @@
 
 /* Build Panel */
 .build-panel-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: rgba(0, 0, 0, 0.7) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 10000 !important;
+    opacity: 0 !important;
+    transition: opacity 0.3s ease !important;
+    transform: translateZ(0) !important;
+    overflow: auto !important;
 }
 
 .build-panel-overlay.visible {
@@ -1421,7 +1458,7 @@
     padding: 12px 20px;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    z-index: 999;
+    z-index: var(--z-index-modal);
     opacity: 0;
     transform: translateY(-20px);
     transition: all 0.3s ease;
@@ -1455,7 +1492,7 @@
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 1001;
+    z-index: var(--z-index-notification);
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -1645,18 +1682,24 @@
 
 /* Victory Screen Styles */
 .victory-screen-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
-    opacity: 0;
-    animation: victoryFadeIn 0.5s ease forwards;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 10000 !important;
+    opacity: 0 !important;
+    animation: victoryFadeIn 0.5s ease forwards !important;
+    transform: translateZ(0) !important;
+    overflow: auto !important;
 }
 
 @keyframes victoryFadeIn {

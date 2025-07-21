@@ -231,7 +231,8 @@ class BuildPanel {
       this.element.classList.add('visible');
     }, 10);
 
-    document.body.appendChild(this.element);
+    // Insert into document root to bypass body grid layout constraints
+    document.documentElement.appendChild(this.element);
   }
 
   hide() {

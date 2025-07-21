@@ -114,7 +114,8 @@ export class VictoryScreen {
       }
     });
 
-    document.body.appendChild(this.overlay);
+    // Insert into document root to bypass body grid layout constraints
+    document.documentElement.appendChild(this.overlay);
   }
 
   /**

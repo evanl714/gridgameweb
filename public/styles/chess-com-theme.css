@@ -401,6 +401,28 @@ body {
   margin-top: 2px;
 }
 
+/* === Build Mode Active State === */
+#buildPanelSidebar.build-mode-active {
+  border: 2px solid var(--border-accent);
+  box-shadow: 0 0 20px rgba(0, 170, 255, 0.4);
+  background: rgba(0, 170, 255, 0.05);
+}
+
+#buildPanelSidebar.build-mode-active .panel-header h3 {
+  color: var(--text-accent);
+  text-shadow: 0 0 8px rgba(0, 170, 255, 0.6);
+}
+
+#buildPanelSidebar.build-mode-active .build-unit-card {
+  border-color: var(--border-accent);
+  background: rgba(0, 170, 255, 0.15);
+}
+
+#buildPanelSidebar.build-mode-active .build-unit-card:hover {
+  box-shadow: 0 0 20px rgba(0, 170, 255, 0.5);
+  background: rgba(0, 170, 255, 0.25);
+}
+
 /* === Unit Info Display === */
 .unit-details {
   text-align: left;

@@ -4,7 +4,13 @@ class TurnTransition {
     this.element = null;
     this.isVisible = false;
     this.transitionCallback = null;
+    this.hideTimeout = null;
+    this.eventListeners = [];
+    this.lastTurnEventTime = 0; // For event deduplication
+    this.eventDeduplicationDelay = 1000; // 1 second minimum between events
+    this.emergencyHideTimeout = null;
     this.init();
+    this.setupEmergencyControls();
   }
 
   init() {
@@ -14,49 +20,78 @@ class TurnTransition {
 
   createElement() {
     const overlay = document.createElement('div');
-    overlay.className = 'turn-transition-overlay';
+    overlay.className = 'turn-transition-overlay hidden';
+    
     overlay.innerHTML = `
-      <div class="turn-transition-modal">
-        <div class="transition-header">
-          <h2 class="transition-title"></h2>
+      <div class="turn-transition-modal" style="
+        background: #2c3e50;
+        border-radius: 12px;
+        padding: 32px;
+        max-width: 500px;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        color: white;
+        font-family: 'Segoe UI', sans-serif;
+      ">
+        <div class="transition-header" style="margin-bottom: 24px; text-align: center;">
+          <h2 class="transition-title" style="font-size: 24px; font-weight: 600; color: #3498db; margin: 0;"></h2>
         </div>
         
-        <div class="transition-content">
-          <div class="turn-summary">
-            <h3>Turn Summary</h3>
-            <div class="summary-stats">
-              <div class="stat-item">
+        <div class="transition-content" style="margin-bottom: 32px;">
+          <div class="turn-summary" style="margin-bottom: 20px;">
+            <h3 style="font-size: 18px; margin-bottom: 12px; color: #ecf0f1;">Turn Summary</h3>
+            <div class="summary-stats" style="display: grid; gap: 8px;">
+              <div class="stat-item" style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #34495e;">
                 <span class="stat-label">Actions Used:</span>
-                <span class="stat-value" id="actionsUsed">0</span>
+                <span class="stat-value" id="actionsUsed" style="color: #e74c3c; font-weight: 600;">0</span>
               </div>
-              <div class="stat-item">
+              <div class="stat-item" style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #34495e;">
                 <span class="stat-label">Energy Remaining:</span>
-                <span class="stat-value" id="energyRemaining">0</span>
+                <span class="stat-value" id="energyRemaining" style="color: #f39c12; font-weight: 600;">0</span>
               </div>
-              <div class="stat-item">
+              <div class="stat-item" style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #34495e;">
                 <span class="stat-label">Units Moved:</span>
-                <span class="stat-value" id="unitsMoved">0</span>
+                <span class="stat-value" id="unitsMoved" style="color: #2ecc71; font-weight: 600;">0</span>
               </div>
             </div>
           </div>
 
-          <div class="player-handoff">
+          <div class="player-handoff" style="text-align: center; padding: 16px; background: #34495e; border-radius: 8px;">
             <div class="handoff-message">
-              <p>Please pass the device to</p>
+              <p style="margin: 0 0 8px 0; font-size: 14px; color: #bdc3c7;">Please pass the device to</p>
               <div class="next-player-info">
-                <span class="next-player-name"></span>
+                <span class="next-player-name" style="font-size: 20px; font-weight: 600; color: #3498db;"></span>
               </div>
             </div>
             
-            <div class="privacy-notice">
-              <p>Game state will be hidden during handoff</p>
+            <div class="privacy-notice" style="margin-top: 12px;">
+              <p style="margin: 0; font-size: 12px; color: #95a5a6;">Game state will be hidden during handoff</p>
             </div>
           </div>
         </div>
 
-        <div class="transition-footer">
-          <button class="transition-btn secondary" id="showGameStateBtn">Show Game State</button>
-          <button class="transition-btn primary" id="startTurnBtn">Start Turn</button>
+        <div class="transition-footer" style="display: flex; gap: 12px; justify-content: center;">
+          <button class="transition-btn secondary" id="showGameStateBtn" style="
+            padding: 12px 24px;
+            border: 2px solid #7f8c8d;
+            background: transparent;
+            color: #ecf0f1;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+          ">Show Game State</button>
+          <button class="transition-btn primary" id="startTurnBtn" style="
+            padding: 12px 24px;
+            border: none;
+            background: #3498db;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+          ">Start Turn</button>
         </div>
       </div>
     `;
@@ -64,7 +99,39 @@ class TurnTransition {
     this.element = overlay;
     this.cacheElements();
     this.setupControls();
-    document.body.appendChild(this.element);
+    
+    // Try inserting into html element instead of body to completely bypass grid layout
+    document.documentElement.appendChild(this.element);
+    
+    // Force the overlay to be positioned outside any parent containers
+    // and override body overflow constraints
+    this.element.style.cssText = `
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      z-index: 10000 !important;
+      background: rgba(0, 0, 0, 0.85) !important;
+      backdrop-filter: blur(8px) !important;
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+      transition: opacity 0.3s ease, visibility 0.3s ease !important;
+      transform: translateZ(0) !important;
+      overflow: auto !important;
+    `;
+    
+    // Also ensure body can accommodate the overlay
+    const originalBodyOverflow = document.body.style.overflow;
+    this.originalBodyOverflow = originalBodyOverflow;
   }
 
   cacheElements() {
@@ -79,11 +146,10 @@ class TurnTransition {
   }
 
   setupControls() {
-    this.showGameStateBtn.addEventListener('click', () => this.showGameState());
-    this.startTurnBtn.addEventListener('click', () => this.startNextTurn());
-    
-    // Allow keyboard navigation
-    this.element.addEventListener('keydown', (e) => {
+    // Track event listeners for proper cleanup
+    const showGameStateHandler = () => this.showGameState();
+    const startTurnHandler = () => this.startNextTurn();
+    const keydownHandler = (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         this.startNextTurn();
@@ -91,24 +157,83 @@ class TurnTransition {
         e.preventDefault();
         this.showGameState();
       }
-    });
+    };
+    
+    this.showGameStateBtn.addEventListener('click', showGameStateHandler);
+    this.startTurnBtn.addEventListener('click', startTurnHandler);
+    this.element.addEventListener('keydown', keydownHandler);
+    
+    // Store references for cleanup
+    this.eventListeners.push(
+      { element: this.showGameStateBtn, event: 'click', handler: showGameStateHandler },
+      { element: this.startTurnBtn, event: 'click', handler: startTurnHandler },
+      { element: this.element, event: 'keydown', handler: keydownHandler }
+    );
   }
 
   setupEventListeners() {
     this.gameState.on('turnEnded', (data) => {
-      this.showTransition(data);
+      this.showTransitionWithDeduplication(data);
     });
   }
 
+  setupEmergencyControls() {
+    // Global emergency hide controls
+    const emergencyHandler = (e) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'H') {
+        e.preventDefault();
+        console.log('Emergency overlay hide triggered');
+        this.emergencyHide();
+      } else if (e.key === 'Escape' && this.isVisible) {
+        e.preventDefault();
+        this.hide();
+      }
+    };
+    
+    document.addEventListener('keydown', emergencyHandler);
+    this.eventListeners.push({
+      element: document,
+      event: 'keydown',
+      handler: emergencyHandler
+    });
+    
+    // Add console debugging commands
+    window.turnTransitionDebug = {
+      hide: () => this.emergencyHide(),
+      show: () => this.element && console.log('Overlay element:', this.element),
+      isVisible: () => this.isVisible,
+      element: () => this.element
+    };
+  }
+
+  showTransitionWithDeduplication(turnData) {
+    const now = Date.now();
+    if (now - this.lastTurnEventTime < this.eventDeduplicationDelay) {
+      console.log('Turn transition event deduplicated - too soon after last event');
+      return;
+    }
+    
+    this.lastTurnEventTime = now;
+    this.showTransition(turnData);
+  }
+
   showTransition(turnData) {
-    if (this.isVisible) return;
+    if (this.isVisible) {
+      console.log('Turn transition already visible, skipping show');
+      return;
+    }
     
     const { previousPlayer, nextPlayer, turnNumber } = turnData;
     const currentPlayer = this.gameState.getPlayerById(previousPlayer);
     const nextPlayerObj = this.gameState.getPlayerById(nextPlayer);
     
-    if (!currentPlayer || !nextPlayerObj) return;
+    if (!currentPlayer || !nextPlayerObj) {
+      console.warn('Invalid player data for turn transition:', { previousPlayer, nextPlayer });
+      return;
+    }
 
+    console.log('Showing turn transition overlay');
+    
     // Update transition content
     this.transitionTitle.textContent = `Turn ${turnNumber - 1} Complete`;
     this.nextPlayerName.textContent = `Player ${nextPlayer}`;
@@ -122,16 +247,30 @@ class TurnTransition {
     this.energyRemaining.textContent = currentPlayer.energy || 0;
     this.unitsMoved.textContent = this.calculateUnitsMoved(currentPlayer);
 
-    // Show the overlay
+    // Show the overlay using inline styles to override everything
     this.isVisible = true;
-    this.element.style.display = 'flex';
+    this.element.style.opacity = '1';
+    this.element.style.visibility = 'visible';
+    this.element.style.pointerEvents = 'auto';
     this.transitionModal.classList.add('slide-in');
     
     // Focus management for accessibility
-    this.startTurnBtn.focus();
+    setTimeout(() => {
+      if (this.startTurnBtn && this.isVisible) {
+        this.startTurnBtn.focus();
+      }
+    }, 100);
     
     // Hide game board during transition
     this.hideGameBoard();
+    
+    // Emergency safety timeout
+    this.emergencyHideTimeout = setTimeout(() => {
+      if (this.isVisible) {
+        console.warn('Turn transition overlay emergency timeout - auto-hiding after 30 seconds');
+        this.emergencyHide();
+      }
+    }, 30000);
   }
 
   calculateUnitsMoved(player) {
@@ -141,52 +280,160 @@ class TurnTransition {
   }
 
   showGameState() {
-    this.showGameBoard();
+    console.log('Show game state button clicked');
     this.hide();
+    this.showGameBoard();
   }
 
   startNextTurn() {
+    console.log('Starting next turn - hiding overlay');
     this.hide();
     this.showGameBoard();
     
     // Call any callback function
     if (this.transitionCallback) {
-      this.transitionCallback();
-      this.transitionCallback = null;
+      try {
+        this.transitionCallback();
+        this.transitionCallback = null;
+      } catch (error) {
+        console.error('Error in transition callback:', error);
+      }
     }
   }
 
   hide() {
-    if (!this.isVisible) return;
+    if (!this.isVisible) {
+      console.log('Turn transition already hidden');
+      return;
+    }
     
-    this.transitionModal.classList.remove('slide-in');
-    this.transitionModal.classList.add('slide-out');
-    
-    setTimeout(() => {
-      this.element.style.display = 'none';
-      this.transitionModal.classList.remove('slide-out');
+    try {
+      console.log('Hiding turn transition overlay');
+      
+      // Immediately mark as not visible to prevent race conditions
       this.isVisible = false;
-    }, 300);
+      
+      // Clear any existing timeouts
+      this.clearTimeouts();
+      
+      // Hide using inline styles for immediate effect
+      this.element.style.opacity = '0';
+      this.element.style.visibility = 'hidden';
+      this.element.style.pointerEvents = 'none';
+      this.transitionModal.classList.remove('slide-in', 'slide-out');
+      
+      // Ensure game board is visible
+      this.showGameBoard();
+      
+      console.log('Turn transition overlay hidden successfully');
+      
+    } catch (error) {
+      console.error('Error hiding turn transition:', error);
+      this.emergencyHide();
+    }
+  }
+  
+  
+  emergencyHide() {
+    // Emergency fallback to ensure overlay is hidden
+    console.log('Emergency hide triggered');
+    
+    try {
+      // Clear all timeouts
+      this.clearTimeouts();
+      
+      // Force mark as not visible
+      this.isVisible = false;
+      
+      if (this.element) {
+        // Force hidden state with inline styles
+        this.element.style.opacity = '0';
+        this.element.style.visibility = 'hidden';
+        this.element.style.pointerEvents = 'none';
+      }
+      
+      if (this.transitionModal) {
+        this.transitionModal.classList.remove('slide-in', 'slide-out');
+      }
+      
+      // Ensure game board is visible
+      this.showGameBoard();
+      
+      console.log('Turn transition overlay emergency hidden successfully');
+    } catch (error) {
+      console.error('Critical error in emergencyHide:', error);
+      // Last resort - remove the entire element
+      if (this.element && this.element.parentNode) {
+        this.element.parentNode.removeChild(this.element);
+        this.isVisible = false;
+        console.log('Turn transition overlay element removed as last resort');
+      }
+    }
+  }
+  
+  clearTimeouts() {
+    if (this.hideTimeout) {
+      clearTimeout(this.hideTimeout);
+      this.hideTimeout = null;
+    }
+    if (this.emergencyHideTimeout) {
+      clearTimeout(this.emergencyHideTimeout);
+      this.emergencyHideTimeout = null;
+    }
   }
 
   hideGameBoard() {
-    const gameBoard = document.querySelector('.game-board');
-    const gameControls = document.querySelector('.game-controls');
-    const uiContainer = document.querySelector('.ui-container');
-    
-    if (gameBoard) gameBoard.style.visibility = 'hidden';
-    if (gameControls) gameControls.style.visibility = 'hidden';
-    if (uiContainer) uiContainer.style.visibility = 'hidden';
+    try {
+      const gameBoard = document.querySelector('.game-board');
+      const gameControls = document.querySelector('.game-controls');
+      const uiContainer = document.querySelector('.ui-container');
+      
+      // Use opacity instead of visibility to avoid layout issues
+      if (gameBoard) {
+        gameBoard.style.opacity = '0';
+        gameBoard.style.pointerEvents = 'none';
+        gameBoard.dataset.hiddenByTransition = 'true';
+      }
+      if (gameControls) {
+        gameControls.style.opacity = '0';
+        gameControls.style.pointerEvents = 'none';
+        gameControls.dataset.hiddenByTransition = 'true';
+      }
+      if (uiContainer) {
+        uiContainer.style.opacity = '0';
+        uiContainer.style.pointerEvents = 'none';
+        uiContainer.dataset.hiddenByTransition = 'true';
+      }
+    } catch (error) {
+      console.error('Error hiding game board:', error);
+    }
   }
 
   showGameBoard() {
-    const gameBoard = document.querySelector('.game-board');
-    const gameControls = document.querySelector('.game-controls');
-    const uiContainer = document.querySelector('.ui-container');
-    
-    if (gameBoard) gameBoard.style.visibility = 'visible';
-    if (gameControls) gameControls.style.visibility = 'visible';
-    if (uiContainer) uiContainer.style.visibility = 'visible';
+    try {
+      const gameBoard = document.querySelector('.game-board');
+      const gameControls = document.querySelector('.game-controls');
+      const uiContainer = document.querySelector('.ui-container');
+      
+      // Only restore elements that were hidden by this transition
+      if (gameBoard && gameBoard.dataset.hiddenByTransition === 'true') {
+        gameBoard.style.opacity = '1';
+        gameBoard.style.pointerEvents = 'auto';
+        delete gameBoard.dataset.hiddenByTransition;
+      }
+      if (gameControls && gameControls.dataset.hiddenByTransition === 'true') {
+        gameControls.style.opacity = '1';
+        gameControls.style.pointerEvents = 'auto';
+        delete gameControls.dataset.hiddenByTransition;
+      }
+      if (uiContainer && uiContainer.dataset.hiddenByTransition === 'true') {
+        uiContainer.style.opacity = '1';
+        uiContainer.style.pointerEvents = 'auto';
+        delete uiContainer.dataset.hiddenByTransition;
+      }
+    } catch (error) {
+      console.error('Error showing game board:', error);
+    }
   }
 
   setTransitionCallback(callback) {
@@ -194,16 +441,46 @@ class TurnTransition {
   }
 
   destroy() {
-    this.hide();
-    if (this.element && this.element.parentNode) {
-      this.element.parentNode.removeChild(this.element);
+    try {
+      console.log('Destroying turn transition overlay');
+      
+      // Clear any pending timeouts
+      this.clearTimeouts();
+      
+      // Remove all tracked event listeners
+      this.eventListeners.forEach(({ element, event, handler }) => {
+        if (element && typeof element.removeEventListener === 'function') {
+          element.removeEventListener(event, handler);
+        }
+      });
+      this.eventListeners = [];
+      
+      // Remove game state event listener if it exists
+      if (this.gameState && typeof this.gameState.off === 'function') {
+        this.gameState.off('turnEnded');
+      }
+      
+      // Clean up debug commands
+      if (window.turnTransitionDebug) {
+        delete window.turnTransitionDebug;
+      }
+      
+      // Hide and remove element
+      this.emergencyHide();
+      if (this.element && this.element.parentNode) {
+        this.element.parentNode.removeChild(this.element);
+      }
+      
+      // Clean up references
+      this.element = null;
+      this.gameState = null;
+      this.transitionCallback = null;
+      
+    } catch (error) {
+      console.error('Error during TurnTransition destroy:', error);
     }
-    this.gameState = null;
   }
 }
 
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = TurnTransition;
-}
-
+// ES6 module export only
 export { TurnTransition };

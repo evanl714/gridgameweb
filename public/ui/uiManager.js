@@ -61,6 +61,11 @@ class UIManager {
     this.renderComponents();
   }
 
+  // Getter to access buildPanelSidebar from game.js
+  get buildPanelSidebar() {
+    return this.components.get('build');
+  }
+
   renderComponents() {
     // Render components to existing containers
     const buildContainer = this.containers.get('build');

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit Building Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #0f0;
+        }
+        .test-frame {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #0f0;
+            margin: 20px 0;
+        }
+        .results {
+            background: #000;
+            padding: 15px;
+            border: 1px solid #0f0;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Unit Building System Test</h1>
+    <p>Testing the game in an iframe below...</p>
+    
+    <iframe id="gameFrame" class="test-frame" src="http://localhost:3000"></iframe>
+    
+    <div class="results" id="results">
+        <h3>Test Results will appear here...</h3>
+    </div>
+    
+    <script>
+        // Wait for iframe to load, then inject test script
+        document.getElementById('gameFrame').onload = function() {
+            const iframe = this;
+            
+            setTimeout(() => {
+                try {
+                    // Inject test script into iframe
+                    const script = iframe.contentDocument.createElement('script');
+                    script.textContent = `
+                        ${fetch('/tests/unit-building-test.js').then(r => r.text()).then(code => {
+                            const script = document.createElement('script');
+                            script.textContent = code;
+                            document.head.appendChild(script);
+                        })}
+                    `;
+                    
+                    // Alternative: directly embed the test
+                    const testScript = iframe.contentDocument.createElement('script');
+                    testScript.textContent = \`
+                        // Unit Building System Test Script
+                        async function testUnitBuildingSystem() {
+                            console.log('🔧 Starting Unit Building System Tests...');
+                            
+                            const results = {
+                                gameLoaded: false,
+                                buildPanelExists: false,
+                                unitCardsExist: false,
+                                buildPanelShowWorks: false,
+                                activeStylingWorks: false,
+                                unitBuildingWorks: false,
+                                consoleErrors: [],
+                                phaseTransitionWorks: false
+                            };
+                            
+                            // Wait for game to fully load
+                            await new Promise(resolve => setTimeout(resolve, 3000));
+                            
+                            try {
+                                // Test 1: Check if game loaded
+                                results.gameLoaded = typeof window.gameInstance !== 'undefined';
+                                console.log('✅ Game loaded:', results.gameLoaded);
+                                
+                                // Test 2: Check if buildPanel exists
+                                results.buildPanelExists = typeof window.buildPanel !== 'undefined';
+                                console.log('✅ Build panel exists:', results.buildPanelExists);
+                                
+                                // Test 3: Check if unit cards exist
+                                const unitCards = document.querySelectorAll('.unit-card');
+                                results.unitCardsExist = unitCards.length > 0;
+                                console.log('✅ Unit cards exist:', results.unitCardsExist, \`(\${unitCards.length} found)\`);
+                                
+                                if (results.buildPanelExists) {
+                                    // Test buildPanel.show() method
+                                    try {
+                                        window.buildPanel.show();
+                                        results.buildPanelShowWorks = true;
+                                        console.log('✅ buildPanel.show() works without errors');
+                                        
+                                        // Check active state styling
+                                        const buildPanelElement = document.getElementById('buildPanel');
+                                        if (buildPanelElement) {
+                                            const hasActiveClass = buildPanelElement.classList.contains('active');
+                                            results.activeStylingWorks = hasActiveClass;
+                                            console.log('✅ Active styling works:', hasActiveClass);
+                                        }
+                                    } catch (error) {
+                                        console.error('❌ Error testing buildPanel.show():', error);
+                                        results.consoleErrors.push(error.message);
+                                    }
+                                }
+                                
+                                // Test unit card interactions
+                                if (unitCards.length > 0) {
+                                    console.log('🔧 Testing unit card interaction...');
+                                    
+                                    const workerCard = document.querySelector('[data-unit-type="Worker"]');
+                                    if (workerCard) {
+                                        workerCard.click();
+                                        console.log('✅ Worker card clicked');
+                                        
+                                        // Try to place unit on grid
+                                        const gridCells = document.querySelectorAll('.grid-cell');
+                                        if (gridCells.length > 0) {
+                                            const firstEmptyCell = Array.from(gridCells).find(cell => !cell.querySelector('.unit'));
+                                            if (firstEmptyCell) {
+                                                firstEmptyCell.click();
+                                                console.log('✅ Grid cell clicked for unit placement');
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                            } catch (error) {
+                                console.error('❌ Test error:', error);
+                                results.consoleErrors.push(error.message);
+                            }
+                            
+                            // Report results to parent window
+                            setTimeout(() => {
+                                console.log('📊 UNIT BUILDING TEST RESULTS:', results);
+                                window.parent.postMessage({type: 'testResults', data: results}, '*');
+                            }, 2000);
+                        }
+                        
+                        // Auto-run test
+                        if (document.readyState === 'loading') {
+                            document.addEventListener('DOMContentLoaded', testUnitBuildingSystem);
+                        } else {
+                            setTimeout(testUnitBuildingSystem, 1000);
+                        }
+                    \`;
+                    
+                    iframe.contentDocument.head.appendChild(testScript);
+                    
+                } catch (error) {
+                    document.getElementById('results').innerHTML = '<h3>Error injecting test: ' + error.message + '</h3>';
+                }
+            }, 2000);
+        };
+        
+        // Listen for test results from iframe
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'testResults') {
+                const results = event.data.data;
+                let html = '<h3>📊 Unit Building Test Results:</h3><ul>';
+                
+                Object.entries(results).forEach(([key, value]) => {
+                    if (key === 'consoleErrors') {
+                        html += \`<li><strong>\${key}:</strong> \${value.length} errors found\`;
+                        if (value.length > 0) {
+                            html += '<ul>';
+                            value.forEach(error => html += \`<li>\${error}</li>\`);
+                            html += '</ul>';
+                        }
+                        html += '</li>';
+                    } else {
+                        const status = value ? '✅' : '❌';
+                        html += \`<li><strong>\${key}:</strong> \${status} \${value}</li>\`;
+                    }
+                });
+                
+                html += '</ul>';
+                document.getElementById('results').innerHTML = html;
+            }
+        });
+    </script>
+</body>
+</html>
