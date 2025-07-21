@@ -67,7 +67,23 @@ class Game {
     console.log('Grid Strategy Game initialized with state management');
   }
 
+  cleanupGameEventListeners() {
+    // Remove all game state event listeners to prevent memory leaks
+    if (this.gameState) {
+      this.gameState.removeAllListeners('gameStarted');
+      this.gameState.removeAllListeners('turnStarted');
+      this.gameState.removeAllListeners('turnEnded');
+      this.gameState.removeAllListeners('phaseChanged');
+      this.gameState.removeAllListeners('unitCreated');
+      this.gameState.removeAllListeners('unitMoved');
+      this.gameState.removeAllListeners('resourcesGathered');
+    }
+  }
+
   setupGameEventListeners() {
+    // Clean up existing listeners first to prevent accumulation
+    this.cleanupGameEventListeners();
+
     // Listen to game state events
     this.gameState.on('gameStarted', () => {
       this.updateUI();
@@ -777,6 +793,9 @@ class Game {
   }
 
   newGame() {
+    // Clean up existing event listeners first
+    this.cleanupGameEventListeners();
+
     // Clean up existing components
     if (this.uiManager) {
       this.uiManager.destroy();

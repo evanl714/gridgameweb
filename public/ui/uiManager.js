@@ -137,9 +137,7 @@ class UIManager {
       this.focusResourceDisplay();
       break;
     case 'enter':
-      if (e.ctrlKey) {
-        this.endTurn();
-      }
+      // Ctrl+Enter End Turn handler removed - using centralized turnInterface.js handler only
       break;
     }
   }
@@ -212,12 +210,7 @@ class UIManager {
     }
   }
 
-  endTurn() {
-    const turnInterface = this.components.get('turn');
-    if (turnInterface && turnInterface.endTurnBtn) {
-      turnInterface.handleEndTurn();
-    }
-  }
+  // endTurn() method removed - using centralized turnInterface.js handler only
 
   showNotification(message, type = 'info', duration = 3000) {
     const notification = document.createElement('div');

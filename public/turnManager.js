@@ -71,42 +71,44 @@ export class TurnManager {
     }
     this.endingTurn = true;
 
-    this.stopTurnTimer();
+    try {
+      this.stopTurnTimer();
 
-    const currentPlayer = this.gameState.getCurrentPlayer();
-    if (currentPlayer) {
-      currentPlayer.isActive = false;
+      const currentPlayer = this.gameState.getCurrentPlayer();
+      if (currentPlayer) {
+        currentPlayer.isActive = false;
+      }
+
+      // Check victory conditions before moving to next player
+      this.gameState.checkVictoryCondition();
+      this.checkWinConditions();
+
+      // Exit early if game has ended
+      if (this.gameState.status === GAME_STATES.ENDED) {
+        return;
+      }
+
+      // Move to next player
+      this.gameState.currentPlayer = this.gameState.currentPlayer === 1 ? 2 : 1;
+      this.gameState.turnNumber++;
+
+      const nextPlayer = this.gameState.getCurrentPlayer();
+      if (nextPlayer) {
+        nextPlayer.isActive = true;
+      }
+
+      this.gameState.emit('turnEnded', {
+        previousPlayer: currentPlayer ? currentPlayer.id : null,
+        nextPlayer: nextPlayer ? nextPlayer.id : null,
+        turnNumber: this.gameState.turnNumber
+      });
+
+      // Start next turn
+      this.startTurn();
+    } finally {
+      // Reset the flag after turn processing is complete (always runs)
+      this.endingTurn = false;
     }
-
-    // Check victory conditions before moving to next player
-    this.gameState.checkVictoryCondition();
-    this.checkWinConditions();
-
-    // Exit early if game has ended
-    if (this.gameState.status === GAME_STATES.ENDED) {
-      return;
-    }
-
-    // Move to next player
-    this.gameState.currentPlayer = this.gameState.currentPlayer === 1 ? 2 : 1;
-    this.gameState.turnNumber++;
-
-    const nextPlayer = this.gameState.getCurrentPlayer();
-    if (nextPlayer) {
-      nextPlayer.isActive = true;
-    }
-
-    this.gameState.emit('turnEnded', {
-      previousPlayer: currentPlayer ? currentPlayer.id : null,
-      nextPlayer: nextPlayer ? nextPlayer.id : null,
-      turnNumber: this.gameState.turnNumber
-    });
-
-    // Start next turn
-    this.startTurn();
-    
-    // Reset the flag after turn processing is complete
-    this.endingTurn = false;
   }
 
   /**

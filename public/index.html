@@ -545,11 +545,14 @@
                 });
             });
 
-            // Grid cell click handling
-            document.querySelectorAll('.grid-cell').forEach(cell => {
-                cell.addEventListener('click', function() {
-                    const x = parseInt(this.dataset.x);
-                    const y = parseInt(this.dataset.y);
+            // Grid cell click handling - using event delegation to survive DOM updates
+            const gameBoard = document.getElementById('gameBoard');
+            gameBoard.addEventListener('click', function(e) {
+                // Find the closest grid cell element
+                const cell = e.target.closest('.grid-cell');
+                if (cell) {
+                    const x = parseInt(cell.dataset.x);
+                    const y = parseInt(cell.dataset.y);
                     
                     // If we have a game instance, use its click handler
                     if (window.game) {
@@ -567,11 +570,11 @@
                             </div>
                             <div class="info-row">
                                 <span class="info-label">Type</span>
-                                <span class="info-value">${this.querySelector('.resource-node') ? 'Resource' : 'Empty'}</span>
+                                <span class="info-value">${cell.querySelector('.resource-node') ? 'Resource' : 'Empty'}</span>
                             </div>
                         `;
                     }
-                });
+                }
             });
         });
     </script>
@@ -764,13 +767,7 @@
                     
                     // Hook up control buttons
                     document.getElementById('newGameBtn')?.addEventListener('click', () => window.game.newGame());
-                    // Add proper End Turn event listener to replace mysterious system
-                    document.getElementById('endTurnBtn')?.addEventListener('click', () => {
-                        console.log('🔧 End Turn button clicked - calling turnManager.forceEndTurn()');
-                        if (window.game && window.game.turnManager) {
-                            window.game.turnManager.forceEndTurn();
-                        }
-                    });
+                    // End Turn handler removed - using centralized turnInterface.js handler only
                     document.getElementById('nextPhaseBtn')?.addEventListener('click', () => window.game.nextPhase());
                     document.getElementById('gatherBtn')?.addEventListener('click', () => window.game.gatherResources());
                     document.getElementById('saveGameBtn')?.addEventListener('click', () => window.game.saveGame());
