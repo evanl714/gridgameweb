@@ -330,17 +330,6 @@ export class TurnManager {
   checkWinConditions() {
     const players = this.gameState.getAllPlayers();
 
-    // Check if any player has no units left
-    for (const player of players) {
-      const playerUnits = this.gameState.getPlayerUnits(player.id);
-      if (playerUnits.length === 0 && this.gameState.turnNumber > 5) {
-        // Player loses if they have no units after turn 5
-        const winnerId = players.find(p => p.id !== player.id).id;
-        this.gameState.endGame(winnerId);
-        return winnerId;
-      }
-    }
-
     // Check resource victory (500 resources gathered)
     for (const player of players) {
       if (player.resourcesGathered >= 500) {
@@ -349,6 +338,9 @@ export class TurnManager {
       }
     }
 
+    // NOTE: No arbitrary turn limits or unit count checks
+    // Game only ends on: base destruction, resource victory, surrender, or draw
+    
     return null;
   }
 

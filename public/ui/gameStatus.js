@@ -238,10 +238,7 @@ class GameStatus {
 
     resourceTotal.textContent = player.resourcesGathered || 0;
 
-    if (playerUnits.length === 0 && this.gameState.turnNumber > 5) {
-      statusIcon.textContent = 'WARN';
-      summary.classList.add('eliminated');
-    } else if (player.resourcesGathered >= 500) {
+    if (player.resourcesGathered >= 500) {
       statusIcon.textContent = 'GOAL';
       summary.classList.add('victory-condition-met');
     } else {
