@@ -316,10 +316,15 @@ class TurnTransition {
       // Clear any existing timeouts
       this.clearTimeouts();
       
-      // Hide using inline styles for immediate effect
+      // Hide using inline styles for immediate effect - use !important for reliability
+      this.element.style.cssText = this.element.style.cssText.replace(/pointer-events: auto/g, 'pointer-events: none');
       this.element.style.opacity = '0';
-      this.element.style.visibility = 'hidden';
+      this.element.style.visibility = 'hidden'; 
       this.element.style.pointerEvents = 'none';
+      
+      // Also add hidden class as backup
+      this.element.classList.add('hidden');
+      this.element.classList.remove('visible');
       this.transitionModal.classList.remove('slide-in', 'slide-out');
       
       // Ensure game board is visible
@@ -346,10 +351,13 @@ class TurnTransition {
       this.isVisible = false;
       
       if (this.element) {
-        // Force hidden state with inline styles
+        // Force hidden state with inline styles and classes
+        this.element.style.cssText = this.element.style.cssText.replace(/pointer-events: auto/g, 'pointer-events: none');
         this.element.style.opacity = '0';
         this.element.style.visibility = 'hidden';
         this.element.style.pointerEvents = 'none';
+        this.element.classList.add('hidden');
+        this.element.classList.remove('visible');
       }
       
       if (this.transitionModal) {
