@@ -118,7 +118,6 @@ class Game {
     document.addEventListener('keydown', (e) => this.handleKeyDown(e));
 
     document.getElementById('newGameBtn').addEventListener('click', () => this.newGame());
-    document.getElementById('resetBtn').addEventListener('click', () => this.reset());
 
     // Add additional controls
     const endTurnBtn = document.getElementById('endTurnBtn');
@@ -146,10 +145,6 @@ class Game {
       drawBtn.addEventListener('click', () => this.offerDraw());
     }
 
-    const saveBtn = document.getElementById('saveBtn');
-    if (saveBtn) {
-      saveBtn.addEventListener('click', () => this.saveGame());
-    }
 
     const loadBtn = document.getElementById('loadBtn');
     if (loadBtn) {
@@ -856,16 +851,26 @@ class Game {
   }
 
   updateGameInfo() {
-    // Update turn number display
+    // Update turn number display (both header and sidebar)
     const turnElement = document.getElementById('turnNumber');
     if (turnElement) {
       turnElement.textContent = `Turn: ${this.gameState.turnNumber}`;
     }
+    
+    const headerTurnElement = document.getElementById('turnDisplay');
+    if (headerTurnElement) {
+      headerTurnElement.textContent = this.gameState.turnNumber;
+    }
 
-    // Update phase display
+    // Update phase display (both header and sidebar)
     const phaseElement = document.getElementById('gamePhase');
     if (phaseElement) {
       phaseElement.textContent = `Phase: ${this.gameState.currentPhase}`;
+    }
+    
+    const headerPhaseElement = document.getElementById('phaseDisplay');
+    if (headerPhaseElement) {
+      headerPhaseElement.textContent = this.gameState.currentPhase;
     }
 
     // Update player info

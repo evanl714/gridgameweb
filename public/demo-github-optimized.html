@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid Strategy Game - GitHub Style Optimized</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.6/dist/darkly/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* GitHub-inspired Professional & Clean Theme */
+        :root {
+            --gh-bg-primary: #0d1117;
+            --gh-bg-secondary: #161b22;
+            --gh-bg-tertiary: #21262d;
+            --gh-border: #30363d;
+            --gh-border-muted: #21262d;
+            --gh-text-primary: #f0f6fc;
+            --gh-text-secondary: #8b949e;
+            --gh-text-muted: #6e7681;
+            --gh-accent-blue: #2f81f7;
+            --gh-accent-green: #3fb950;
+            --gh-accent-orange: #ff7b72;
+            --gh-shadow: rgba(1, 4, 9, 0.8);
+        }
+
+        body {
+            background: var(--gh-bg-primary);
+            color: var(--gh-text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .github-nav {
+            background: var(--gh-bg-secondary);
+            border-bottom: 1px solid var(--gh-border);
+            backdrop-filter: saturate(180%) blur(20px);
+        }
+
+        .github-panel {
+            background: var(--gh-bg-secondary);
+            border: 1px solid var(--gh-border);
+            border-radius: 6px;
+            box-shadow: 0 8px 24px var(--gh-shadow);
+        }
+
+        .github-panel-header {
+            background: var(--gh-bg-tertiary);
+            border-bottom: 1px solid var(--gh-border);
+            padding: 12px 16px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--gh-text-primary);
+        }
+
+        .github-button {
+            background: var(--gh-bg-tertiary);
+            border: 1px solid var(--gh-border);
+            color: var(--gh-text-primary);
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+        }
+
+        .github-button:hover {
+            background: var(--gh-bg-primary);
+            border-color: var(--gh-text-muted);
+            color: var(--gh-text-primary);
+            transform: translateY(-1px);
+        }
+
+        .github-button-primary {
+            background: var(--gh-accent-green);
+            border-color: rgba(63, 185, 80, 0.4);
+            color: white;
+        }
+
+        .github-button-primary:hover {
+            background: #2ea043;
+            border-color: rgba(63, 185, 80, 0.4);
+            color: white;
+        }
+
+        .github-button-danger {
+            background: var(--gh-accent-orange);
+            border-color: rgba(255, 123, 114, 0.4);
+            color: white;
+        }
+
+        .github-button-danger:hover {
+            background: #ff6b63;
+            border-color: rgba(255, 123, 114, 0.4);
+            color: white;
+        }
+
+        .game-canvas-container {
+            background: var(--gh-bg-secondary);
+            border: 1px solid var(--gh-border);
+            border-radius: 6px;
+            padding: 20px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+        }
+
+        .game-canvas {
+            background: var(--gh-bg-primary);
+            border: 1px solid var(--gh-border-muted);
+            border-radius: 6px;
+            width: 100%;
+            height: 100%;
+            min-height: calc(100vh - 130px);
+        }
+
+        .status-badge {
+            background: var(--gh-bg-tertiary);
+            border: 1px solid var(--gh-border);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--gh-accent-green);
+            margin-right: 8px;
+        }
+
+        .unit-card {
+            background: var(--gh-bg-tertiary);
+            border: 1px solid var(--gh-border);
+            border-radius: 6px;
+            padding: 8px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            margin-bottom: 6px;
+        }
+
+        .unit-card:hover {
+            background: var(--gh-bg-primary);
+            border-color: var(--gh-accent-blue);
+            transform: translateY(-1px);
+        }
+
+        .sidebar {
+            background: var(--gh-bg-secondary);
+            border-right: 1px solid var(--gh-border);
+            height: calc(100vh - 73px);
+            overflow-y: auto;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: var(--gh-bg-secondary);
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--gh-border);
+            border-radius: 4px;
+        }
+
+        .info-item {
+            background: var(--gh-bg-tertiary);
+            border: 1px solid var(--gh-border);
+            border-radius: 4px;
+            padding: 8px;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+
+        .info-label {
+            font-size: 10px;
+            color: var(--gh-text-muted);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gh-text-primary);
+            margin-top: 2px;
+        }
+
+        .player-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 14px;
+        }
+
+        .section-divider {
+            border-top: 1px solid var(--gh-border);
+            margin: 12px 0;
+            padding-top: 12px;
+        }
+
+        .section-title {
+            color: var(--gh-text-primary);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .compact-stat {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .compact-stat-label {
+            color: var(--gh-text-secondary);
+        }
+
+        .compact-stat-value {
+            color: var(--gh-text-primary);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <!-- GitHub-style Navigation -->
+    <nav class="github-nav px-4 py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <h1 class="mb-0 fs-4 fw-semibold text-white">Grid Strategy</h1>
+                <span class="badge bg-secondary ms-3 text-uppercase" style="font-size: 10px;">Beta</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <div class="status-badge d-flex align-items-center">
+                    <div class="status-dot"></div>
+                    <span id="currentPlayer">Player 1's Turn</span>
+                </div>
+                <div class="status-badge">
+                    <span id="gameStatus">Ready to Play</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Layout -->
+    <div class="d-flex">
+        <!-- Left Sidebar - CONSOLIDATED -->
+        <div class="sidebar" style="width: 340px;">
+            <div class="p-3">
+                <div class="github-panel">
+                    <div class="github-panel-header">
+                        <svg class="me-2" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                        </svg>
+                        Player 1 (Active)
+                    </div>
+                    <div class="p-3">
+                        <!-- Player 1 Info -->
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="player-avatar bg-primary me-3">P1</div>
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold" style="color: var(--gh-text-primary);">Player 1</div>
+                                <div class="small" style="color: var(--gh-text-secondary);">Your turn</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Stats - 2x2 Grid -->
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <div class="info-item">
+                                    <div class="info-label">Energy</div>
+                                    <div class="info-value" style="color: var(--gh-accent-green);" id="playerEnergy">100</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="info-item">
+                                    <div class="info-label">Actions</div>
+                                    <div class="info-value" style="color: var(--gh-accent-green);" id="playerActions">3</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="info-item">
+                                    <div class="info-label">Units</div>
+                                    <div class="info-value">0</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="info-item">
+                                    <div class="info-label">Resources</div>
+                                    <div class="info-value">0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Build Units Section -->
+                        <div class="section-divider">
+                            <div class="section-title">Build Units</div>
+                            <div class="unit-card">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-2" style="font-size: 16px;">⚔️</div>
+                                    <div class="flex-grow-1">
+                                        <div class="fw-semibold small" style="color: var(--gh-text-primary);">Warrior</div>
+                                        <div style="font-size: 10px; color: var(--gh-accent-green);">50 Energy • ATK: 10 | DEF: 8</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="unit-card">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-2" style="font-size: 16px;">🏹</div>
+                                    <div class="flex-grow-1">
+                                        <div class="fw-semibold small" style="color: var(--gh-text-primary);">Archer</div>
+                                        <div style="font-size: 10px; color: var(--gh-accent-green);">40 Energy • ATK: 8 | RNG: 3</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="unit-card">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-2" style="font-size: 16px;">🛡️</div>
+                                    <div class="flex-grow-1">
+                                        <div class="fw-semibold small" style="color: var(--gh-text-primary);">Guard</div>
+                                        <div style="font-size: 10px; color: var(--gh-accent-green);">45 Energy • DEF: 12 | HP: 20</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Game Status -->
+                        <div class="section-divider">
+                            <div class="section-title">Game Status</div>
+                            <div class="compact-stat">
+                                <span class="compact-stat-label">Phase:</span>
+                                <span class="compact-stat-value" id="gamePhase">Ready</span>
+                            </div>
+                            <div class="compact-stat">
+                                <span class="compact-stat-label">Turn:</span>
+                                <span class="compact-stat-value" id="turnNumber">0</span>
+                            </div>
+                            <div class="compact-stat">
+                                <span class="compact-stat-label">Mode:</span>
+                                <span class="compact-stat-value">Local PvP</span>
+                            </div>
+                            <div class="compact-stat">
+                                <span class="compact-stat-label">Grid:</span>
+                                <span class="compact-stat-value">25x25</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Central Game Area - MAXIMIZED -->
+        <div class="flex-grow-1 d-flex p-2" style="min-width: 0;">
+            <div class="flex-grow-1 d-flex justify-content-center align-items-center">
+                <div class="game-canvas-container w-100 h-100">
+                    <canvas id="gameCanvas" class="game-canvas"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar - CONSOLIDATED -->
+        <div class="sidebar border-start border-end-0" style="width: 340px;">
+            <div class="p-3">
+                <div class="github-panel">
+                    <div class="github-panel-header">
+                        <svg class="me-2" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                        </svg>
+                        Player 2 & Controls
+                    </div>
+                    <div class="p-3">
+                        <!-- Player 2 Info -->
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="player-avatar bg-danger me-3">P2</div>
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold" style="color: var(--gh-text-primary);">Player 2</div>
+                                <div class="small" style="color: var(--gh-text-secondary);">Waiting for turn</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Player 2 Stats -->
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <div class="info-item">
+                                    <div class="info-label">Units</div>
+                                    <div class="info-value">0</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="info-item">
+                                    <div class="info-label">Resources</div>
+                                    <div class="info-value">0</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="info-item">
+                                    <div class="info-label">Territory</div>
+                                    <div class="info-value" style="color: var(--gh-accent-orange);">0%</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="info-item">
+                                    <div class="info-label">Score</div>
+                                    <div class="info-value">0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Game Controls -->
+                        <div class="section-divider">
+                            <div class="section-title">Controls</div>
+                            <div class="d-grid gap-2">
+                                <button class="github-button github-button-primary">New Game</button>
+                                <button class="github-button github-button-primary">End Turn</button>
+                                <button class="github-button">Next Phase</button>
+                                <button class="github-button" disabled>Gather Resources</button>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <button class="github-button w-100">Reset</button>
+                                    </div>
+                                    <div class="col-6">
+                                        <button class="github-button github-button-danger w-100">Surrender</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Victory Conditions -->
+                        <div class="section-divider">
+                            <div class="section-title">Victory Conditions</div>
+                            <div class="compact-stat">
+                                <span class="compact-stat-label">Resource Victory:</span>
+                                <span class="compact-stat-value">500</span>
+                            </div>
+                            <div class="compact-stat">
+                                <span class="compact-stat-label">Elimination:</span>
+                                <span class="compact-stat-value">All units</span>
+                            </div>
+                            <div class="compact-stat">
+                                <span class="compact-stat-label">Base Capture:</span>
+                                <span class="compact-stat-value">Enemy base</span>
+                            </div>
+                        </div>
+
+                        <!-- Activity Log -->
+                        <div class="section-divider">
+                            <div class="section-title">Recent Activity</div>
+                            <div style="font-size: 11px; color: var(--gh-text-secondary);">
+                                <div class="mb-1">• Game started</div>
+                                <div class="mb-1">• Turn 1 begins</div>
+                                <div class="mb-1">• Resource phase active</div>
+                                <div>• Player 1 ready</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="game.js"></script>
+</body>
+</html>
