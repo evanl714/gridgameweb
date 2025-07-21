@@ -119,11 +119,7 @@ class Game {
 
     document.getElementById('newGameBtn').addEventListener('click', () => this.newGame());
 
-    // Add additional controls
-    const endTurnBtn = document.getElementById('endTurnBtn');
-    if (endTurnBtn) {
-      endTurnBtn.addEventListener('click', () => this.endTurn());
-    }
+    // End Turn button is handled by turnInterface.js - removed duplicate handler
 
     const nextPhaseBtn = document.getElementById('nextPhaseBtn');
     if (nextPhaseBtn) {

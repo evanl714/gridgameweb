@@ -746,7 +746,7 @@
                     
                     // Hook up control buttons
                     document.getElementById('newGameBtn')?.addEventListener('click', () => window.game.newGame());
-                    document.getElementById('endTurnBtn')?.addEventListener('click', () => window.game.endTurn());
+                    // endTurnBtn is handled by turnInterface.js - removed duplicate handler
                     document.getElementById('nextPhaseBtn')?.addEventListener('click', () => window.game.nextPhase());
                     document.getElementById('gatherBtn')?.addEventListener('click', () => window.game.gatherResources());
                     document.getElementById('saveGameBtn')?.addEventListener('click', () => window.game.saveGame());

@@ -170,16 +170,13 @@ export class TurnManager {
       resourceBonus: resourceBonus
     });
 
-    // TEMPORARILY DISABLED: Automatic phase progression to debug turn counter issue
-    // TODO: Re-enable after fixing turn counter bug
-    /*
+    // Auto-advance from resource phase after 1 second
     setTimeout(() => {
       // Only auto-advance if turn hasn't been manually ended
       if (this.gameState.currentPhase === 'resource' && !this.endingTurn) {
         this.nextPhase();
       }
     }, 1000);
-    */
   }
 
   /**
@@ -316,9 +313,7 @@ export class TurnManager {
         actionsRemaining: currentPlayer.actionsRemaining
       });
 
-      // TEMPORARILY DISABLED: Automatic phase progression to debug turn counter issue
-      // TODO: Re-enable after fixing turn counter bug
-      /*
+      // Auto-advance from action phase when no actions remain
       if (this.gameState.currentPhase === 'action' &&
                 currentPlayer.actionsRemaining === 0) {
         setTimeout(() => {
@@ -328,7 +323,6 @@ export class TurnManager {
           }
         }, 500);
       }
-      */
 
       return true;
     }
