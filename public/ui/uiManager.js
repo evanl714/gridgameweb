@@ -90,10 +90,13 @@ class UIManager {
 
     document.addEventListener('keydown', (e) => this.handleKeyboardShortcuts(e));
 
+    // Handle both canvas and grid rendering modes
     const canvas = document.getElementById('gameCanvas');
     if (canvas) {
       canvas.addEventListener('click', (e) => this.handleCanvasClick(e));
     }
+    
+    // Grid cells handle their own click events through InputController
   }
 
   handlePhaseChanged() {

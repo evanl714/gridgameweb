@@ -614,191 +614,30 @@
                     });
                 }
                 
-                console.log('✅ Game and grid ready - initializing adapter...');
+                console.log('✅ Game and grid ready - using Strategy pattern...');
+                    
+                // Hook up control buttons
+                document.getElementById('newGameBtn')?.addEventListener('click', async () => await window.game.newGame());
+                document.getElementById('nextPhaseBtn')?.addEventListener('click', () => window.game.nextPhase());
+                document.getElementById('gatherBtn')?.addEventListener('click', () => window.game.gatherResources());
+                document.getElementById('saveGameBtn')?.addEventListener('click', () => window.game.saveGame());
+                document.getElementById('resetBtn')?.addEventListener('click', () => window.game.resetGame());
+                document.getElementById('surrenderBtn')?.addEventListener('click', () => window.game.surrender());
                 
-                // Override render method to use grid-only rendering
-                window.game.render = function() {
+                // Initial render using Strategy pattern
+                setTimeout(() => {
                     try {
-                        this.renderToGrid();
-                    } catch (error) {
-                        console.error('Error in grid render:', error);
-                    }
-                };
-                    
-                    // Add grid rendering capability with error handling
-                    window.game.renderToGrid = function() {
-                        try {
-                            const cells = document.querySelectorAll('.grid-cell');
-                            
-                            if (cells.length === 0) {
-                                console.warn('No grid cells found for rendering');
-                                return;
-                            }
-                            
-                            console.log('🔧 DEBUG: renderToGrid called, found', cells.length, 'cells');
-                            
-                            // Clear all cells safely - preserve grid structure
-                            cells.forEach((cell, index) => {
-                                if (cell) {
-                                    // Preserve essential grid cell attributes
-                                    const originalClasses = cell.className;
-                                    const dataIndex = cell.dataset.index;
-                                    const dataX = cell.dataset.x;
-                                    const dataY = cell.dataset.y;
-                                    
-                                    cell.classList.remove('selected', 'hovered', 'unit', 'base', 'player1', 'player2', 'player1-base', 'player2-base');
-                                    const existingUnit = cell.querySelector('.unit-display');
-                                    const existingBase = cell.querySelector('.base-display');
-                                    if (existingUnit) existingUnit.remove();
-                                    if (existingBase) existingBase.remove();
-                                    
-                                    // Only clear background if it was explicitly set (for bases/units)
-                                    if (cell.style.background && (cell.style.background.includes('#4CAF50') || cell.style.background.includes('#F44336'))) {
-                                        cell.style.background = '';
-                                    }
-                                    
-                                    // Ensure grid-cell class is preserved
-                                    if (!cell.classList.contains('grid-cell')) {
-                                        cell.classList.add('grid-cell');
-                                    }
-                                    
-                                    // Restore data attributes if missing
-                                    if (!cell.dataset.index) cell.dataset.index = dataIndex || index;
-                                    if (!cell.dataset.x) cell.dataset.x = dataX || (index % 25);
-                                    if (!cell.dataset.y) cell.dataset.y = dataY || Math.floor(index / 25);
-                                }
-                            });
-                        
-                        // Render selected cell
-                        if (this.selectedCell) {
-                            const selectedIndex = this.selectedCell.y * 25 + this.selectedCell.x;
-                            const selectedElement = cells[selectedIndex];
-                            if (selectedElement) {
-                                selectedElement.classList.add('selected');
-                            }
-                        }
-                        
-                        // Render hovered cell
-                        if (this.hoveredCell) {
-                            const hoveredIndex = this.hoveredCell.y * 25 + this.hoveredCell.x;
-                            const hoveredElement = cells[hoveredIndex];
-                            if (hoveredElement) {
-                                hoveredElement.classList.add('hovered');
-                            }
-                        }
-                        
-                            // Render bases first
-                            if (this.gameState && this.gameState.bases) {
-                                Array.from(this.gameState.bases.values()).forEach(base => {
-                                    if (base && base.position && 
-                                        typeof base.position.x === 'number' && 
-                                        typeof base.position.y === 'number' &&
-                                        base.position.x >= 0 && base.position.x < 25 &&
-                                        base.position.y >= 0 && base.position.y < 25) {
-                                        
-                                        const baseIndex = base.position.y * 25 + base.position.x;
-                                        const baseCell = cells[baseIndex];
-                                        if (baseCell) {
-                                            const baseDisplay = document.createElement('div');
-                                            baseDisplay.className = 'base-display';
-                                            baseDisplay.textContent = '🏛️';
-                                            baseDisplay.style.cssText = `
-                                                position: absolute;
-                                                font-size: 20px;
-                                                z-index: 4;
-                                                top: 50%;
-                                                left: 50%;
-                                                transform: translate(-50%, -50%);
-                                            `;
-                                            baseCell.appendChild(baseDisplay);
-                                            baseCell.classList.add('base', `player${base.playerId}-base`);
-                                            baseCell.style.background = base.playerId === 1 ? '#4CAF50' : '#F44336';
-                                        }
-                                    }
-                                });
-                            }
-                            
-                            // Render units with validation
-                            if (this.gameState && this.gameState.units) {
-                                Array.from(this.gameState.units.values()).forEach(unit => {
-                                    if (unit && unit.position && 
-                                        typeof unit.position.x === 'number' && 
-                                        typeof unit.position.y === 'number' &&
-                                        unit.position.x >= 0 && unit.position.x < 25 &&
-                                        unit.position.y >= 0 && unit.position.y < 25) {
-                                        
-                                        const unitIndex = unit.position.y * 25 + unit.position.x;
-                                        const unitCell = cells[unitIndex];
-                                        if (unitCell) {
-                                            const unitDisplay = document.createElement('div');
-                                            unitDisplay.className = 'unit-display';
-                                            unitDisplay.textContent = this.getUnitSymbol(unit.type);
-                                            unitDisplay.style.cssText = `
-                                                position: absolute;
-                                                font-size: 16px;
-                                                font-weight: bold;
-                                                color: ${unit.playerId === 1 ? '#00aaff' : '#F44336'};
-                                                z-index: 5;
-                                                top: 50%;
-                                                left: 50%;
-                                                transform: translate(-50%, -50%);
-                                            `;
-                                            unitCell.appendChild(unitDisplay);
-                                            unitCell.classList.add('unit', `player${unit.playerId}`);
-                                        }
-                                    }
-                                });
-                            }
-                        } catch (error) {
-                            console.error('Error in renderToGrid:', error);
-                        }
-                    };
-                    
-                    // Add helper method for unit symbols
-                    window.game.getUnitSymbol = function(unitType) {
-                        const symbols = {
-                            worker: '♦',
-                            scout: '♙', 
-                            infantry: '♗',
-                            heavy: '♖'
-                        };
-                        return symbols[unitType] || '?';
-                    };
-                    
-                    // Override canvas-specific methods to work with grid
-                    window.game.updateCanvasSize = function() {
-                        // No-op for grid-based version
-                    };
-                    
-                    // Ensure grid coordinates work properly
-                    window.game.getGridCoordinates = function(event) {
-                        // This will be handled by the grid cell click handlers
-                        return null;
-                    };
-                    
-                    // Hook up control buttons
-                    document.getElementById('newGameBtn')?.addEventListener('click', async () => await window.game.newGame());
-                    document.getElementById('nextPhaseBtn')?.addEventListener('click', () => window.game.nextPhase());
-                    document.getElementById('gatherBtn')?.addEventListener('click', () => window.game.gatherResources());
-                    document.getElementById('saveGameBtn')?.addEventListener('click', () => window.game.saveGame());
-                    document.getElementById('resetBtn')?.addEventListener('click', () => window.game.resetGame());
-                    document.getElementById('surrenderBtn')?.addEventListener('click', () => window.game.surrender());
-                    
-                    // Mark adapter as initialized
-                    window.game.gridAdapterInitialized = true;
-                    
-                    // Initial render
-                    setTimeout(() => {
-                        try {
+                        if (window.game && window.game.render) {
                             window.game.render();
-                            console.log('✅ Grid adapter initialized successfully');
-                        } catch (error) {
-                            console.error('❌ Error during initial render:', error);
+                            console.log('✅ Strategy pattern rendering initialized successfully');
                         }
-                    }, 100);
+                    } catch (error) {
+                        console.error('❌ Error during initial render:', error);
+                    }
+                }, 100);
                     
                 } catch (error) {
-                    console.error('❌ Grid adapter initialization failed:', error);
+                    console.error('❌ Game initialization failed:', error);
                 }
             }
         
