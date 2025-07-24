@@ -6,6 +6,7 @@ import NotificationService from './NotificationService.js';
 import UIStateManager from '../managers/UIStateManagerRefactored.js';
 import { EventHandlerService } from './EventHandlerService.js';
 import { EventEmitter } from '../patterns/Observer.js';
+import { ComponentManager } from '../managers/ComponentManager.js';
 
 /**
  * ServiceBootstrap - Application dependency injection bootstrap
@@ -88,18 +89,26 @@ class ServiceBootstrap {
     console.log('📋 Phase 3: Registering UI services...');
     await this.registerUIServices();
 
-    // Phase 4: Initialize services
-    console.log('📋 Phase 4: Initializing services...');
+    // Phase 4: Register UI components
+    console.log('📋 Phase 4: Registering UI components...');
+    await this.registerUIComponents();
+
+    // Phase 5: Initialize services
+    console.log('📋 Phase 5: Initializing services...');
     await this.initializeServices();
 
-    // Phase 5: Connect to existing game instance (backward compatibility)
+    // Phase 6: Connect to existing game instance (backward compatibility)
     if (gameInstance) {
-      console.log('📋 Phase 5: Connecting to existing game instance...');
+      console.log('📋 Phase 6: Connecting to existing game instance...');
       await this.connectGameInstance(gameInstance);
     }
 
-    // Phase 6: Validate dependencies
-    console.log('📋 Phase 6: Validating dependencies...');
+    // Phase 7: Initialize UI components
+    console.log('📋 Phase 7: Initializing UI components...');
+    await this.initializeUIComponents();
+
+    // Phase 8: Validate dependencies
+    console.log('📋 Phase 8: Validating dependencies...');
     await this.validateServices();
 
     // Return service access object
@@ -157,6 +166,19 @@ class ServiceBootstrap {
   }
 
   /**
+     * Register UI components (ComponentManager, etc.)
+     */
+  async registerUIComponents() {
+    // ComponentManager - UI component lifecycle management
+    this.container.register('componentManager', (container) => {
+      return new ComponentManager(container);
+    }, {
+      singleton: true,
+      dependencies: []
+    });
+  }
+
+  /**
      * Register UI services (UIStateManager, EventHandlerService, etc.)
      */
   async registerUIServices() {
@@ -166,16 +188,18 @@ class ServiceBootstrap {
       const turnManagerService = container.get('turnManagerService');
       const domProvider = container.get('domProvider');
       const notificationService = container.get('notificationService');
+      const componentManager = container.get('componentManager');
 
       return new UIStateManager(
         gameStateManager,
         turnManagerService,
         domProvider,
-        notificationService
+        notificationService,
+        componentManager
       );
     }, {
       singleton: true,
-      dependencies: ['gameStateManager', 'turnManagerService', 'domProvider', 'notificationService']
+      dependencies: ['gameStateManager', 'turnManagerService', 'domProvider', 'notificationService', 'componentManager']
     });
 
     // EventHandlerService - Centralized event handling
@@ -208,6 +232,22 @@ class ServiceBootstrap {
   }
 
   /**
+     * Initialize UI components
+     */
+  async initializeUIComponents() {
+    try {
+      const componentManager = this.container.get('componentManager');
+      await componentManager.initialize();
+      console.log('✅ UI components initialized successfully');
+    } catch (error) {
+      console.error('❌ UI component initialization failed:', error);
+      if (this.config.strictMode) {
+        throw error;
+      }
+    }
+  }
+
+  /**
      * Connect to existing game instance for backward compatibility
      * @param {Object} gameInstance - Existing game instance
      */
@@ -236,7 +276,8 @@ class ServiceBootstrap {
       { name: 'gameStateManager', test: () => this.container.get('gameStateManager').getState },
       { name: 'turnManagerService', test: () => this.container.get('turnManagerService').getCurrentTurnInfo },
       { name: 'uiStateManager', test: () => this.container.get('uiStateManager').updateAllUI },
-      { name: 'eventHandlerService', test: () => this.container.get('eventHandlerService').initialize }
+      { name: 'eventHandlerService', test: () => this.container.get('eventHandlerService').initialize },
+      { name: 'componentManager', test: () => this.container.get('componentManager').getComponent }
     ];
 
     for (const validation of validations) {
@@ -394,6 +435,7 @@ class ServiceBootstrap {
       get turnManagerService() { return this.container.get('turnManagerService'); },
       get uiStateManager() { return this.container.get('uiStateManager'); },
       get eventHandlerService() { return this.container.get('eventHandlerService'); },
+      get componentManager() { return this.container.get('componentManager'); },
 
       // Utility methods
       getService: (name) => this.container.get(name),
@@ -460,7 +502,7 @@ class ServiceBootstrap {
 
     try {
       // Dispose services in reverse order
-      const services = ['eventHandlerService', 'uiStateManager', 'turnManagerService', 'gameStateManager', 'notificationService', 'domProvider', 'eventEmitter'];
+      const services = ['componentManager', 'eventHandlerService', 'uiStateManager', 'turnManagerService', 'gameStateManager', 'notificationService', 'domProvider', 'eventEmitter'];
 
       services.forEach(serviceName => {
         try {

@@ -31,6 +31,7 @@ import { UnitInfoSidebar } from './ui/unitInfoSidebar.js';
 import { InputController } from './js/controllers/InputController.js';
 import { GameRenderer } from './js/rendering/GameRenderer.js';
 import { UIStateManager } from './js/managers/UIStateManager.js';
+import ServiceBootstrap from './js/services/ServiceBootstrap.js';
 
 // Import design patterns
 import {
@@ -567,10 +568,44 @@ class Game {
 // Initialize game when DOM is loaded
 document.addEventListener('DOMContentLoaded', async () => {
   try {
+    console.log('🚀 Starting complete game initialization...');
+    
+    // Step 1: Create game instance
     window.game = new Game();
     await window.game.initialize();
-    console.log('Game fully initialized');
+    console.log('✅ Core game initialized');
+    
+    // Step 2: Initialize ServiceBootstrap with component system
+    const bootstrap = new ServiceBootstrap();
+    const services = await bootstrap.initialize(window.game, {
+      enableDebugMode: true,
+      strictMode: false
+    });
+    
+    console.log('✅ ServiceBootstrap initialized with components');
+    console.log('✅ Game fully initialized with modular UI architecture');
+    
+    // Make services available globally for debugging
+    window.services = services;
+    
   } catch (error) {
-    console.error('Failed to initialize game:', error);
+    console.error('❌ Failed to initialize game:', error);
+    
+    // Show error to user
+    const errorDiv = document.createElement('div');
+    errorDiv.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #dc3545;
+      color: white;
+      padding: 16px 24px;
+      border-radius: 8px;
+      z-index: 10000;
+      font-family: Arial, sans-serif;
+    `;
+    errorDiv.textContent = `Game initialization failed: ${error.message}`;
+    document.body.appendChild(errorDiv);
   }
 });

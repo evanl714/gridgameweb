@@ -7,11 +7,12 @@ import { GameEventTypes } from '../patterns/Observer.js';
  * Uses injectable services for DOM access, game state, and turn management
  */
 export class UIStateManager {
-  constructor(gameStateManager, turnManagerService, domProvider, notificationService) {
+  constructor(gameStateManager, turnManagerService, domProvider, notificationService, componentManager = null) {
     this.gameStateManager = gameStateManager;
     this.turnManagerService = turnManagerService;
     this.domProvider = domProvider;
     this.notificationService = notificationService;
+    this.componentManager = componentManager;
 
     // UI state tracking
     this.uiState = {
@@ -50,7 +51,30 @@ export class UIStateManager {
     };
 
     this.setupUIListeners();
+    this.setupComponentListeners();
     this.scheduleUIUpdate();
+  }
+
+  /**
+     * Setup component event listeners
+     */
+  setupComponentListeners() {
+    if (this.componentManager) {
+      // Listen for component events
+      this.componentManager.on('componentInitialized', (data) => {
+        console.log(`✅ UIStateManager: Component ${data.componentName} initialized`);
+        this.updateComponentStates();
+      });
+
+      this.componentManager.on('componentDestroyed', (data) => {
+        console.log(`🗑️ UIStateManager: Component ${data.componentName} destroyed`);
+      });
+
+      // Update components when game state changes
+      this.componentManager.on('gameActionTriggered', () => {
+        this.scheduleUIUpdate();
+      });
+    }
   }
 
   /**
@@ -108,6 +132,7 @@ export class UIStateManager {
       this.updateGameInfo();
       this.updateUnitInfo();
       this.updateControlButtons();
+      this.updateComponentStates();
       this.uiState.lastUpdate = Date.now();
     } catch (error) {
       console.error('UI update failed:', error);
@@ -516,6 +541,41 @@ export class UIStateManager {
         domProvider: this.domProvider.getRegistryInfo()
       }
     };
+  }
+
+  /**
+     * Update all UI components with current game state
+     */
+  updateComponentStates() {
+    if (!this.componentManager) return;
+
+    try {
+      const updateData = {
+        gameInstance: window.game,
+        refreshAvailability: true,
+        refreshButtonStates: true
+      };
+
+      this.componentManager.updateAllComponents(updateData);
+    } catch (error) {
+      console.warn('Error updating component states:', error);
+    }
+  }
+
+  /**
+     * Get component by name
+     */
+  getComponent(componentName) {
+    return this.componentManager ? this.componentManager.getComponent(componentName) : null;
+  }
+
+  /**
+     * Broadcast event to all components
+     */
+  broadcastToComponents(eventName, data) {
+    if (this.componentManager) {
+      this.componentManager.broadcast(eventName, data);
+    }
   }
 
   /**
