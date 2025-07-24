@@ -25,23 +25,23 @@ Move all event listeners and UI logic from `index.html` to JavaScript modules to
 
 ## Tasks
 
-- [ ] Move all event listeners from `index.html` to JavaScript modules
-- [ ] Create dedicated UI component classes
-- [ ] Implement proper component lifecycle management
-- [ ] Update `UIStateManager` to manage components, not DOM IDs
-- [ ] Create component-based UI architecture
-- [ ] Establish clean separation between HTML structure and behavior
+- [✓] Move all event listeners from `index.html` to JavaScript modules
+- [✓] Create dedicated UI component classes
+- [✓] Implement proper component lifecycle management
+- [✓] Update `UIStateManager` to manage components, not DOM IDs
+- [✓] Create component-based UI architecture
+- [✓] Establish clean separation between HTML structure and behavior
 
 ## Subtasks
 
-- [ ] [[ISSUE-047-extract-ui-components-from-html-a]] - Audit all JavaScript in index.html
-- [ ] [[ISSUE-047-extract-ui-components-from-html-b]] - Design component-based UI architecture
-- [ ] [[ISSUE-047-extract-ui-components-from-html-c]] - Create BuildPanel component class
-- [ ] [[ISSUE-047-extract-ui-components-from-html-d]] - Create GameBoard component class
-- [ ] [[ISSUE-047-extract-ui-components-from-html-e]] - Create ControlPanel component class
-- [ ] [[ISSUE-047-extract-ui-components-from-html-f]] - Move all event listeners to components
-- [ ] [[ISSUE-047-extract-ui-components-from-html-g]] - Update UIStateManager for component management
-- [ ] [[ISSUE-047-extract-ui-components-from-html-h]] - Implement component lifecycle management
+- [✓] [[ISSUE-047-extract-ui-components-from-html-a]] - Audit all JavaScript in index.html
+- [✓] [[ISSUE-047-extract-ui-components-from-html-b]] - Design component-based UI architecture
+- [✓] [[ISSUE-047-extract-ui-components-from-html-c]] - Create BuildPanel component class
+- [✓] [[ISSUE-047-extract-ui-components-from-html-d]] - Create GameBoard component class
+- [✓] [[ISSUE-047-extract-ui-components-from-html-e]] - Create ControlPanel component class
+- [✓] [[ISSUE-047-extract-ui-components-from-html-f]] - Move all event listeners to components
+- [✓] [[ISSUE-047-extract-ui-components-from-html-g]] - Update UIStateManager for component management
+- [✓] [[ISSUE-047-extract-ui-components-from-html-h]] - Implement component lifecycle management
 
 ## Related Issues
 
