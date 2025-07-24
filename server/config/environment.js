@@ -127,7 +127,7 @@ const config = {
 
     // Error tracking
     errorTracking: {
-      enabled: parseBoolean(process.env.ERROR_TRACKING_ENABLED, isProduction),
+      enabled: parseBoolean(process.env.ERROR_TRACKING_ENABLED, false), // Disabled by default, requires explicit enable
       dsn: process.env.SENTRY_DSN || '',
       environment: environment,
       release: process.env.npm_package_version || '1.0.0',
@@ -163,12 +163,15 @@ export const validateConfig = () => {
 
   // Check critical settings
   if (isProduction) {
-    if (!config.security.cors.origins.length) {
-      errors.push('FRONTEND_URLS must be set in production');
+    // CORS origins validation - allow default Railway URL if FRONTEND_URLS not explicitly set
+    const corsOrigins = config.security.cors.origins;
+    if (!corsOrigins.length || (corsOrigins.length === 1 && corsOrigins[0] === '*')) {
+      errors.push('FRONTEND_URLS must be set in production (wildcards not allowed)');
     }
 
+    // Error tracking validation - only require SENTRY_DSN if error tracking is explicitly enabled
     if (config.monitoring.errorTracking.enabled && !config.monitoring.errorTracking.dsn) {
-      errors.push('SENTRY_DSN must be set when error tracking is enabled in production');
+      errors.push('SENTRY_DSN must be set when ERROR_TRACKING_ENABLED=true');
     }
   }
 
