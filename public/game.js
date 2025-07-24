@@ -10,7 +10,7 @@ import {
   ENTITY_CHARACTERS,
   BASE_CONFIG,
   MOVEMENT_COLORS
-} from '../shared/constants.js';
+} from './shared/constants.js';
 
 import { GameState } from './gameState.js';
 import { TurnManager } from './turnManager.js';
