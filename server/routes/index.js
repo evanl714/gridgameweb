@@ -3,6 +3,8 @@ import gamesRouter from './api/games.js';
 import playersRouter from './api/players.js';
 import savesRouter from './api/saves.js';
 import dbConnection from '../database/connection.js';
+import healthMonitor from '../modules/HealthMonitor.js';
+import logger from '../modules/Logger.js';
 
 const router = express.Router();
 
@@ -11,30 +13,117 @@ router.use('/api/games', gamesRouter);
 router.use('/api/players', playersRouter);
 router.use('/api/saves', savesRouter);
 
-// Health check endpoint
+// Health check endpoints
 router.get('/api/health', async (req, res) => {
   try {
-    // Check database connection
-    const db = dbConnection.getDatabase();
-    const result = db.prepare('SELECT 1 as test').get();
-
-    // Get basic stats
-    const stats = dbConnection.getStats();
-
-    res.json({
-      success: true,
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-      database: {
-        connected: !!result,
-        stats
-      }
+    const health = await healthMonitor.getBasicHealth();
+    const statusCode = health.success ? 200 : 503;
+    
+    logger.api('Health check requested', {
+      ip: req.ip,
+      userAgent: req.get('User-Agent'),
+      status: health.status
     });
+    
+    res.status(statusCode).json(health);
   } catch (error) {
-    console.error('Health check failed:', error);
+    logger.error('Health check failed', { 
+      error: error.message, 
+      stack: error.stack,
+      ip: req.ip 
+    });
+    
     res.status(503).json({
       success: false,
       status: 'unhealthy',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Detailed health and metrics endpoint
+router.get('/api/health/detailed', async (req, res) => {
+  try {
+    const health = await healthMonitor.getHealthStatus();
+    const statusCode = health.success ? 200 : 503;
+    
+    logger.api('Detailed health check requested', {
+      ip: req.ip,
+      userAgent: req.get('User-Agent'),
+      status: health.status
+    });
+    
+    res.status(statusCode).json(health);
+  } catch (error) {
+    logger.error('Detailed health check failed', { 
+      error: error.message,
+      stack: error.stack,
+      ip: req.ip 
+    });
+    
+    res.status(503).json({
+      success: false,
+      status: 'unhealthy',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Security metrics endpoint
+router.get('/api/health/security', async (req, res) => {
+  try {
+    const health = await healthMonitor.getHealthStatus();
+    
+    logger.api('Security metrics requested', {
+      ip: req.ip,
+      userAgent: req.get('User-Agent')
+    });
+    
+    res.json({
+      success: true,
+      timestamp: new Date().toISOString(),
+      security: health.security
+    });
+  } catch (error) {
+    logger.error('Security metrics check failed', { 
+      error: error.message,
+      ip: req.ip 
+    });
+    
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Performance metrics endpoint
+router.get('/api/health/performance', async (req, res) => {
+  try {
+    const health = await healthMonitor.getHealthStatus();
+    
+    logger.api('Performance metrics requested', {
+      ip: req.ip,
+      userAgent: req.get('User-Agent')
+    });
+    
+    res.json({
+      success: true,
+      timestamp: new Date().toISOString(),
+      performance: health.performance,
+      system: health.system
+    });
+  } catch (error) {
+    logger.error('Performance metrics check failed', { 
+      error: error.message,
+      ip: req.ip 
+    });
+    
+    res.status(500).json({
+      success: false,
       error: error.message,
       timestamp: new Date().toISOString()
     });
