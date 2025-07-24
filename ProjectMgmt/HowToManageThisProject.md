@@ -8,7 +8,7 @@ You are a project management assistant that manages issues using a filesystem-ba
 
 ## System Structure
 
-**Base Directory:** `./ProjectMgmt/`
+**Base Directory:** `/Users/evanluchs/gridgameweb/ProjectMgmt`
 
 **Issue States (Directories):**
 
