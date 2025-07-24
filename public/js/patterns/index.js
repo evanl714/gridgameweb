@@ -13,11 +13,11 @@ export { CommandManager } from '../commands/CommandManager.js';
 export { EntityFactory } from '../factories/EntityFactory.js';
 
 // Observer Pattern
-export { 
-  EventEmitter, 
-  Observable, 
-  GameEventTypes, 
-  EventData 
+export {
+  EventEmitter,
+  Observable,
+  GameEventTypes,
+  EventData
 } from './Observer.js';
 
 /**
@@ -26,27 +26,27 @@ export {
 export const PatternExamples = {
   /**
    * Command Pattern Usage:
-   * 
+   *
    * const commandManager = new CommandManager();
    * const moveCommand = new MoveCommand(gameState, unitId, targetPos, turnManager);
    * const result = commandManager.executeCommand(moveCommand);
-   * 
+   *
    * if (result.success) {
    *   // Command executed successfully
    *   console.log('Unit moved:', result.description);
    * }
-   * 
+   *
    * // Undo the last command
    * commandManager.undo();
    */
-  
+
   /**
    * Factory Pattern Usage:
-   * 
+   *
    * const unit = EntityFactory.createUnit('infantry', playerId, x, y);
    * const base = EntityFactory.createBase(playerId, x, y);
    * const resource = EntityFactory.createResourceNode(x, y, 100);
-   * 
+   *
    * // Validate before creation
    * const validation = EntityFactory.validateCreation('unit', {
    *   unitType: 'scout',
@@ -55,16 +55,16 @@ export const PatternExamples = {
    *   y: 5
    * });
    */
-  
+
   /**
    * Observer Pattern Usage:
-   * 
+   *
    * const emitter = new EventEmitter();
-   * 
+   *
    * emitter.on(GameEventTypes.UNIT_MOVED, (data) => {
    *   console.log(`Unit ${data.unit.id} moved from (${data.from.x}, ${data.from.y}) to (${data.to.x}, ${data.to.y})`);
    * });
-   * 
+   *
    * emitter.emit(GameEventTypes.UNIT_MOVED, EventData.unitMoved(unit, oldPos, newPos, cost));
    */
 };
@@ -83,7 +83,7 @@ export class PatternIntegrator {
     const { CommandManager } = await import('../commands/CommandManager.js');
     const { EntityFactory } = await import('../factories/EntityFactory.js');
     const commandManager = new CommandManager();
-    
+
     // Setup command event listeners
     commandManager.on('commandExecuted', (data) => {
       if (game.uiStateManager) {
@@ -114,13 +114,13 @@ export class PatternIntegrator {
     const { MoveCommand } = await import('../commands/MoveCommand.js');
     const { AttackCommand } = await import('../commands/AttackCommand.js');
     const { BuildCommand } = await import('../commands/BuildCommand.js');
-    
+
     return {
       moveUnit: (unitId, targetPos) => {
         const command = new MoveCommand(
-          game.gameState, 
-          unitId, 
-          targetPos, 
+          game.gameState,
+          unitId,
+          targetPos,
           game.turnManager
         );
         return commandManager.executeCommand(command);

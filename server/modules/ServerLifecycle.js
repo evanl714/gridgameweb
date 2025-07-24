@@ -15,14 +15,14 @@ export class ServerLifecycle {
    */
   setupGracefulShutdown() {
     const signals = ['SIGINT', 'SIGTERM'];
-    
+
     signals.forEach(signal => {
       process.on(signal, () => {
         if (this.shutdownInProgress) {
           console.log(`Received ${signal} again, forcing exit...`);
           process.exit(1);
         }
-        
+
         console.log(`\nReceived ${signal}. Graceful shutdown...`);
         this.gracefulShutdown();
       });
@@ -51,10 +51,10 @@ export class ServerLifecycle {
     try {
       // Initialize database first
       await this.databaseManager.initialize();
-      
+
       // Start periodic cleanup
       this.databaseManager.startPeriodicCleanup();
-      
+
       // Start HTTP server
       this.server = app.listen(port, () => {
         console.log(`Grid Game server running at http://localhost:${port}`);
@@ -64,7 +64,7 @@ export class ServerLifecycle {
 
       // Setup graceful shutdown
       this.setupGracefulShutdown();
-      
+
     } catch (error) {
       console.error('Failed to start server:', error);
       await this.gracefulShutdown(1);
@@ -79,12 +79,12 @@ export class ServerLifecycle {
     if (this.shutdownInProgress) {
       return;
     }
-    
+
     this.shutdownInProgress = true;
-    
+
     try {
       console.log('Starting graceful shutdown...');
-      
+
       // Close HTTP server
       if (this.server) {
         await new Promise((resolve) => {
@@ -94,15 +94,15 @@ export class ServerLifecycle {
           });
         });
       }
-      
+
       // Close database connection
       if (this.databaseManager) {
         this.databaseManager.close();
       }
-      
+
       console.log('Graceful shutdown completed');
       process.exit(exitCode);
-      
+
     } catch (error) {
       console.error('Error during graceful shutdown:', error);
       process.exit(1);
@@ -122,7 +122,7 @@ export class ServerLifecycle {
   }
 
   /**
-   * Restart server (for development/maintenance)  
+   * Restart server (for development/maintenance)
    * @param {Object} app - Express application
    * @param {number} port - Port to listen on
    * @returns {Promise<void>}
@@ -130,11 +130,11 @@ export class ServerLifecycle {
   async restart(app, port) {
     console.log('Restarting server...');
     await this.gracefulShutdown(0);
-    
+
     // Reset state
     this.shutdownInProgress = false;
     this.server = null;
-    
+
     // Start again
     await this.startServer(app, port);
   }

@@ -147,7 +147,7 @@ export const COMBAT_CONFIG = {
   DAMAGE_VALUES: {
     worker: 1,   // Workers can defend themselves
     scout: 1,    // As per ISSUE-009 requirements
-    infantry: 2, // As per ISSUE-009 requirements  
+    infantry: 2, // As per ISSUE-009 requirements
     heavy: 3,    // As per ISSUE-009 requirements
   },
   CAN_ATTACK_BASES: true, // Units can attack enemy bases

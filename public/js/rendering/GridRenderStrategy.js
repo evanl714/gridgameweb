@@ -13,7 +13,7 @@ import { RENDERING_CONSTANTS } from '../config/RenderingConstants.js';
 export class GridRenderStrategy extends RenderStrategy {
   constructor(gameState, resourceManager, gridSize, cellSize) {
     super(gameState, resourceManager, gridSize, cellSize);
-    
+
     this.gridContainer = document.querySelector('.grid-container');
     this.gridCells = [];
   }
@@ -66,15 +66,15 @@ export class GridRenderStrategy extends RenderStrategy {
     this.gridCells.forEach(cell => {
       if (cell) {
         // Remove all rendering classes
-        cell.classList.remove('selected', 'hovered', 'unit', 'base', 'player1', 'player2', 
-                             'player1-base', 'player2-base', 'movement-range', 'movement-preview');
-        
+        cell.classList.remove('selected', 'hovered', 'unit', 'base', 'player1', 'player2',
+          'player1-base', 'player2-base', 'movement-range', 'movement-preview');
+
         // Remove existing displays
         const existingDisplays = cell.querySelectorAll('.unit-display, .base-display, .resource-display');
         existingDisplays.forEach(display => display.remove());
-        
+
         // Clear inline styles except for layout
-        if (cell.style.background && 
+        if (cell.style.background &&
             (cell.style.background.includes('#4CAF50') || cell.style.background.includes('#F44336'))) {
           cell.style.background = '';
         }
@@ -84,7 +84,7 @@ export class GridRenderStrategy extends RenderStrategy {
 
   renderHoverToGrid(inputController) {
     if (!inputController) return;
-    
+
     const hoveredCell = inputController.getHoveredCell();
     if (hoveredCell) {
       const hoveredIndex = hoveredCell.y * this.gridSize + hoveredCell.x;
@@ -97,7 +97,7 @@ export class GridRenderStrategy extends RenderStrategy {
 
   renderSelectionToGrid(inputController) {
     if (!inputController) return;
-    
+
     const selectedCell = inputController.getSelectedCell();
     if (selectedCell) {
       const selectedIndex = selectedCell.y * this.gridSize + selectedCell.x;
@@ -110,19 +110,19 @@ export class GridRenderStrategy extends RenderStrategy {
 
   renderMovementRangeToGrid(inputController) {
     if (!inputController) return;
-    
+
     const selectedUnit = inputController.getSelectedUnit();
     const showMovementRange = inputController.getShowMovementRange();
-    
+
     if (selectedUnit && showMovementRange) {
       const validMoves = this.gameState.getValidMovePositions(selectedUnit.id);
-      
+
       validMoves.forEach(move => {
         const moveIndex = move.y * this.gridSize + move.x;
         const moveElement = this.gridCells[moveIndex];
         if (moveElement) {
           moveElement.classList.add('movement-range');
-          
+
           // Add cost indicator
           const costIndicator = document.createElement('div');
           costIndicator.className = 'movement-cost-indicator';
@@ -136,12 +136,12 @@ export class GridRenderStrategy extends RenderStrategy {
 
   renderResourceNodesToGrid() {
     const resourceInfo = this.resourceManager.getResourceNodeInfo();
-    
+
     resourceInfo.forEach(nodeInfo => {
       const node = nodeInfo.position;
       const nodeIndex = node.y * this.gridSize + node.x;
       const nodeElement = this.gridCells[nodeIndex];
-      
+
       if (nodeElement) {
         const resourceDisplay = document.createElement('div');
         resourceDisplay.className = 'resource-display';
@@ -152,13 +152,13 @@ export class GridRenderStrategy extends RenderStrategy {
           z-index: ${RENDERING_CONSTANTS.DOM_ELEMENT_Z_INDICES.RESOURCE_DISPLAY};
           opacity: ${0.3 + (nodeInfo.efficiency * 0.7)};
         `;
-        
+
         // Add value indicator
         const valueIndicator = document.createElement('div');
         valueIndicator.className = 'resource-value';
         valueIndicator.textContent = nodeInfo.value.toString();
         valueIndicator.style.cssText = RENDERING_CONSTANTS.DOM_RESOURCE_VALUE_STYLE;
-        
+
         nodeElement.appendChild(resourceDisplay);
         nodeElement.appendChild(valueIndicator);
       }
@@ -171,7 +171,7 @@ export class GridRenderStrategy extends RenderStrategy {
 
       const baseIndex = base.position.y * this.gridSize + base.position.x;
       const baseCell = this.gridCells[baseIndex];
-      
+
       if (baseCell) {
         const baseDisplay = document.createElement('div');
         baseDisplay.className = 'base-display';
@@ -184,7 +184,7 @@ export class GridRenderStrategy extends RenderStrategy {
           left: 50%;
           transform: translate(-50%, -50%);
         `;
-        
+
         baseCell.appendChild(baseDisplay);
         baseCell.classList.add('base', `player${base.playerId}-base`);
         baseCell.style.background = base.playerId === 1 ? '#4CAF50' : '#F44336';
@@ -196,7 +196,7 @@ export class GridRenderStrategy extends RenderStrategy {
     Array.from(this.gameState.units.values()).forEach(unit => {
       const unitIndex = unit.position.y * this.gridSize + unit.position.x;
       const unitCell = this.gridCells[unitIndex];
-      
+
       if (unitCell) {
         const unitDisplay = document.createElement('div');
         unitDisplay.className = 'unit-display';
@@ -211,7 +211,7 @@ export class GridRenderStrategy extends RenderStrategy {
           left: 50%;
           transform: translate(-50%, -50%);
         `;
-        
+
         unitCell.appendChild(unitDisplay);
         unitCell.classList.add('unit', `player${unit.playerId}`);
       }
@@ -220,15 +220,15 @@ export class GridRenderStrategy extends RenderStrategy {
 
   renderUnitSelectionToGrid(inputController) {
     if (!inputController) return;
-    
+
     const selectedUnit = inputController.getSelectedUnit();
     if (selectedUnit) {
       const unitIndex = selectedUnit.position.y * this.gridSize + selectedUnit.position.x;
       const unitCell = this.gridCells[unitIndex];
-      
+
       if (unitCell) {
         unitCell.classList.add('unit-selected');
-        
+
         // Add selection ring
         const selectionRing = document.createElement('div');
         selectionRing.className = 'unit-selection-ring';
@@ -244,7 +244,7 @@ export class GridRenderStrategy extends RenderStrategy {
           z-index: 6;
           pointer-events: none;
         `;
-        
+
         unitCell.appendChild(selectionRing);
       }
     }

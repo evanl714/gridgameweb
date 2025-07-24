@@ -4,7 +4,7 @@ test.describe('Core Player Journey Tests', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('http://localhost:3000');
     await page.waitForSelector('.grid-cell');
-    
+
     // Wait for game to fully initialize
     await page.waitForFunction(() => window.game !== undefined);
     await page.waitForTimeout(1000);
@@ -25,7 +25,7 @@ test.describe('Core Player Journey Tests', () => {
     await page.click('button:has-text("Next Phase")'); // Resource -> Action
     await expect(page.locator('text=Phase: action')).toBeVisible();
 
-    await page.click('button:has-text("Next Phase")'); // Action -> Build  
+    await page.click('button:has-text("Next Phase")'); // Action -> Build
     await expect(page.locator('text=Phase: build')).toBeVisible();
 
     // Build first worker
@@ -48,10 +48,10 @@ test.describe('Core Player Journey Tests', () => {
     // Complete Turn 1 setup
     await page.click('button:has-text("Next Phase")'); // Resource -> Action
     await page.click('button:has-text("Next Phase")'); // Action -> Build
-    
+
     // End Turn 1
     await page.click('button:has-text("End Turn")');
-    
+
     // Verify turn transition screen
     await expect(page.locator('text=Turn 1 Complete')).toBeVisible();
     await expect(page.locator('text=Please pass the device to')).toBeVisible();
@@ -59,7 +59,7 @@ test.describe('Core Player Journey Tests', () => {
 
     // Start Player 2's turn
     await page.click('button:has-text("Start Turn")');
-    
+
     // Verify Player 2 state
     await expect(page.locator('text=Player 2\'s Turn')).toBeVisible();
     await expect(page.locator('text=Turn: 2')).toBeVisible();
@@ -84,7 +84,7 @@ test.describe('Core Player Journey Tests', () => {
 
     // Now test resource gathering
     await expect(page.locator('text=Player 1\'s Turn')).toBeVisible();
-    
+
     // Click on worker to select
     await page.click('[data-x="6"][data-y="5"]');
     await page.waitForTimeout(500);
@@ -137,7 +137,7 @@ test.describe('Core Player Journey Tests', () => {
       // Navigate through phases
       await page.click('button:has-text("Next Phase")'); // Resource -> Action
       await page.waitForTimeout(300);
-      
+
       await page.click('button:has-text("Next Phase")'); // Action -> Build
       await page.waitForTimeout(300);
 
@@ -175,7 +175,7 @@ test.describe('Core Player Journey Tests', () => {
     // Test button responsiveness
     await page.click('button:has-text("Next Phase")');
     await page.click('button:has-text("Next Phase")');
-    
+
     const endTime = Date.now();
     const totalTime = endTime - startTime;
 

@@ -121,7 +121,7 @@ describe('Movement System Performance Tests', () => {
     });
 
     test('should handle movement state efficiently', () => {
-      const unit = gameState.createUnit('scout', 1, 12, 12);
+      const unit = gameState.createUnit('scout', 1, 3, 21);
 
       // Simulate many movement state changes
       const stateChanges = 1000;
@@ -225,7 +225,7 @@ describe('Movement System Performance Tests', () => {
         eventsFired.push(data);
       });
 
-      const unit = gameState.createUnit('scout', 1, 10, 10);
+      const unit = gameState.createUnit('scout', 1, 1, 21);
       const startTime = performance.now();
 
       // Perform many movements
@@ -295,7 +295,7 @@ describe('Movement System Performance Tests', () => {
 
   describe('Stress Testing', () => {
     test('should survive extreme usage patterns', () => {
-      const unit = gameState.createUnit('heavy', 1, 12, 12);
+      const unit = gameState.createUnit('heavy', 1, 3, 21);
       let operationCount = 0;
       const startTime = performance.now();
 
@@ -318,7 +318,7 @@ describe('Movement System Performance Tests', () => {
     });
 
     test('should maintain accuracy under stress', () => {
-      const unit = gameState.createUnit('worker', 1, 10, 10);
+      const unit = gameState.createUnit('worker', 1, 1, 21);
       const results = [];
 
       // Perform same calculation many times

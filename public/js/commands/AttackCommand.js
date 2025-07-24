@@ -12,7 +12,7 @@ export class AttackCommand extends Command {
     this.attackerUnitId = attackerUnitId;
     this.targetPosition = { x: targetPosition.x, y: targetPosition.y };
     this.turnManager = turnManager;
-    
+
     // Store state for potential undo
     this.targetData = null;
     this.attackerOriginalActions = 0;
@@ -37,8 +37,8 @@ export class AttackCommand extends Command {
 
     // Check if attack is valid
     return this.gameState.canUnitAttack(
-      this.attackerUnitId, 
-      this.targetPosition.x, 
+      this.attackerUnitId,
+      this.targetPosition.x,
       this.targetPosition.y
     );
   }
@@ -55,7 +55,7 @@ export class AttackCommand extends Command {
 
     const attacker = this.gameState.units.get(this.attackerUnitId);
     const targetEntity = this.gameState.getEntityAt(this.targetPosition.x, this.targetPosition.y);
-    
+
     if (!targetEntity) {
       return {
         success: false,
@@ -83,7 +83,7 @@ export class AttackCommand extends Command {
 
     if (attackResult) {
       this.executed = true;
-      
+
       // Check if target was destroyed
       const targetStillExists = this.gameState.getEntityAt(this.targetPosition.x, this.targetPosition.y);
       this.targetDestroyed = !targetStillExists;

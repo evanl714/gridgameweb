@@ -89,7 +89,7 @@ test.describe('Basic Functionality Tests', () => {
     // Try to click unit cards
     const unitCards = page.locator('[class*="unit-card"]');
     const workerCard = unitCards.filter({ hasText: 'Worker' }).first();
-    
+
     if (await workerCard.isVisible()) {
       await workerCard.click();
       await page.waitForTimeout(500);
@@ -121,7 +121,7 @@ test.describe('Basic Functionality Tests', () => {
     // Test each control button exists and is clickable
     const buttons = [
       'New Game',
-      'End Turn', 
+      'End Turn',
       'Next Phase',
       'Save Game',
       'Reset',
@@ -131,7 +131,7 @@ test.describe('Basic Functionality Tests', () => {
     for (const buttonText of buttons) {
       const button = page.locator('button', { hasText: buttonText });
       await expect(button).toBeVisible();
-      
+
       // Test that button is clickable (don't actually click all to avoid side effects)
       if (buttonText === 'Next Phase') {
         await button.click();
@@ -202,7 +202,7 @@ test.describe('Basic Functionality Tests', () => {
     await page.click('[data-x="12"][data-y="12"]');
     const clickResponseTime = Date.now() - startTime;
 
-    console.log(`📊 Performance Metrics:`);
+    console.log('📊 Performance Metrics:');
     console.log(`   Page Load Time: ${pageLoadTime}ms`);
     console.log(`   Click Response Time: ${clickResponseTime}ms`);
 

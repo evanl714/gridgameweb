@@ -27,7 +27,7 @@ describe('Enhanced Game Logic Validation', () => {
       // Test grid at maximum capacity within base radius
       const maxUnits = TestDataFactory.createMultipleUnits(gameState, 'worker', 1, 20);
       expect(maxUnits.length).toBeGreaterThan(10); // Should create at least 10 units
-      
+
       // Verify all units are within base radius
       maxUnits.forEach(unit => {
         const basePos = BASE_CONFIG.STARTING_POSITIONS[1];
@@ -52,7 +52,7 @@ describe('Enhanced Game Logic Validation', () => {
       edgeUnits.forEach(unit => {
         // Test movement from edge positions
         const validMoves = gameState.getValidMovePositions(unit.id);
-        
+
         // Verify no moves go off grid
         validMoves.forEach(move => {
           expect(move.x).toBeGreaterThanOrEqual(0);
@@ -65,19 +65,19 @@ describe('Enhanced Game Logic Validation', () => {
 
     test('should validate all unit type interactions', () => {
       const unitTypes = ['worker', 'scout', 'infantry', 'heavy'];
-      
+
       unitTypes.forEach(attackerType => {
         unitTypes.forEach(defenderType => {
           // Create combat scenario
           const attacker = TestDataFactory.createValidUnit(gameState, attackerType, 1);
           const defender = TestDataFactory.createValidUnit(gameState, defenderType, 2);
-          
+
           if (attacker && defender) {
             // Test damage calculations
             const damage = COMBAT_CONFIG.DAMAGE_VALUES[attackerType] || 1;
             expect(damage).toBeGreaterThan(0);
             expect(damage).toBeLessThanOrEqual(3);
-            
+
             // Test unit health ranges
             expect(defender.health).toBeGreaterThan(0);
             expect(defender.health).toBeLessThanOrEqual(200);
@@ -103,7 +103,7 @@ describe('Enhanced Game Logic Validation', () => {
 
       // Test regeneration with depleted nodes
       resourceManager.regenerateResources();
-      
+
       const totalResources = resourceManager.getTotalResourcesAvailable();
       expect(totalResources).toBeGreaterThan(0); // Should regenerate
     });
@@ -112,12 +112,12 @@ describe('Enhanced Game Logic Validation', () => {
       // Create workers near each resource node
       const workers = [];
       const resourcePositions = RESOURCE_CONFIG.NODE_POSITIONS;
-      
+
       resourcePositions.forEach(nodePos => {
         // Try to create worker near this node for both players
         const worker1 = TestDataFactory.createUnitNearResource(gameState, 'worker', 1);
         const worker2 = TestDataFactory.createUnitNearResource(gameState, 'worker', 2);
-        
+
         if (worker1) workers.push(worker1);
         if (worker2) workers.push(worker2);
       });
@@ -143,11 +143,11 @@ describe('Enhanced Game Logic Validation', () => {
       if (worker) {
         const initialPlayerEnergy = gameState.players.get(1).energy;
         const result = resourceManager.gatherResources(worker.id);
-        
+
         if (result.success) {
           const finalTotal = resourceManager.getTotalResourcesAvailable();
           const finalPlayerEnergy = gameState.players.get(1).energy;
-          
+
           // Resources should be conserved (transferred not created)
           expect(finalTotal).toBe(initialTotal - result.amount);
           expect(finalPlayerEnergy).toBe(initialPlayerEnergy + result.amount);
@@ -179,7 +179,7 @@ describe('Enhanced Game Logic Validation', () => {
     test('should validate base destruction mechanics', () => {
       const base1 = gameState.getPlayerBase(1);
       const base2 = gameState.getPlayerBase(2);
-      
+
       expect(base1).toBeTruthy();
       expect(base2).toBeTruthy();
       expect(base1.health).toBe(BASE_CONFIG.HEALTH);
@@ -229,23 +229,23 @@ describe('Enhanced Game Logic Validation', () => {
       // Test turn reset
       turnManager.forceEndTurn();
       turnManager.forceEndTurn(); // Back to original player
-      
+
       expect(unit.canAct()).toBe(true);
       expect(unit.actionsUsed).toBe(0);
     });
 
     test('should handle phase transition edge cases', () => {
       const phases = ['resource', 'action', 'build'];
-      
+
       phases.forEach(expectedPhase => {
         // Force specific phase
         gameState.currentPhase = expectedPhase;
-        
+
         // Test phase-specific restrictions
         const unit = TestDataFactory.createValidUnit(gameState, 'worker', 1);
         if (unit) {
           const canMove = gameState.canUnitMoveTo(unit.id, unit.position.x + 1, unit.position.y);
-          
+
           if (expectedPhase === 'action') {
             // Movement should be allowed in action phase (if position is valid)
             expect(typeof canMove).toBe('boolean');
@@ -284,12 +284,12 @@ describe('Enhanced Game Logic Validation', () => {
       // Simulate simultaneous base destruction
       const base1 = gameState.getPlayerBase(1);
       const base2 = gameState.getPlayerBase(2);
-      
+
       if (base1 && base2) {
         // Remove both bases
         gameState.bases.delete(base1.id);
         gameState.bases.delete(base2.id);
-        
+
         gameState.checkVictoryCondition();
         expect(gameEndEvents.length).toBeGreaterThan(0);
         expect(gameEndEvents[0].winner).toBe(null); // Draw
@@ -300,7 +300,7 @@ describe('Enhanced Game Logic Validation', () => {
   describe('Memory and Performance Validation', () => {
     test('should not leak memory during intensive operations', () => {
       const initialUnitCount = gameState.units.size;
-      
+
       // Create and destroy units repeatedly
       for (let i = 0; i < 50; i++) {
         const unit = TestDataFactory.createValidUnit(gameState, 'worker', 1);
@@ -310,7 +310,7 @@ describe('Enhanced Game Logic Validation', () => {
       }
 
       expect(gameState.units.size).toBe(initialUnitCount);
-      
+
       // Check board cleanup
       let occupiedCells = 0;
       for (let x = 0; x < GAME_CONFIG.GRID_SIZE; x++) {
@@ -320,16 +320,16 @@ describe('Enhanced Game Logic Validation', () => {
           }
         }
       }
-      
+
       // Only bases should remain
       expect(occupiedCells).toBe(2); // Two player bases
     });
 
     test('should maintain performance under stress', () => {
       const maxUnits = TestDataFactory.createMultipleUnits(gameState, 'scout', 1, 15);
-      
+
       const startTime = performance.now();
-      
+
       // Perform intensive operations
       for (let i = 0; i < 100; i++) {
         maxUnits.forEach(unit => {
@@ -339,7 +339,7 @@ describe('Enhanced Game Logic Validation', () => {
           }
         });
       }
-      
+
       const totalTime = performance.now() - startTime;
       expect(totalTime).toBeLessThan(200); // Should complete within 200ms
     });
@@ -377,22 +377,22 @@ describe('Enhanced Game Logic Validation', () => {
       // Test movement rules
       expect(gameState.canUnitMoveTo(unit.id, -1, -1)).toBe(false); // Off grid
       expect(gameState.canUnitMoveTo(unit.id, 25, 25)).toBe(false); // Off grid
-      
+
       // Test action limits
       while (unit.canAct()) {
         unit.useAction();
       }
-      
+
       expect(gameState.canUnitMoveTo(unit.id, unit.position.x + 1, unit.position.y)).toBe(false); // No actions
-      
+
       // Test energy constraints
       const player = gameState.players.get(1);
       const initialEnergy = player.energy;
       player.energy = 0;
-      
+
       const newUnit = gameState.createUnit('heavy', 1, 3, 3); // Expensive unit
       expect(newUnit).toBe(null); // Should fail due to insufficient energy
-      
+
       player.energy = initialEnergy; // Restore for other tests
     });
   });

@@ -3,13 +3,13 @@ import GameSave from './GameSave.js';
 import PlayerProfile from './PlayerProfile.js';
 
 export {
-    Game,
-    GameSave,
-    PlayerProfile
+  Game,
+  GameSave,
+  PlayerProfile
 };
 
 export default {
-    Game,
-    GameSave,
-    PlayerProfile
+  Game,
+  GameSave,
+  PlayerProfile
 };

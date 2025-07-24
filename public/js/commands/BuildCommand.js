@@ -13,7 +13,7 @@ export class BuildCommand extends Command {
     this.position = { x: position.x, y: position.y };
     this.playerId = playerId;
     this.turnManager = turnManager;
-    
+
     // Store state for undo
     this.createdUnitId = null;
     this.energyCost = 0;
@@ -38,7 +38,7 @@ export class BuildCommand extends Command {
 
     // Get unit cost (simplified - in real game this would come from unit definitions)
     this.energyCost = this.getUnitCost(this.unitType);
-    
+
     return player.energy >= this.energyCost;
   }
 
@@ -54,7 +54,7 @@ export class BuildCommand extends Command {
     }
 
     const player = this.gameState.players.get(this.playerId);
-    
+
     // Create the unit
     const createResult = this.gameState.createUnit(
       this.unitType,
@@ -66,10 +66,10 @@ export class BuildCommand extends Command {
     if (createResult && createResult.success) {
       this.executed = true;
       this.createdUnitId = createResult.unit.id;
-      
+
       // Deduct energy cost
       player.energy -= this.energyCost;
-      
+
       // Use turn manager action if provided
       if (this.turnManager) {
         this.turnManager.usePlayerAction();
@@ -111,7 +111,7 @@ export class BuildCommand extends Command {
 
     // Remove the unit
     const removeResult = this.gameState.removeUnit(this.createdUnitId);
-    
+
     if (removeResult) {
       // Restore energy
       const player = this.gameState.players.get(this.playerId);

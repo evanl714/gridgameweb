@@ -143,7 +143,7 @@ export class VictoryScreen {
     // Base destruction victory (default)
     return {
       title: `🏆 Player ${winner} Wins!`,
-      message: `Enemy base destroyed!`,
+      message: 'Enemy base destroyed!',
       celebrationClass: 'victory-result'
     };
   }

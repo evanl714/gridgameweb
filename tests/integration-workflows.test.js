@@ -25,7 +25,7 @@ describe('Integration Testing - Complete Game Workflows', () => {
   describe('Complete Game Flow Validation', () => {
     test('should execute full game from start to victory', () => {
       const gameEvents = [];
-      
+
       // Monitor game events
       gameState.on('gameStarted', (data) => gameEvents.push({ type: 'gameStarted', data }));
       gameState.on('unitCreated', (data) => gameEvents.push({ type: 'unitCreated', data }));
@@ -43,7 +43,7 @@ describe('Integration Testing - Complete Game Workflows', () => {
       // Phase 2: Unit creation and resource gathering
       const worker1 = TestDataFactory.createUnitNearResource(gameState, 'worker', 1);
       const worker2 = TestDataFactory.createUnitNearResource(gameState, 'worker', 2);
-      
+
       expect(worker1).toBeTruthy();
       expect(worker2).toBeTruthy();
 
@@ -62,7 +62,7 @@ describe('Integration Testing - Complete Game Workflows', () => {
       // Phase 4: Combat scenario
       gameState.currentPhase = 'action';
       const targetBase = gameState.getPlayerBase(2);
-      
+
       if (attacker && targetBase) {
         // Move attacker toward enemy base (if possible)
         const validMoves = gameState.getValidMovePositions(attacker.id);
@@ -74,7 +74,7 @@ describe('Integration Testing - Complete Game Workflows', () => {
         // Phase 5: Victory condition - destroy enemy base
         targetBase.health = 1; // Set low health for quick victory
         const attackResult = gameState.attackUnit(attacker.id, targetBase.position.x, targetBase.position.y);
-        
+
         if (attackResult) {
           expect(gameState.status).toBe('ended');
           expect(gameState.winner).toBe(1);
@@ -84,7 +84,7 @@ describe('Integration Testing - Complete Game Workflows', () => {
       // Verify event sequence
       const eventTypes = gameEvents.map(e => e.type);
       expect(eventTypes).toContain('unitCreated');
-      
+
       console.log(`Game flow completed with ${gameEvents.length} events:`, eventTypes);
     });
 
@@ -94,11 +94,11 @@ describe('Integration Testing - Complete Game Workflows', () => {
 
       // Track phase transitions
       const originalPhase = gameState.currentPhase;
-      
+
       // Player 1 turn cycle
       gameState.currentPhase = 'resource';
       phaseSequence.push('resource');
-      
+
       // Resource phase activities
       const worker = TestDataFactory.createUnitNearResource(gameState, 'worker', 1);
       if (worker) {
@@ -109,7 +109,7 @@ describe('Integration Testing - Complete Game Workflows', () => {
       // Action phase activities
       gameState.currentPhase = 'action';
       phaseSequence.push('action');
-      
+
       if (worker && worker.canAct()) {
         const validMoves = gameState.getValidMovePositions(worker.id);
         if (validMoves.length > 0) {
@@ -121,14 +121,14 @@ describe('Integration Testing - Complete Game Workflows', () => {
       // Build phase activities
       gameState.currentPhase = 'build';
       phaseSequence.push('build');
-      
+
       const newUnit = TestDataFactory.createValidUnit(gameState, 'scout', 1);
       turnEvents.push({ phase: 'build', action: 'create', success: newUnit !== null });
 
       // End turn and verify state
       const initialPlayer = gameState.currentPlayer;
       turnManager.forceEndTurn();
-      
+
       expect(gameState.currentPlayer).not.toBe(initialPlayer);
       expect(phaseSequence).toEqual(['resource', 'action', 'build']);
       expect(turnEvents.length).toBeGreaterThan(0);
@@ -244,7 +244,7 @@ describe('Integration Testing - Complete Game Workflows', () => {
       // Set up complex game state
       const worker1 = TestDataFactory.createUnitNearResource(gameState, 'worker', 1);
       const worker2 = TestDataFactory.createValidUnit(gameState, 'scout', 2);
-      
+
       if (worker1) {
         worker1.useAction(); // Modify unit state
         resourceManager.gatherResources(worker1.id); // Create cooldown
@@ -278,7 +278,7 @@ describe('Integration Testing - Complete Game Workflows', () => {
       // Create new game instance and deserialize
       const newGameState = new GameState();
       const newResourceManager = new ResourceManager(newGameState);
-      
+
       // Note: Full deserialization would require implementing deserialize methods
       // For now, verify that serialization captures all critical data
       expect(gameStateSerialized.currentPlayer).toBe(originalState.currentPlayer);
@@ -345,7 +345,7 @@ describe('Integration Testing - Complete Game Workflows', () => {
 
       // Verify game continues to function
       expect(gameState.status).toBe('playing');
-      
+
       const validMoves = gameState.getValidMovePositions(worker.id);
       expect(Array.isArray(validMoves)).toBe(true);
 
@@ -423,7 +423,7 @@ describe('Integration Testing - Complete Game Workflows', () => {
       // Simulate systematic base destruction
       gameState.currentPhase = 'action';
       let attacksNeeded = 0;
-      
+
       while (enemyBase.health > 0 && attacksNeeded < 100) { // Safety limit
         const attackResult = gameState.attackUnit(attacker.id, enemyBase.position.x, enemyBase.position.y);
         if (attackResult) {

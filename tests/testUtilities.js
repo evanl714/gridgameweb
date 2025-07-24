@@ -41,7 +41,7 @@ export class TestDataFactory {
    */
   static createValidUnit(gameState, unitType, playerId, preferences = {}) {
     const validPositions = this.getValidPositionsForPlayer(playerId);
-    
+
     // If specific position requested, check if it's valid
     if (preferences.x !== undefined && preferences.y !== undefined) {
       const isValid = validPositions.some(pos => pos.x === preferences.x && pos.y === preferences.y);
@@ -102,8 +102,8 @@ export class TestDataFactory {
     // Find adjacent position that's also within base radius
     for (const adjPos of adjacentPositions) {
       const isWithinBase = validPositions.some(pos => pos.x === adjPos.x && pos.y === adjPos.y);
-      if (isWithinBase && 
-          adjPos.x >= 0 && adjPos.x < 25 && 
+      if (isWithinBase &&
+          adjPos.x >= 0 && adjPos.x < 25 &&
           adjPos.y >= 0 && adjPos.y < 25 &&
           gameState.isPositionEmpty(adjPos.x, adjPos.y)) {
         return gameState.createUnit(unitType, playerId, adjPos.x, adjPos.y);
@@ -126,7 +126,7 @@ export class TestDataFactory {
     const edgeUnits = [];
 
     // Filter for positions near grid edges (within 2 squares)
-    const edgePositions = validPositions.filter(pos => 
+    const edgePositions = validPositions.filter(pos =>
       pos.x <= 2 || pos.x >= 22 || pos.y <= 2 || pos.y >= 22
     );
 
@@ -157,7 +157,7 @@ export class TestDataFactory {
 
     for (const pos of validPositions) {
       if (units.length >= maxCount) break;
-      
+
       if (gameState.isPositionEmpty(pos.x, pos.y)) {
         const unit = gameState.createUnit(unitType, playerId, pos.x, pos.y);
         if (unit) {
@@ -236,14 +236,14 @@ export class TestScenarios {
     ];
 
     const validPlayer2Positions = TestDataFactory.getValidPositionsForPlayer(2);
-    
+
     for (const adjPos of adjacentPositions) {
-      const isValidForPlayer2 = validPlayer2Positions.some(pos => 
+      const isValidForPlayer2 = validPlayer2Positions.some(pos =>
         pos.x === adjPos.x && pos.y === adjPos.y
       );
-      
-      if (isValidForPlayer2 && 
-          adjPos.x >= 0 && adjPos.x < 25 && 
+
+      if (isValidForPlayer2 &&
+          adjPos.x >= 0 && adjPos.x < 25 &&
           adjPos.y >= 0 && adjPos.y < 25 &&
           gameState.isPositionEmpty(adjPos.x, adjPos.y)) {
         const defender = gameState.createUnit('worker', 2, adjPos.x, adjPos.y);

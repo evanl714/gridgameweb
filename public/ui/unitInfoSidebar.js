@@ -3,7 +3,7 @@ class UnitInfoSidebar {
     this.gameState = gameState;
     this.element = document.getElementById('unitInfoSidebar');
     this.selectedUnit = null;
-    
+
     this.initialize();
   }
 
@@ -14,7 +14,7 @@ class UnitInfoSidebar {
 
   renderEmptyState() {
     if (!this.element) return;
-    
+
     this.element.innerHTML = `
       <div class="unit-details">
         <div class="info-item">
@@ -30,11 +30,11 @@ class UnitInfoSidebar {
 
   renderUnitDetails(unit) {
     if (!this.element || !unit) return;
-    
+
     const unitType = unit.type || 'unknown';
     const unitIcon = this.getUnitIcon(unitType);
     const playerColor = unit.player === 1 ? 'var(--player-1-color)' : 'var(--player-2-color)';
-    
+
     this.element.innerHTML = `
       <div class="unit-details">
         <div class="unit-header">
@@ -97,7 +97,7 @@ class UnitInfoSidebar {
   getUnitIcon(unitType) {
     const iconMap = {
       'worker': '♦',
-      'scout': '♙', 
+      'scout': '♙',
       'infantry': '♗',
       'heavy': '♖',
       'base': '⬛'
@@ -111,19 +111,19 @@ class UnitInfoSidebar {
         No actions available this turn
       </div>`;
     }
-    
+
     const actions = [];
-    
+
     // Movement action
     if (unit.movement > 0) {
       actions.push('Move');
     }
-    
+
     // Attack action
     if (unit.attack > 0) {
       actions.push('Attack');
     }
-    
+
     // Special abilities
     if (unit.abilities) {
       if (unit.abilities.includes('gather')) {
@@ -133,11 +133,11 @@ class UnitInfoSidebar {
         actions.push('Build Units');
       }
     }
-    
+
     if (actions.length === 0) {
       return '';
     }
-    
+
     return `
       <div style="margin-top: var(--spacing-md);">
         <div class="unit-abilities-title">Available Actions</div>
@@ -158,13 +158,13 @@ class UnitInfoSidebar {
       this.selectedUnit = e.detail.unit;
       this.renderUnitDetails(this.selectedUnit);
     });
-    
+
     // Listen for unit deselection
     document.addEventListener('unitDeselected', () => {
       this.selectedUnit = null;
       this.renderEmptyState();
     });
-    
+
     // Listen for unit updates
     document.addEventListener('unitUpdated', (e) => {
       if (this.selectedUnit && this.selectedUnit.id === e.detail.unit.id) {
@@ -172,7 +172,7 @@ class UnitInfoSidebar {
         this.renderUnitDetails(this.selectedUnit);
       }
     });
-    
+
     // Listen for game state changes
     document.addEventListener('gameStateChanged', () => {
       if (this.selectedUnit) {
@@ -193,9 +193,9 @@ class UnitInfoSidebar {
   findUnitInGameState(unit) {
     // Try to find the unit by position and player
     const allUnits = this.gameState.getAllUnits();
-    return allUnits.find(u => 
-      u.x === unit.x && 
-      u.y === unit.y && 
+    return allUnits.find(u =>
+      u.x === unit.x &&
+      u.y === unit.y &&
       u.player === unit.player &&
       u.type === unit.type
     );

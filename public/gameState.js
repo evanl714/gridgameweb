@@ -670,7 +670,7 @@ export class GameState {
 
     // Check victory conditions after unit removal (for elimination victories)
     this.checkVictoryCondition();
-    
+
     return true;
   }
 
@@ -733,7 +733,7 @@ export class GameState {
 
     const attackerUnit = this.units.get(attackerUnitId);
     const targetEntity = this.getEntityAt(targetX, targetY);
-    
+
     // Calculate damage based on attacker unit type
     const damage = COMBAT_CONFIG.DAMAGE_VALUES[attackerUnit.type] || 1;
 
@@ -786,10 +786,10 @@ export class GameState {
     for (let dx = -1; dx <= 1; dx++) {
       for (let dy = -1; dy <= 1; dy++) {
         if (dx === 0 && dy === 0) continue; // Skip current position
-        
+
         const targetX = x + dx;
         const targetY = y + dy;
-        
+
         if (this.canUnitAttack(unitId, targetX, targetY)) {
           const targetEntity = this.getEntityAt(targetX, targetY);
           targets.push({
@@ -839,7 +839,7 @@ export class GameState {
       return;
     }
 
-    // Player 1 wins if Player 2's base is destroyed  
+    // Player 1 wins if Player 2's base is destroyed
     if (!player2Base) {
       this.endGame(1);
       return;
@@ -849,7 +849,7 @@ export class GameState {
   /**
      * Secondary victory conditions
      */
-  
+
   /**
      * Player forfeits/surrenders the game
      */
@@ -860,7 +860,7 @@ export class GameState {
 
     // Determine winner (the other player)
     const winnerId = playerId === 1 ? 2 : 1;
-    
+
     this.emit('playerSurrendered', {
       surrenderedPlayer: playerId,
       winner: winnerId
@@ -896,7 +896,7 @@ export class GameState {
 
     const currentPlayer = this.getCurrentPlayer();
     const playerUnits = this.getPlayerUnits(currentPlayer.id);
-    
+
     // Check if current player has any valid moves
     for (const unit of playerUnits) {
       // Check for valid movement
@@ -904,20 +904,20 @@ export class GameState {
       if (validMoves.length > 0) {
         return false; // Found valid moves, not stalemate
       }
-      
+
       // Check for valid attacks
       const validAttacks = this.getValidAttackTargets(unit.id);
       if (validAttacks.length > 0) {
         return false; // Found valid attacks, not stalemate
       }
     }
-    
+
     // No valid moves found - this is a stalemate
     this.emit('stalemateDetected', {
       player: currentPlayer.id,
       turnNumber: this.turnNumber
     });
-    
+
     this.declareDraw();
     return true;
   }

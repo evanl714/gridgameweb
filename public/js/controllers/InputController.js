@@ -13,19 +13,19 @@ export class InputController {
     this.uiManager = uiManager;
     this.renderer = renderer;
     this.gameActions = gameActions || new GameActions(window.game); // Fallback for backward compatibility
-    
+
     // UI state for input handling
     this.selectedCell = null;
     this.hoveredCell = null;
     this.selectedUnit = null;
     this.movementPreview = null;
     this.showMovementRange = false;
-    
+
     // Canvas reference for coordinate calculations
     this.canvas = document.getElementById('gameCanvas');
     this.cellSize = GAME_CONFIG.CELL_SIZE;
     this.gridSize = GAME_CONFIG.GRID_SIZE;
-    
+
     this.setupEventListeners();
   }
 
@@ -114,9 +114,9 @@ export class InputController {
       return;
     }
 
-    const canAttack = this.gameState.currentPhase === 'action' && 
+    const canAttack = this.gameState.currentPhase === 'action' &&
                      this.gameState.canUnitAttack(this.selectedUnit.id, x, y);
-    
+
     if (canAttack) {
       this.handleAttackAction(x, y);
     } else {
@@ -127,7 +127,7 @@ export class InputController {
   handleAttackAction(x, y) {
     const targetEntity = this.gameState.getEntityAt(x, y);
     const attacked = this.gameState.attackUnit(this.selectedUnit.id, x, y);
-    
+
     if (attacked) {
       this.turnManager.usePlayerAction();
       this.clearSelection();
@@ -138,7 +138,7 @@ export class InputController {
 
   handleMoveOrSelectAction(x, y, unit) {
     const canMove = this.gameState.canUnitMoveTo(this.selectedUnit.id, x, y);
-    
+
     if (canMove) {
       this.handleMoveAction(x, y);
     } else if (unit && unit.playerId === this.gameState.currentPlayer) {
@@ -153,7 +153,7 @@ export class InputController {
   handleMoveAction(x, y) {
     const movementCost = this.gameState.calculateMovementCost(this.selectedUnit.id, x, y);
     const moved = this.gameState.moveUnit(this.selectedUnit.id, x, y);
-    
+
     if (moved) {
       this.turnManager.usePlayerAction();
       this.clearSelection();
@@ -180,24 +180,24 @@ export class InputController {
   handleCellSelection(x, y) {
     if (this.gameState.currentPhase === 'build' && this.gameState.isPositionEmpty(x, y)) {
       this.selectedCell = { x, y };
-      
+
       // Notify BuildPanelSidebar of selected position for building
       if (this.uiManager && this.uiManager.buildPanelSidebar) {
         this.uiManager.buildPanelSidebar.setSelectedPosition({ x, y });
       }
-      
+
       // Emit event for other components
       this.gameState.emit('cellSelected', { position: { x, y } });
-      
+
       this.showUnitCreationDialog(x, y);
     } else {
       this.selectedCell = { x, y };
-      
+
       // Notify BuildPanelSidebar of selected position for building
       if (this.gameState.isPositionEmpty(x, y) && this.uiManager && this.uiManager.buildPanelSidebar) {
         this.uiManager.buildPanelSidebar.setSelectedPosition({ x, y });
       }
-      
+
       // Emit event for other components
       this.gameState.emit('cellSelected', { position: { x, y } });
       this.clearSelection();
@@ -208,12 +208,12 @@ export class InputController {
 
   provideMoveAttackFeedback(x, y) {
     const distance = this.gameState.getMovementDistance(
-      this.selectedUnit.position.x, 
-      this.selectedUnit.position.y, 
+      this.selectedUnit.position.x,
+      this.selectedUnit.position.y,
       x, y
     );
     const remaining = this.selectedUnit.maxActions - this.selectedUnit.actionsUsed;
-    
+
     if (distance > remaining) {
       this.updateStatus(`Cannot move: distance ${distance} > ${remaining} actions remaining`);
     } else if (!this.gameState.isPositionEmpty(x, y)) {
@@ -272,20 +272,20 @@ export class InputController {
     }
 
     switch(event.key) {
-      case 'r':
-      case 'R':
-        // Toggle movement range display
-        this.handleToggleMovementRange();
-        break;
-      case 'g':
-      case 'G':
-        // Gather resources with selected worker
-        this.handleGatherKeypress();
-        break;
-      case 'Escape':
-        // Deselect unit
-        this.handleEscapeKey();
-        break;
+    case 'r':
+    case 'R':
+      // Toggle movement range display
+      this.handleToggleMovementRange();
+      break;
+    case 'g':
+    case 'G':
+      // Gather resources with selected worker
+      this.handleGatherKeypress();
+      break;
+    case 'Escape':
+      // Deselect unit
+      this.handleEscapeKey();
+      break;
     }
   }
 
@@ -322,7 +322,7 @@ export class InputController {
 
   getGridCoordinates(event) {
     if (!this.canvas) return null;
-    
+
     const rect = this.canvas.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
@@ -387,7 +387,7 @@ export class InputController {
     } else {
       this.gameActions.render();
     }
-    
+
     this.gameActions.updateUI();
   }
 

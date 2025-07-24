@@ -45,9 +45,9 @@ describe('TurnManager', () => {
   });
 
   test('should reset player and unit actions on turn start', () => {
-    // Create units for testing (near player 1 base at 5,5)
-    const unit1 = gameState.createUnit('worker', 1, 6, 5);
-    const unit2 = gameState.createUnit('scout', 1, 7, 5);
+    // Create units for testing (near player 1 base at 1,23)
+    const unit1 = gameState.createUnit('worker', 1, 2, 23);
+    const unit2 = gameState.createUnit('scout', 1, 1, 22);
 
     // Use some actions
     const player = gameState.getCurrentPlayer();
@@ -90,7 +90,7 @@ describe('TurnManager', () => {
 
   test('should calculate resource bonus for workers near resource nodes', () => {
     // Create a worker near a resource node (5, 5)
-    const worker = gameState.createUnit('worker', 1, 4, 5); // Adjacent to node at (5,5)
+    const worker = gameState.createUnit('worker', 1, 3, 23); // Adjacent to node at (5,5)
     const player = gameState.getCurrentPlayer();
     const initialEnergy = player.energy;
 

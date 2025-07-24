@@ -26,7 +26,7 @@ export class EventEmitter {
     }
 
     const listeners = this.listeners.get(event);
-    
+
     if (listeners.length >= this.maxListeners) {
       console.warn(`Event '${event}' has reached maximum listeners (${this.maxListeners})`);
     }
@@ -39,7 +39,7 @@ export class EventEmitter {
     };
 
     listeners.push(listenerInfo);
-    
+
     // Sort by priority (higher priority first)
     listeners.sort((a, b) => b.priority - a.priority);
 
@@ -70,10 +70,10 @@ export class EventEmitter {
     if (!listeners) return false;
 
     let removed = false;
-    
+
     for (let i = listeners.length - 1; i >= 0; i--) {
       const listener = listeners[i];
-      
+
       if (typeof callbackOrId === 'string') {
         // Remove by ID
         if (listener.id === callbackOrId) {
@@ -108,22 +108,22 @@ export class EventEmitter {
     if (event) {
       const count = this.listeners.get(event)?.length || 0;
       this.listeners.delete(event);
-      
+
       if (this.debugMode && count > 0) {
         console.log(`Removed ${count} listeners for '${event}'`);
       }
-      
+
       return count;
     } else {
       // Remove all listeners for all events
       const totalCount = Array.from(this.listeners.values())
         .reduce((sum, listeners) => sum + listeners.length, 0);
       this.listeners.clear();
-      
+
       if (this.debugMode && totalCount > 0) {
         console.log(`Removed all ${totalCount} listeners`);
       }
-      
+
       return totalCount;
     }
   }
@@ -149,7 +149,7 @@ export class EventEmitter {
       try {
         listener.callback(data, event);
         emitCount++;
-        
+
         if (listener.once) {
           toRemove.push(listener);
         }
@@ -253,11 +253,11 @@ export class Observable extends EventEmitter {
    */
   setState(key, value, silent = false) {
     const oldValue = this.state[key];
-    
+
     if (oldValue !== value) {
       this.previousState[key] = oldValue;
       this.state[key] = value;
-      
+
       if (!silent) {
         this.emit('stateChanged', { key, value, oldValue });
         this.emit(`${key}Changed`, { value, oldValue });
@@ -301,12 +301,12 @@ export const GameEventTypes = {
   GAME_ENDED: 'gameEnded',
   GAME_PAUSED: 'gamePaused',
   GAME_RESUMED: 'gameResumed',
-  
+
   // Turn management
   TURN_STARTED: 'turnStarted',
   TURN_ENDED: 'turnEnded',
   PHASE_CHANGED: 'phaseChanged',
-  
+
   // Unit events
   UNIT_CREATED: 'unitCreated',
   UNIT_MOVED: 'unitMoved',
@@ -314,29 +314,29 @@ export const GameEventTypes = {
   UNIT_DESTROYED: 'unitDestroyed',
   UNIT_SELECTED: 'unitSelected',
   UNIT_DESELECTED: 'unitDeselected',
-  
+
   // Base events
   BASE_CREATED: 'baseCreated',
   BASE_ATTACKED: 'baseAttacked',
   BASE_DESTROYED: 'baseDestroyed',
-  
+
   // Resource events
   RESOURCES_GATHERED: 'resourcesGathered',
   RESOURCE_NODE_DEPLETED: 'resourceNodeDepleted',
-  
+
   // Player events
   PLAYER_JOINED: 'playerJoined',
   PLAYER_LEFT: 'playerLeft',
   PLAYER_SURRENDERED: 'playerSurrendered',
-  
+
   // UI events
   CELL_SELECTED: 'cellSelected',
   CELL_HOVERED: 'cellHovered',
-  
+
   // Command events
   COMMAND_EXECUTED: 'commandExecuted',
   COMMAND_UNDONE: 'commandUndone',
-  
+
   // Victory events
   VICTORY_ACHIEVED: 'victoryAchieved',
   DRAW_DECLARED: 'drawDeclared'

@@ -11,7 +11,7 @@ test.describe('Player Journey: First 5 Turns', () => {
     // ===========================================
     // TURN 1 - PLAYER 1: LEARNING THE BASICS
     // ===========================================
-    
+
     await test.step('Turn 1 - Player 1: Initial setup and learning', async () => {
       // Verify initial game state
       await expect(page.locator('text=Player 1\'s Turn')).toBeVisible();
@@ -22,7 +22,7 @@ test.describe('Player Journey: First 5 Turns', () => {
       // Phase 1: Resource Collection - Explore the grid
       const resourceNodes = page.locator('.resource-node');
       await expect(resourceNodes).toHaveCount(9);
-      
+
       // Click on a resource node to explore
       await resourceNodes.first().click();
       await expect(page.locator('text=Selected cell:')).toBeVisible();
@@ -35,7 +35,7 @@ test.describe('Player Journey: First 5 Turns', () => {
       await page.click('button:has-text("Next Phase")');
       await expect(page.locator('text=Phase: action')).toBeVisible();
 
-      // Move to Build phase  
+      // Move to Build phase
       await page.click('button:has-text("Next Phase")');
       await expect(page.locator('text=Phase: build')).toBeVisible();
     });
@@ -43,17 +43,17 @@ test.describe('Player Journey: First 5 Turns', () => {
     await test.step('Turn 1 - Player 1: Build first workers', async () => {
       // Select Worker unit
       await page.click('.unit-card:has-text("Worker")');
-      
+
       // Find and click near Player 1's base (around 5,5)
       // Build first worker
       await page.click('[data-x="6"][data-y="5"]');
       await page.waitForTimeout(500);
-      
+
       // Verify energy decreased
       await expect(page.locator('text=Energy: 90')).toBeVisible();
-      
+
       // Build second worker
-      await page.click('[data-x="5"][data-y="6"]'); 
+      await page.click('[data-x="5"][data-y="6"]');
       await page.waitForTimeout(500);
       await expect(page.locator('text=Energy: 80')).toBeVisible();
 
@@ -63,7 +63,7 @@ test.describe('Player Journey: First 5 Turns', () => {
     });
 
     // ===========================================
-    // TURN 2 - PLAYER 2: COMPETITIVE RESPONSE  
+    // TURN 2 - PLAYER 2: COMPETITIVE RESPONSE
     // ===========================================
 
     await test.step('Turn 2 - Player 2: Match opponent strategy', async () => {
@@ -82,7 +82,7 @@ test.describe('Player Journey: First 5 Turns', () => {
       await page.waitForTimeout(500);
       await expect(page.locator('text=Energy: 100')).toBeVisible();
 
-      // Build Worker 2  
+      // Build Worker 2
       await page.click('[data-x="19"][data-y="18"]');
       await page.waitForTimeout(500);
       await expect(page.locator('text=Energy: 90')).toBeVisible();
@@ -178,7 +178,7 @@ test.describe('Player Journey: First 5 Turns', () => {
       await page.waitForTimeout(500);
 
       // Progress to Build phase
-      await page.click('button:has-text("Next Phase")'); // -> Action  
+      await page.click('button:has-text("Next Phase")'); // -> Action
       await page.click('button:has-text("Next Phase")'); // -> Build
 
       // Build Infantry (first military unit!)
@@ -231,7 +231,7 @@ test.describe('Player Journey: First 5 Turns', () => {
       await page.click('[data-x="7"][data-y="7"]');
       await page.waitForTimeout(500);
 
-      // Build Scout for reconnaissance  
+      // Build Scout for reconnaissance
       await page.click('.unit-card:has-text("Scout")');
       await page.click('[data-x="6"][data-y="8"]');
       await page.waitForTimeout(500);
@@ -247,21 +247,21 @@ test.describe('Player Journey: First 5 Turns', () => {
 
     await test.step('Verify final game state after 5 turns', async () => {
       await page.click('button:has-text("Start Turn")');
-      
+
       // Should be Player 2's turn again
       await expect(page.locator('text=Player 2\'s Turn')).toBeVisible();
-      
+
       // Both players should have military units on the board
       const units = page.locator('.unit-display');
       await expect(units).toHaveCount.greaterThan(6); // At least 3 per player
-      
+
       // Resource nodes should be partially depleted
       const resourceNodes = page.locator('.resource-node');
       await expect(resourceNodes).toHaveCount(9); // Still 9 nodes
-      
+
       // Game should be in advanced state
       await expect(page.locator('text=Turn:')).toContainText('6');
-      
+
       console.log('✅ 5-turn player journey completed successfully!');
       console.log('✅ Both players have established economies and military forces');
       console.log('✅ Strategic tension created - ready for combat phase');
@@ -273,15 +273,15 @@ test.describe('Player Journey: First 5 Turns', () => {
       // Test basic interactions still work after game progression
       await expect(page.locator('.grid-cell')).toHaveCount(625);
       await expect(page.locator('.resource-node')).toHaveCount(9);
-      
+
       // Test control buttons
       await expect(page.locator('button:has-text("New Game")')).toBeVisible();
       await expect(page.locator('button:has-text("End Turn")')).toBeVisible();
       await expect(page.locator('button:has-text("Next Phase")')).toBeVisible();
-      
+
       // Test unit cards
       await expect(page.locator('.unit-card')).toHaveCount(4);
-      
+
       // Test sidebar information
       await expect(page.locator('text=Game Status')).toBeVisible();
       await expect(page.locator('text=Victory Conditions')).toBeVisible();

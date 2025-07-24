@@ -28,7 +28,7 @@ class UIManager {
     this.containers.set('build', document.getElementById('buildPanelSidebar'));
     this.containers.set('unitInfo', document.getElementById('unitInfoSidebar'));
     this.containers.set('status', document.querySelector('.game-status'));
-    
+
     // Create minimal additional containers if needed
     const gameInfo = document.querySelector('.game-info');
     if (gameInfo) {
@@ -71,7 +71,7 @@ class UIManager {
     const buildContainer = this.containers.get('build');
     const unitInfoContainer = this.containers.get('unitInfo');
     const statusContainer = this.containers.get('status');
-    
+
     if (buildContainer && this.components.get('build')) {
       this.components.get('build').render(buildContainer);
     }
@@ -95,7 +95,7 @@ class UIManager {
     if (canvas) {
       canvas.addEventListener('click', (e) => this.handleCanvasClick(e));
     }
-    
+
     // Grid cells handle their own click events through InputController
   }
 

@@ -21,7 +21,7 @@ class TurnTransition {
   createElement() {
     const overlay = document.createElement('div');
     overlay.className = 'turn-transition-overlay hidden';
-    
+
     overlay.innerHTML = `
       <div class="turn-transition-modal" style="
         background: #2c3e50;
@@ -99,10 +99,10 @@ class TurnTransition {
     this.element = overlay;
     this.cacheElements();
     this.setupControls();
-    
+
     // Try inserting into html element instead of body to completely bypass grid layout
     document.documentElement.appendChild(this.element);
-    
+
     // Force the overlay to be positioned outside any parent containers
     // and override body overflow constraints
     this.element.style.cssText = `
@@ -128,7 +128,7 @@ class TurnTransition {
       transform: translateZ(0) !important;
       overflow: auto !important;
     `;
-    
+
     // Also ensure body can accommodate the overlay
     const originalBodyOverflow = document.body.style.overflow;
     this.originalBodyOverflow = originalBodyOverflow;
@@ -158,11 +158,11 @@ class TurnTransition {
         this.showGameState();
       }
     };
-    
+
     this.showGameStateBtn.addEventListener('click', showGameStateHandler);
     this.startTurnBtn.addEventListener('click', startTurnHandler);
     this.element.addEventListener('keydown', keydownHandler);
-    
+
     // Store references for cleanup
     this.eventListeners.push(
       { element: this.showGameStateBtn, event: 'click', handler: showGameStateHandler },
@@ -189,14 +189,14 @@ class TurnTransition {
         this.hide();
       }
     };
-    
+
     document.addEventListener('keydown', emergencyHandler);
     this.eventListeners.push({
       element: document,
       event: 'keydown',
       handler: emergencyHandler
     });
-    
+
     // Add console debugging commands
     window.turnTransitionDebug = {
       hide: () => this.emergencyHide(),
@@ -212,7 +212,7 @@ class TurnTransition {
       console.log('Turn transition event deduplicated - too soon after last event');
       return;
     }
-    
+
     this.lastTurnEventTime = now;
     this.showTransition(turnData);
   }
@@ -222,27 +222,27 @@ class TurnTransition {
       console.log('Turn transition already visible, skipping show');
       return;
     }
-    
+
     const { previousPlayer, nextPlayer, turnNumber } = turnData;
     const currentPlayer = this.gameState.getPlayerById(previousPlayer);
     const nextPlayerObj = this.gameState.getPlayerById(nextPlayer);
-    
+
     if (!currentPlayer || !nextPlayerObj) {
       console.warn('Invalid player data for turn transition:', { previousPlayer, nextPlayer });
       return;
     }
 
     console.log('Showing turn transition overlay');
-    
+
     // Update transition content
     this.transitionTitle.textContent = `Turn ${turnNumber - 1} Complete`;
     this.nextPlayerName.textContent = `Player ${nextPlayer}`;
     this.nextPlayerName.className = `next-player-name player-${nextPlayer}`;
-    
+
     // Calculate turn summary
     const maxActions = currentPlayer.maxActions || 3;
     const actionsUsed = maxActions - (currentPlayer.actionsRemaining || 0);
-    
+
     this.actionsUsed.textContent = `${actionsUsed}/${maxActions}`;
     this.energyRemaining.textContent = currentPlayer.energy || 0;
     this.unitsMoved.textContent = this.calculateUnitsMoved(currentPlayer);
@@ -253,17 +253,17 @@ class TurnTransition {
     this.element.style.visibility = 'visible';
     this.element.style.pointerEvents = 'auto';
     this.transitionModal.classList.add('slide-in');
-    
+
     // Focus management for accessibility
     setTimeout(() => {
       if (this.startTurnBtn && this.isVisible) {
         this.startTurnBtn.focus();
       }
     }, 100);
-    
+
     // Hide game board during transition
     this.hideGameBoard();
-    
+
     // Emergency safety timeout
     this.emergencyHideTimeout = setTimeout(() => {
       if (this.isVisible) {
@@ -289,7 +289,7 @@ class TurnTransition {
     console.log('Starting next turn - hiding overlay');
     this.hide();
     this.showGameBoard();
-    
+
     // Call any callback function
     if (this.transitionCallback) {
       try {
@@ -306,50 +306,50 @@ class TurnTransition {
       console.log('Turn transition already hidden');
       return;
     }
-    
+
     try {
       console.log('Hiding turn transition overlay');
-      
+
       // Immediately mark as not visible to prevent race conditions
       this.isVisible = false;
-      
+
       // Clear any existing timeouts
       this.clearTimeouts();
-      
+
       // Hide using inline styles for immediate effect - use !important for reliability
       this.element.style.cssText = this.element.style.cssText.replace(/pointer-events: auto/g, 'pointer-events: none');
       this.element.style.opacity = '0';
-      this.element.style.visibility = 'hidden'; 
+      this.element.style.visibility = 'hidden';
       this.element.style.pointerEvents = 'none';
-      
+
       // Also add hidden class as backup
       this.element.classList.add('hidden');
       this.element.classList.remove('visible');
       this.transitionModal.classList.remove('slide-in', 'slide-out');
-      
+
       // Ensure game board is visible
       this.showGameBoard();
-      
+
       console.log('Turn transition overlay hidden successfully');
-      
+
     } catch (error) {
       console.error('Error hiding turn transition:', error);
       this.emergencyHide();
     }
   }
-  
-  
+
+
   emergencyHide() {
     // Emergency fallback to ensure overlay is hidden
     console.log('Emergency hide triggered');
-    
+
     try {
       // Clear all timeouts
       this.clearTimeouts();
-      
+
       // Force mark as not visible
       this.isVisible = false;
-      
+
       if (this.element) {
         // Force hidden state with inline styles and classes
         this.element.style.cssText = this.element.style.cssText.replace(/pointer-events: auto/g, 'pointer-events: none');
@@ -359,14 +359,14 @@ class TurnTransition {
         this.element.classList.add('hidden');
         this.element.classList.remove('visible');
       }
-      
+
       if (this.transitionModal) {
         this.transitionModal.classList.remove('slide-in', 'slide-out');
       }
-      
+
       // Ensure game board is visible
       this.showGameBoard();
-      
+
       console.log('Turn transition overlay emergency hidden successfully');
     } catch (error) {
       console.error('Critical error in emergencyHide:', error);
@@ -378,7 +378,7 @@ class TurnTransition {
       }
     }
   }
-  
+
   clearTimeouts() {
     if (this.hideTimeout) {
       clearTimeout(this.hideTimeout);
@@ -395,7 +395,7 @@ class TurnTransition {
       const gameBoard = document.querySelector('.game-board');
       const gameControls = document.querySelector('.game-controls');
       const uiContainer = document.querySelector('.ui-container');
-      
+
       // Use opacity instead of visibility to avoid layout issues
       if (gameBoard) {
         gameBoard.style.opacity = '0';
@@ -422,7 +422,7 @@ class TurnTransition {
       const gameBoard = document.querySelector('.game-board');
       const gameControls = document.querySelector('.game-controls');
       const uiContainer = document.querySelector('.ui-container');
-      
+
       // Only restore elements that were hidden by this transition
       if (gameBoard && gameBoard.dataset.hiddenByTransition === 'true') {
         gameBoard.style.opacity = '1';
@@ -451,10 +451,10 @@ class TurnTransition {
   destroy() {
     try {
       console.log('Destroying turn transition overlay');
-      
+
       // Clear any pending timeouts
       this.clearTimeouts();
-      
+
       // Remove all tracked event listeners
       this.eventListeners.forEach(({ element, event, handler }) => {
         if (element && typeof element.removeEventListener === 'function') {
@@ -462,28 +462,28 @@ class TurnTransition {
         }
       });
       this.eventListeners = [];
-      
+
       // Remove game state event listener if it exists
       if (this.gameState && typeof this.gameState.off === 'function') {
         this.gameState.off('turnEnded');
       }
-      
+
       // Clean up debug commands
       if (window.turnTransitionDebug) {
         delete window.turnTransitionDebug;
       }
-      
+
       // Hide and remove element
       this.emergencyHide();
       if (this.element && this.element.parentNode) {
         this.element.parentNode.removeChild(this.element);
       }
-      
+
       // Clean up references
       this.element = null;
       this.gameState = null;
       this.transitionCallback = null;
-      
+
     } catch (error) {
       console.error('Error during TurnTransition destroy:', error);
     }

@@ -11,7 +11,7 @@ export class CommandManager {
     this.undoStack = [];
     this.redoStack = [];
     this.maxHistorySize = maxHistorySize;
-    
+
     // Event listeners for command events
     this.listeners = {
       commandExecuted: [],
@@ -41,20 +41,20 @@ export class CommandManager {
 
     // Execute the command
     const result = command.execute();
-    
+
     if (result.success) {
       // Add to history and undo stack
       this.addToHistory(command);
       this.undoStack.push(command);
-      
+
       // Clear redo stack when new command is executed
       this.redoStack = [];
-      
+
       // Limit undo stack size
       if (this.undoStack.length > this.maxHistorySize) {
         this.undoStack.shift();
       }
-      
+
       this.emit('commandExecuted', { command, result });
     } else {
       this.emit('commandFailed', { command, result });
@@ -73,7 +73,7 @@ export class CommandManager {
     }
 
     const command = this.undoStack.pop();
-    
+
     if (!command.canUndo()) {
       // Put it back if it can't be undone
       this.undoStack.push(command);
@@ -81,7 +81,7 @@ export class CommandManager {
     }
 
     const result = command.undo();
-    
+
     if (result.success) {
       this.redoStack.push(command);
       this.emit('commandUndone', { command, result });
@@ -105,7 +105,7 @@ export class CommandManager {
 
     const command = this.redoStack.pop();
     const result = command.execute();
-    
+
     if (result.success) {
       this.undoStack.push(command);
       this.emit('commandRedone', { command, result });
@@ -157,7 +157,7 @@ export class CommandManager {
    * @returns {boolean} True if undo is available
    */
   canUndo() {
-    return this.undoStack.length > 0 && 
+    return this.undoStack.length > 0 &&
            this.undoStack[this.undoStack.length - 1].canUndo();
   }
 
@@ -201,7 +201,7 @@ export class CommandManager {
   getStatistics() {
     const commandTypes = {};
     const totalCommands = this.commandHistory.length;
-    
+
     this.commandHistory.forEach(entry => {
       const type = entry.metadata.type;
       commandTypes[type] = (commandTypes[type] || 0) + 1;
@@ -260,7 +260,7 @@ class BatchCommand extends Command {
   }
 
   canExecute() {
-    return this.commands.length > 0 && 
+    return this.commands.length > 0 &&
            this.commands.every(cmd => cmd.canExecute());
   }
 
@@ -270,30 +270,30 @@ class BatchCommand extends Command {
     }
 
     const results = [];
-    
+
     for (const command of this.commands) {
       const result = command.execute();
       results.push(result);
-      
+
       if (result.success) {
         this.executedCommands.push(command);
       } else {
         // If any command fails, undo all executed commands
         this.undoExecutedCommands();
-        return { 
-          success: false, 
-          error: 'Batch command failed', 
+        return {
+          success: false,
+          error: 'Batch command failed',
           failedCommand: command,
-          results 
+          results
         };
       }
     }
 
     this.executed = true;
-    return { 
-      success: true, 
+    return {
+      success: true,
       commandCount: this.commands.length,
-      results 
+      results
     };
   }
 
@@ -307,7 +307,7 @@ class BatchCommand extends Command {
 
   undoExecutedCommands() {
     const results = [];
-    
+
     // Undo in reverse order
     for (let i = this.executedCommands.length - 1; i >= 0; i--) {
       const command = this.executedCommands[i];
@@ -319,7 +319,7 @@ class BatchCommand extends Command {
 
     this.executedCommands = [];
     this.executed = false;
-    
+
     return { success: true, undoResults: results };
   }
 

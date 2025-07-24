@@ -20,13 +20,13 @@ export class DatabaseManager {
     try {
       console.log('Initializing database...');
       await dbConnection.initialize(this.dbPath);
-      
+
       // Validate database integrity
       const isValid = dbConnection.validateIntegrity();
       if (!isValid) {
         throw new Error('Database integrity check failed');
       }
-      
+
       this.isInitialized = true;
       console.log('Database initialized and ready');
     } catch (error) {
@@ -75,7 +75,7 @@ export class DatabaseManager {
    */
   close() {
     this.stopPeriodicCleanup();
-    
+
     if (this.isInitialized) {
       dbConnection.close();
       this.isInitialized = false;
@@ -99,7 +99,7 @@ export class DatabaseManager {
     if (!this.isInitialized) {
       throw new Error('Database not initialized');
     }
-    
+
     try {
       const results = dbConnection.cleanup();
       console.log('Manual database cleanup completed:', results);

@@ -15,7 +15,7 @@ export class PersistenceManager {
     this.SAVE_VERSION = '1.0.0';
     this.databaseEnabled = true;
     this.fallbackToLocal = true;
-    
+
     // Test database connectivity on initialization
     this.testDatabaseConnection();
   }
@@ -57,7 +57,7 @@ export class PersistenceManager {
 
     // Always save to localStorage first (immediate backup)
     const localResult = this.saveToLocalStorage(saveData, isAutoSave);
-    
+
     // Try to save to database if enabled
     let dbResult = null;
     if (this.databaseEnabled) {
@@ -173,7 +173,7 @@ export class PersistenceManager {
     try {
       // Handle different data formats
       let gameStateData, resourceManagerData, metadata, timestamp;
-      
+
       if (data.gameState && data.resourceManager) {
         // localStorage format
         gameStateData = data.gameState;

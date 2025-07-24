@@ -108,9 +108,9 @@ describe('Performance Benchmarks and Monitoring', () => {
 
       unitCounts.forEach(count => {
         const units = TestDataFactory.createMultipleUnits(gameState, 'worker', 1, count);
-        
+
         const startTime = performance.now();
-        
+
         // Perform common operations
         units.forEach(unit => {
           if (unit) {
@@ -137,7 +137,7 @@ describe('Performance Benchmarks and Monitoring', () => {
 
       expect(scalabilityFactor).toBeLessThan(3); // Should not degrade more than 3x
 
-      console.log('Scalability results:', results.map(r => 
+      console.log('Scalability results:', results.map(r =>
         `${r.count} units: ${r.timePerUnit.toFixed(3)}ms/unit`
       ).join(', '));
     });
@@ -148,7 +148,7 @@ describe('Performance Benchmarks and Monitoring', () => {
 
       const operationsPerSecond = 1000; // Target 1000 ops/sec
       const testDurationMs = 100; // Test for 100ms
-      
+
       const startTime = performance.now();
       let operationCount = 0;
 
@@ -169,12 +169,12 @@ describe('Performance Benchmarks and Monitoring', () => {
   describe('Memory Usage Benchmarks', () => {
     test('should not accumulate memory during gameplay cycles', () => {
       const initialMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
-      
+
       // Simulate intensive gameplay
       for (let cycle = 0; cycle < 10; cycle++) {
         // Create units
         const units = TestDataFactory.createMultipleUnits(gameState, 'worker', 1, 10);
-        
+
         // Perform operations
         units.forEach(unit => {
           if (unit) {
@@ -193,14 +193,14 @@ describe('Performance Benchmarks and Monitoring', () => {
       }
 
       const finalMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
-      
+
       if (performance.memory) {
         const memoryGrowth = finalMemory - initialMemory;
         const memoryGrowthMB = memoryGrowth / (1024 * 1024);
-        
+
         // Should not grow by more than 5MB during cycles
         expect(memoryGrowthMB).toBeLessThan(5);
-        
+
         console.log(`Memory growth: ${memoryGrowthMB.toFixed(2)}MB`);
       }
     });
@@ -316,7 +316,7 @@ describe('Performance Benchmarks and Monitoring', () => {
           if (unit) {
             // UI queries that happen every frame
             gameState.getValidMovePositions(unit.id);
-            
+
             // Resource calculations
             if (unit.type === 'worker') {
               resourceManager.canGatherAtPosition(unit.id);
@@ -349,7 +349,7 @@ describe('Performance Benchmarks and Monitoring', () => {
 
       for (let turn = 0; turn < turnsToSimulate; turn++) {
         const turnStart = performance.now();
-        
+
         // Create some activity during turn
         const unit = TestDataFactory.createValidUnit(gameState, 'worker', gameState.currentPlayer);
         if (unit) {
@@ -360,7 +360,7 @@ describe('Performance Benchmarks and Monitoring', () => {
 
         // End turn
         turnManager.forceEndTurn();
-        
+
         const turnTime = performance.now() - turnStart;
         turnTimes.push(turnTime);
       }

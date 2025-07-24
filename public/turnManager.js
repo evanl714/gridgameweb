@@ -33,7 +33,7 @@ export class TurnManager {
     if (this.gameState.status !== GAME_STATES.PLAYING) {
       return;
     }
-    
+
     // Turn ending flag will be reset by endTurn() after startTurn() completes
 
     const currentPlayer = this.gameState.getCurrentPlayer();
@@ -359,7 +359,7 @@ export class TurnManager {
 
     // NOTE: No arbitrary turn limits or unit count checks
     // Game only ends on: base destruction, resource victory, surrender, or draw
-    
+
     return null;
   }
 

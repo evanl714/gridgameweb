@@ -13,11 +13,11 @@ export class GameRenderer {
     this.resourceManager = resourceManager;
     this.gridSize = GAME_CONFIG.GRID_SIZE;
     this.cellSize = GAME_CONFIG.CELL_SIZE;
-    
+
     // Determine and set rendering strategy
     this.renderMode = renderMode === 'auto' ? this.detectRenderMode() : renderMode;
     this.strategy = this.createRenderStrategy();
-    
+
     this.initializeRenderer();
   }
 
@@ -25,7 +25,7 @@ export class GameRenderer {
     // Detect which rendering mode to use based on available elements
     const hasCanvas = document.getElementById('gameCanvas');
     const hasGrid = document.querySelector('.grid-container') && document.querySelectorAll('.grid-cell').length > 0;
-    
+
     if (hasGrid) {
       return 'grid';
     } else if (hasCanvas) {
@@ -38,12 +38,12 @@ export class GameRenderer {
 
   createRenderStrategy() {
     switch (this.renderMode) {
-      case 'canvas':
-        return new CanvasRenderStrategy(this.gameState, this.resourceManager, this.gridSize, this.cellSize);
-      case 'grid':
-        return new GridRenderStrategy(this.gameState, this.resourceManager, this.gridSize, this.cellSize);
-      default:
-        throw new Error(`Unknown render mode: ${this.renderMode}`);
+    case 'canvas':
+      return new CanvasRenderStrategy(this.gameState, this.resourceManager, this.gridSize, this.cellSize);
+    case 'grid':
+      return new GridRenderStrategy(this.gameState, this.resourceManager, this.gridSize, this.cellSize);
+    default:
+      throw new Error(`Unknown render mode: ${this.renderMode}`);
     }
   }
 

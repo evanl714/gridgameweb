@@ -51,14 +51,14 @@ class BuildPanelSidebar {
         description: 'Powerful unit with high health and damage'
       }
     ];
-    
+
     this.initialize();
   }
 
   initialize() {
     // Ensure DOM is ready and dependencies are available
     if (this.isInitialized) return;
-    
+
     try {
       // Wait for DOM element to be available
       this.element = document.getElementById('buildPanelSidebar');
@@ -67,19 +67,19 @@ class BuildPanelSidebar {
         setTimeout(() => this.initialize(), 100);
         return;
       }
-      
+
       // Check if gameState is properly initialized
       if (!this.gameState || typeof this.gameState.getCurrentPlayer !== 'function') {
         console.warn('BuildPanelSidebar: gameState not ready, retrying in 100ms');
         setTimeout(() => this.initialize(), 100);
         return;
       }
-      
+
       this.isInitialized = true;
       this.renderBuildOptions();
       this.setupEventListeners();
       this.setupGameEventListeners();
-      
+
       console.log('BuildPanelSidebar initialized successfully');
     } catch (error) {
       console.error('Error initializing BuildPanelSidebar:', error);
@@ -90,11 +90,11 @@ class BuildPanelSidebar {
 
   renderBuildOptions() {
     if (!this.element || !this.isInitialized) return;
-    
+
     try {
       const currentPlayer = this.gameState.getCurrentPlayer();
       const playerEnergy = currentPlayer ? currentPlayer.energy : 0;
-    
+
       this.element.innerHTML = `
         <div class="build-unit-grid">
           ${this.unitTypes.map(unit => `
@@ -120,27 +120,27 @@ class BuildPanelSidebar {
 
   setupEventListeners() {
     if (!this.element || !this.isInitialized) return;
-    
+
     this.element.addEventListener('click', (e) => {
       const unitCard = e.target.closest('.build-unit-card');
       if (!unitCard) return;
-      
+
       const unitType = unitCard.dataset.type;
       const unitCost = parseInt(unitCard.dataset.cost);
-      
+
       // Check if player has enough energy
       const currentPlayer = this.gameState.getCurrentPlayer();
       if (!currentPlayer || currentPlayer.energy < unitCost) {
         this.showNotification('Insufficient energy to build this unit', 'error');
         return;
       }
-      
+
       // Check if we have a selected position
       if (!this.selectedPosition) {
         this.showNotification('Select a position on the grid first', 'warning');
         return;
       }
-      
+
       this.buildUnit(unitType, this.selectedPosition);
     });
   }
@@ -150,12 +150,12 @@ class BuildPanelSidebar {
     document.addEventListener('gameStateChanged', () => {
       this.renderBuildOptions();
     });
-    
+
     // Listen for turn changes
     document.addEventListener('turnChanged', () => {
       this.renderBuildOptions();
     });
-    
+
     // Listen for energy changes
     document.addEventListener('energyChanged', () => {
       this.renderBuildOptions();
@@ -176,23 +176,23 @@ class BuildPanelSidebar {
       if (!unitType || typeof unitType !== 'string') {
         throw new Error('Invalid unit type');
       }
-      
+
       if (!position || typeof position.x !== 'number' || typeof position.y !== 'number') {
         throw new Error('Invalid position coordinates');
       }
-      
+
       if (!this.gameState || typeof this.gameState.buildUnit !== 'function') {
         throw new Error('Game state not available or buildUnit method missing');
       }
-      
+
       // Call the game's build unit method
       const success = this.gameState.buildUnit(unitType, position.x, position.y);
-      
+
       if (success) {
         this.showNotification(`${unitType} built successfully!`, 'success');
         this.clearSelectedPosition();
         this.renderBuildOptions(); // Update energy display
-        
+
         // Dispatch events for other UI components
         document.dispatchEvent(new CustomEvent('unitBuilt', {
           detail: { unitType, position }
@@ -211,7 +211,7 @@ class BuildPanelSidebar {
     const notification = document.createElement('div');
     notification.className = `build-notification ${type}`;
     notification.textContent = message;
-    
+
     // Determine colors based on type
     const colors = {
       info: { bg: '#3498db', color: 'white', border: '#2980b9' },
@@ -219,9 +219,9 @@ class BuildPanelSidebar {
       error: { bg: '#e74c3c', color: 'white', border: '#c0392b' },
       warning: { bg: '#f39c12', color: 'white', border: '#e67e22' }
     };
-    
+
     const styleColor = colors[type] || colors.info;
-    
+
     notification.style.cssText = `
       position: fixed;
       top: 20px;
@@ -240,14 +240,14 @@ class BuildPanelSidebar {
       transition: transform 0.3s ease;
       font-family: 'Segoe UI', sans-serif;
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     // Animate in
     setTimeout(() => {
       notification.style.transform = 'translateX(0)';
     }, 10);
-    
+
     // Remove after 3 seconds
     setTimeout(() => {
       notification.style.transform = 'translateX(100%)';
@@ -267,53 +267,53 @@ class BuildPanelSidebar {
         this.initialize();
         return;
       }
-      
+
       // Set the selected position if provided
       if (position) {
         this.setSelectedPosition(position);
       }
-      
+
       // Make sure the sidebar is visible and highlighted for build mode
       if (this.element) {
         this.element.classList.add('build-mode-active');
         this.element.style.display = 'block';
         this.element.style.visibility = 'visible';
-        
+
         // Update the build options with current game state
         this.renderBuildOptions();
-        
+
         // Add visual indicator that build mode is active
         const header = this.element.querySelector('.panel-header h3');
         if (header && !header.textContent.includes('(Active)')) {
           header.textContent += ' (Active)';
         }
       }
-      
+
       console.log('Build panel activated for position:', position);
     } catch (error) {
       console.error('Error showing build panel:', error);
     }
   }
-  
+
   hide() {
     try {
       // Clear the selected position
       this.clearSelectedPosition();
-      
+
       // Remove build mode highlighting but keep sidebar visible
       if (this.element) {
         this.element.classList.remove('build-mode-active');
-        
+
         // Remove the active indicator from header
         const header = this.element.querySelector('.panel-header h3');
         if (header) {
           header.textContent = header.textContent.replace(' (Active)', '');
         }
-        
+
         // Update display to show current state
         this.renderBuildOptions();
       }
-      
+
       console.log('Build panel deactivated');
     } catch (error) {
       console.error('Error hiding build panel:', error);

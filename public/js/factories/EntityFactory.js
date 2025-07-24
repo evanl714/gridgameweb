@@ -17,7 +17,7 @@ export class EntityFactory {
    */
   static createUnit(type, playerId, x, y, overrides = {}) {
     const unitTemplate = this.getUnitTemplate(type);
-    
+
     if (!unitTemplate) {
       throw new Error(`Unknown unit type: ${type}`);
     }
@@ -36,12 +36,12 @@ export class EntityFactory {
       actionsUsed: 0,
       isAlive: true,
       createdAt: Date.now(),
-      
+
       // Methods
       canAct: function() {
         return this.actionsUsed < this.maxActions && this.isAlive;
       },
-      
+
       getStats: function() {
         return {
           name: this.type.charAt(0).toUpperCase() + this.type.slice(1),
@@ -402,7 +402,7 @@ export class EntityFactory {
    */
   static createEntity(type, params) {
     const validation = this.validateCreation(type, params);
-    
+
     if (!validation.valid) {
       return {
         success: false,
@@ -412,22 +412,22 @@ export class EntityFactory {
 
     try {
       let entity;
-      
+
       switch (type) {
-        case 'unit':
-          entity = this.createUnit(params.unitType, params.playerId, params.x, params.y, params.overrides);
-          break;
-        case 'base':
-          entity = this.createBase(params.playerId, params.x, params.y, params.overrides);
-          break;
-        case 'resource':
-          entity = this.createResourceNode(params.x, params.y, params.initialValue, params.overrides);
-          break;
-        case 'player':
-          entity = this.createPlayer(params.id, params.name, params.overrides);
-          break;
-        default:
-          throw new Error(`Unknown entity type: ${type}`);
+      case 'unit':
+        entity = this.createUnit(params.unitType, params.playerId, params.x, params.y, params.overrides);
+        break;
+      case 'base':
+        entity = this.createBase(params.playerId, params.x, params.y, params.overrides);
+        break;
+      case 'resource':
+        entity = this.createResourceNode(params.x, params.y, params.initialValue, params.overrides);
+        break;
+      case 'player':
+        entity = this.createPlayer(params.id, params.name, params.overrides);
+        break;
+      default:
+        throw new Error(`Unknown entity type: ${type}`);
       }
 
       return {

@@ -33,11 +33,11 @@ import { GameRenderer } from './js/rendering/GameRenderer.js';
 import { UIStateManager } from './js/managers/UIStateManager.js';
 
 // Import design patterns
-import { 
-  CommandManager, 
-  EntityFactory, 
+import {
+  CommandManager,
+  EntityFactory,
   PatternIntegrator,
-  GameEventTypes 
+  GameEventTypes
 } from './js/patterns/index.js';
 
 class Game {
@@ -71,7 +71,7 @@ class Game {
     this.commandManager = null;
     this.entityFactory = null;
     this.actionHandlers = null;
-    
+
     // Input controller will be initialized after patterns
     this.inputController = null;
 
@@ -95,7 +95,7 @@ class Game {
 
       // Complete initialization
       this.finishInitialization();
-      
+
       console.log('Grid Strategy Game initialized with patterns and InputController');
     } catch (error) {
       console.error('Failed to initialize game patterns:', error);
@@ -265,7 +265,7 @@ class Game {
     this.uiManager = new UIManager(this.gameState, this.turnManager);
     this.victoryScreen = new VictoryScreen(this.gameState);
     this.uiStateManager = new UIStateManager(this.gameState, this.turnManager);
-    
+
     // Reinitialize design patterns
     const patterns = await PatternIntegrator.setupPatterns(this);
     this.commandManager = patterns.commandManager;
@@ -298,7 +298,7 @@ class Game {
     // Delegate to UIStateManager for centralized UI updates
     if (this.uiStateManager) {
       this.uiStateManager.updateAllUI();
-      
+
       // Update unit info with current selection
       const selectedUnit = this.inputController ? this.inputController.getSelectedUnit() : null;
       this.uiStateManager.updateUnitInfo(selectedUnit);
@@ -317,7 +317,7 @@ class Game {
   }
 
   // Enhanced methods using design patterns
-  
+
   /**
    * Execute a unit move using Command pattern
    * @param {string} unitId Unit ID
@@ -328,7 +328,7 @@ class Game {
     if (this.actionHandlers) {
       return this.actionHandlers.moveUnit(unitId, targetPosition);
     }
-    
+
     // Fallback to direct method
     return this.gameState.moveUnit(unitId, targetPosition.x, targetPosition.y);
   }
@@ -343,7 +343,7 @@ class Game {
     if (this.actionHandlers) {
       return this.actionHandlers.attackTarget(attackerUnitId, targetPosition);
     }
-    
+
     // Fallback to direct method
     return this.gameState.attackUnit(attackerUnitId, targetPosition.x, targetPosition.y);
   }
@@ -363,14 +363,14 @@ class Game {
         x: position.x,
         y: position.y
       });
-      
+
       if (!validation.valid) {
         return {
           success: false,
           errors: validation.errors
         };
       }
-      
+
       return this.entityFactory.createEntity('unit', {
         unitType,
         playerId,
@@ -378,7 +378,7 @@ class Game {
         y: position.y
       });
     }
-    
+
     // Fallback to gameState method
     return this.gameState.createUnit(unitType, playerId, position.x, position.y);
   }
@@ -391,7 +391,7 @@ class Game {
     if (this.actionHandlers) {
       return this.actionHandlers.undo();
     }
-    
+
     return { success: false, error: 'Undo not available' };
   }
 
@@ -403,7 +403,7 @@ class Game {
     if (this.actionHandlers) {
       return this.actionHandlers.redo();
     }
-    
+
     return { success: false, error: 'Redo not available' };
   }
 
@@ -415,7 +415,7 @@ class Game {
     if (this.commandManager) {
       return this.commandManager.getHistory();
     }
-    
+
     return [];
   }
 
@@ -429,19 +429,19 @@ class Game {
       gameStateEvents: null,
       uiStateEvents: null
     };
-    
+
     if (this.commandManager) {
       stats.commandManager = this.commandManager.getStatistics();
     }
-    
+
     if (this.gameState && typeof this.gameState.getStatistics === 'function') {
       stats.gameStateEvents = this.gameState.getStatistics();
     }
-    
+
     if (this.uiStateManager && typeof this.uiStateManager.getStatistics === 'function') {
       stats.uiStateEvents = this.uiStateManager.getStatistics();
     }
-    
+
     return stats;
   }
 
@@ -544,11 +544,11 @@ class Game {
       if (this.commandManager) {
         this.commandManager.clear();
       }
-      
+
       this.gameState = result.gameState;
       this.turnManager = new TurnManager(this.gameState);
       this.resourceManager = result.resourceManager;
-      
+
       // Reinitialize patterns after loading
       const patterns = await PatternIntegrator.setupPatterns(this);
       this.commandManager = patterns.commandManager;

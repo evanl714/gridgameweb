@@ -228,7 +228,7 @@ describe('Movement System Edge Cases', () => {
 
   describe('Game Phase Integration', () => {
     test('should allow movement only during action phase', () => {
-      const unit = gameState.createUnit('worker', 1, 5, 5);
+      const unit = gameState.createUnit('worker', 1, 4, 23);
 
       // Start in resource phase
       expect(gameState.currentPhase).toBe('resource');
@@ -254,7 +254,7 @@ describe('Movement System Edge Cases', () => {
     });
 
     test('should reset unit actions at turn start', () => {
-      const unit = gameState.createUnit('worker', 1, 5, 5);
+      const unit = gameState.createUnit('worker', 1, 4, 23);
 
       // Exhaust unit actions
       unit.useAction();
@@ -275,8 +275,8 @@ describe('Movement System Edge Cases', () => {
 
   describe('Turn Transition Testing', () => {
     test('should maintain unit positions across turn transitions', () => {
-      const unit1 = gameState.createUnit('worker', 1, 5, 5);
-      const unit2 = gameState.createUnit('scout', 2, 15, 15);
+      const unit1 = gameState.createUnit('worker', 1, 4, 23);
+      const unit2 = gameState.createUnit('scout', 2, 22, 1);
 
       // Move units
       turnManager.nextPhase(); // Go to action phase
@@ -295,7 +295,7 @@ describe('Movement System Edge Cases', () => {
     });
 
     test('should properly handle player actions across turns', () => {
-      const unit = gameState.createUnit('worker', 1, 5, 5);
+      const unit = gameState.createUnit('worker', 1, 4, 23);
       turnManager.nextPhase(); // Go to action phase
 
       const player = gameState.getCurrentPlayer();
@@ -351,8 +351,8 @@ describe('Movement System Edge Cases', () => {
     });
 
     test('should exclude occupied positions from valid moves', () => {
-      const unit1 = gameState.createUnit('worker', 1, 10, 10);
-      const unit2 = gameState.createUnit('scout', 1, 11, 10);
+      const unit1 = gameState.createUnit('worker', 1, 1, 21);
+      const unit2 = gameState.createUnit('scout', 1, 2, 21);
 
       const validMoves = gameState.getValidMovePositions(unit1.id);
 
@@ -364,7 +364,7 @@ describe('Movement System Edge Cases', () => {
     });
 
     test('should respect grid boundaries in valid moves', () => {
-      const unit = gameState.createUnit('scout', 1, 1, 1); // 4 movement, near corner
+      const unit = gameState.createUnit('scout', 1, 0, 23); // 4 movement, near corner
 
       const validMoves = gameState.getValidMovePositions(unit.id);
 
@@ -410,7 +410,7 @@ describe('Movement System Edge Cases', () => {
       const startTime = performance.now();
 
       // Test movement calculations across the entire grid
-      const unit = gameState.createUnit('scout', 1, 12, 12); // Center of grid
+      const unit = gameState.createUnit('scout', 1, 3, 21); // Center of grid
 
       for (let i = 0; i < 100; i++) {
         gameState.getValidMovePositions(unit.id);

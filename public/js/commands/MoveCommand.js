@@ -12,7 +12,7 @@ export class MoveCommand extends Command {
     this.unitId = unitId;
     this.targetPosition = { x: targetPosition.x, y: targetPosition.y };
     this.turnManager = turnManager;
-    
+
     // Store original position for undo
     this.originalPosition = null;
     this.movementCost = 0;
@@ -49,25 +49,25 @@ export class MoveCommand extends Command {
     }
 
     const unit = this.gameState.units.get(this.unitId);
-    
+
     // Store original state for undo
     this.originalPosition = { x: unit.position.x, y: unit.position.y };
     this.movementCost = this.gameState.calculateMovementCost(
-      this.unitId, 
-      this.targetPosition.x, 
+      this.unitId,
+      this.targetPosition.x,
       this.targetPosition.y
     );
 
     // Execute the movement
     const moveResult = this.gameState.moveUnit(
-      this.unitId, 
-      this.targetPosition.x, 
+      this.unitId,
+      this.targetPosition.x,
       this.targetPosition.y
     );
 
     if (moveResult) {
       this.executed = true;
-      
+
       // Use turn manager action if provided
       if (this.turnManager) {
         this.turnManager.usePlayerAction();

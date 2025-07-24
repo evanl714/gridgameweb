@@ -37,14 +37,14 @@ describe('Victory Conditions System', () => {
       // Create attacking unit near player 2's base (near position 23, 1 within radius 3)
       const attackingUnit = gameState.createUnit('heavy', 2, 22, 1); // Adjacent to base
       expect(attackingUnit).not.toBe(null);
-      
+
       // Move unit to attack position manually (bypass movement system for test)
       gameState.board[22][1] = null; // Clear original position
       gameState.board[2][23] = attackingUnit.id; // Place adjacent to enemy base (1,23)
       attackingUnit.position = { x: 2, y: 23 };
-      
+
       const player1Base = gameState.getPlayerBase(1);
-      
+
       // Damage base to low health (heavy does 3 damage)
       player1Base.takeDamage(BASE_CONFIG.HEALTH - 3);
 
@@ -121,9 +121,9 @@ describe('Victory Conditions System', () => {
 
     test('should not allow surrender after game has ended', () => {
       gameState.endGame(1);
-      
+
       const result = gameState.playerSurrender(2);
-      
+
       expect(result).toBe(false);
       expect(gameState.winner).toBe(1); // Should remain unchanged
     });
@@ -153,9 +153,9 @@ describe('Victory Conditions System', () => {
 
     test('should not allow draw declaration after game has ended', () => {
       gameState.endGame(2);
-      
+
       const result = gameState.declareDraw();
-      
+
       expect(result).toBe(false);
       expect(gameState.winner).toBe(2); // Should remain unchanged
     });
@@ -186,7 +186,7 @@ describe('Victory Conditions System', () => {
 
     test('should check resource victory condition', () => {
       const player1 = gameState.getCurrentPlayer();
-      
+
       // Mock resource gathering to 500
       player1.resourcesGathered = 500;
 
@@ -206,13 +206,13 @@ describe('Victory Conditions System', () => {
       // Create some units for both players first
       const player1Unit = gameState.createUnit('worker', 1, 2, 23);
       const player2Unit = gameState.createUnit('worker', 2, 22, 1);
-      
+
       // Remove all of player 2's units
       gameState.removeUnit(player2Unit.id);
 
       // Move to turn 6 (elimination only applies after turn 5)
       gameState.turnNumber = 6;
-      
+
       // Set current player to 2 (the player being checked for elimination)
       gameState.currentPlayer = 2;
 
@@ -247,14 +247,14 @@ describe('Victory Conditions System', () => {
 
     test('should emit baseDestroyed event when base is destroyed in combat', () => {
       const attackingUnit = gameState.createUnit('heavy', 2, 22, 1);
-      
-      // Move unit to attack position manually 
+
+      // Move unit to attack position manually
       gameState.board[22][1] = null;
       gameState.board[2][23] = attackingUnit.id;
       attackingUnit.position = { x: 2, y: 23 };
-      
+
       const player1Base = gameState.getPlayerBase(1);
-      
+
       // Damage base to 1 HP
       player1Base.takeDamage(BASE_CONFIG.HEALTH - 3);
 
@@ -276,7 +276,7 @@ describe('Victory Conditions System', () => {
     test('should check victory after unit removal', () => {
       // Create a unit to remove
       const testUnit = gameState.createUnit('worker', 2, 22, 1);
-      
+
       let victoryCheckCalled = false;
       gameState.on('victoryCheck', () => {
         victoryCheckCalled = true;
@@ -291,7 +291,7 @@ describe('Victory Conditions System', () => {
     test('should check victory after combat', () => {
       const attackingUnit = gameState.createUnit('heavy', 1, 2, 23);
       const targetUnit = gameState.createUnit('worker', 2, 22, 1);
-      
+
       // Move attacking unit to be adjacent to target
       gameState.board[2][23] = null;
       gameState.board[21][1] = attackingUnit.id;
@@ -304,11 +304,11 @@ describe('Victory Conditions System', () => {
 
       // Attack should trigger victory check (through removeUnit -> checkVictoryCondition)
       const attackResult = gameState.attackUnit(attackingUnit.id, 22, 1);
-      
+
       // Verify attack succeeded and destroyed target unit (worker has 50 HP, heavy does 3 damage)
       // Worker won't be destroyed in one hit, so let's verify the attack happened but no victory check
       expect(attackResult).toBe(true);
-      
+
       // Victory check is only called when a unit is destroyed, so let's destroy the unit
       targetUnit.takeDamage(50); // Destroy the worker
       gameState.removeUnit(targetUnit.id); // This should trigger victory check
@@ -348,7 +348,7 @@ describe('Victory Conditions System', () => {
       // Attempt to modify game state should not affect winner
       gameState.winner = 2;
       expect(gameState.winner).toBe(2); // This is actually allowed for testing
-      
+
       // But victory checks should not change the outcome
       const originalWinner = gameState.winner;
       gameState.checkVictoryCondition();

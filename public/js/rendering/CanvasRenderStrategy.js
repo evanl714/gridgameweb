@@ -10,16 +10,16 @@ import {
   MOVEMENT_COLORS,
   ENTITY_CHARACTERS
 } from '../../shared/constants.js';
-import { 
-  RENDERING_CONSTANTS, 
-  getResourceNodeColor, 
-  calculateResourceNodeAlpha 
+import {
+  RENDERING_CONSTANTS,
+  getResourceNodeColor,
+  calculateResourceNodeAlpha
 } from '../config/RenderingConstants.js';
 
 export class CanvasRenderStrategy extends RenderStrategy {
   constructor(gameState, resourceManager, gridSize, cellSize) {
     super(gameState, resourceManager, gridSize, cellSize);
-    
+
     this.canvas = document.getElementById('gameCanvas');
     this.ctx = this.canvas ? this.canvas.getContext('2d') : null;
   }
@@ -78,20 +78,20 @@ export class CanvasRenderStrategy extends RenderStrategy {
     // Fill entire canvas with dark tactical background
     this.ctx.fillStyle = UI_COLORS.GRID_BG;
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    
+
     // Draw alternating tactical grid pattern
     for (let x = 0; x < this.gridSize; x++) {
       for (let y = 0; y < this.gridSize; y++) {
         const isLight = (x + y) % 2 === 0;
         this.ctx.fillStyle = isLight ? UI_COLORS.GRID_LIGHT : UI_COLORS.GRID_DARK;
-        
+
         this.ctx.fillRect(
           x * this.cellSize,
           y * this.cellSize,
           this.cellSize,
           this.cellSize
         );
-        
+
         if (isLight) {
           this.ctx.fillStyle = UI_COLORS.GRID_ACCENT;
           this.ctx.fillRect(
@@ -103,51 +103,51 @@ export class CanvasRenderStrategy extends RenderStrategy {
         }
       }
     }
-    
+
     // Draw grid lines
     this.ctx.strokeStyle = UI_COLORS.GRID_LINE;
     this.ctx.lineWidth = RENDERING_CONSTANTS.GRID_LINE_WIDTH;
     this.ctx.globalAlpha = RENDERING_CONSTANTS.GRID_LINE_ALPHA;
-    
+
     for (let i = 0; i <= this.gridSize; i++) {
       const pos = i * this.cellSize;
-      
+
       this.ctx.beginPath();
       this.ctx.moveTo(pos, 0);
       this.ctx.lineTo(pos, this.canvas.height);
       this.ctx.stroke();
-      
+
       this.ctx.beginPath();
       this.ctx.moveTo(0, pos);
       this.ctx.lineTo(this.canvas.width, pos);
       this.ctx.stroke();
     }
-    
+
     // Enhanced border lines every N cells
     this.ctx.strokeStyle = UI_COLORS.GRID_BORDER_GLOW;
     this.ctx.lineWidth = RENDERING_CONSTANTS.GRID_BORDER_WIDTH;
     this.ctx.globalAlpha = RENDERING_CONSTANTS.GRID_BORDER_ALPHA;
-    
+
     for (let i = 0; i <= this.gridSize; i += RENDERING_CONSTANTS.GRID_BORDER_INTERVAL) {
       const pos = i * this.cellSize;
-      
+
       this.ctx.beginPath();
       this.ctx.moveTo(pos, 0);
       this.ctx.lineTo(pos, this.canvas.height);
       this.ctx.stroke();
-      
+
       this.ctx.beginPath();
       this.ctx.moveTo(0, pos);
       this.ctx.lineTo(this.canvas.width, pos);
       this.ctx.stroke();
     }
-    
+
     this.ctx.globalAlpha = 1.0;
   }
 
   drawHover(inputController) {
     if (!this.ctx || !inputController) return;
-    
+
     const hoveredCell = inputController.getHoveredCell();
     if (hoveredCell) {
       this.ctx.fillStyle = UI_COLORS.HOVER;
@@ -162,7 +162,7 @@ export class CanvasRenderStrategy extends RenderStrategy {
 
   drawSelection(inputController) {
     if (!this.ctx || !inputController) return;
-    
+
     const selectedCell = inputController.getSelectedCell();
     if (selectedCell) {
       this.ctx.fillStyle = UI_COLORS.SELECTION;
@@ -186,10 +186,10 @@ export class CanvasRenderStrategy extends RenderStrategy {
 
   drawMovementRange(inputController) {
     if (!this.ctx || !inputController) return;
-    
+
     const selectedUnit = inputController.getSelectedUnit();
     const showMovementRange = inputController.getShowMovementRange();
-    
+
     if (selectedUnit && showMovementRange) {
       const validMoves = this.gameState.getValidMovePositions(selectedUnit.id);
 
@@ -220,10 +220,10 @@ export class CanvasRenderStrategy extends RenderStrategy {
 
   drawMovementPreview(inputController) {
     if (!this.ctx || !inputController) return;
-    
+
     const movementPreview = inputController.getMovementPreview();
     const selectedUnit = inputController.getSelectedUnit();
-    
+
     if (movementPreview && selectedUnit) {
       const x = movementPreview.x * this.cellSize;
       const y = movementPreview.y * this.cellSize;
@@ -249,10 +249,10 @@ export class CanvasRenderStrategy extends RenderStrategy {
 
   drawResourceNodes(inputController) {
     if (!this.ctx) return;
-    
+
     const resourceInfo = this.resourceManager.getResourceNodeInfo();
     const selectedUnit = inputController ? inputController.getSelectedUnit() : null;
-    
+
     resourceInfo.forEach(nodeInfo => {
       const node = nodeInfo.position;
       const centerX = node.x * this.cellSize + this.cellSize / 2;
@@ -298,7 +298,7 @@ export class CanvasRenderStrategy extends RenderStrategy {
 
   drawBases() {
     if (!this.ctx) return;
-    
+
     Array.from(this.gameState.bases.values()).forEach(base => {
       if (base.isDestroyed) return;
 
@@ -333,7 +333,7 @@ export class CanvasRenderStrategy extends RenderStrategy {
 
   drawUnits() {
     if (!this.ctx) return;
-    
+
     Array.from(this.gameState.units.values()).forEach(unit => {
       const centerX = unit.position.x * this.cellSize + this.cellSize / 2;
       const centerY = unit.position.y * this.cellSize + this.cellSize / 2;
@@ -358,7 +358,7 @@ export class CanvasRenderStrategy extends RenderStrategy {
 
   drawUnitSelection(inputController) {
     if (!this.ctx || !inputController) return;
-    
+
     const selectedUnit = inputController.getSelectedUnit();
     if (selectedUnit) {
       const centerX = selectedUnit.position.x * this.cellSize + this.cellSize / 2;

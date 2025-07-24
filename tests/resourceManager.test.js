@@ -51,7 +51,7 @@ describe('ResourceManager', () => {
 
   test('should successfully gather resources with worker', () => {
     // Create a worker adjacent to a resource node (near Player 1 base)
-    const worker = gameState.createUnit('worker', 1, 4, 5); // Adjacent to node at (4,4), within base radius
+    const worker = gameState.createUnit('worker', 1, 3, 23); // Adjacent to node at (4,4), within base radius
     const player = gameState.getCurrentPlayer();
     const initialEnergy = player.energy;
 
@@ -65,7 +65,7 @@ describe('ResourceManager', () => {
   });
 
   test('should not gather resources with non-worker units', () => {
-    const scout = gameState.createUnit('scout', 1, 4, 5); // Adjacent to node at (4,4), within base radius
+    const scout = gameState.createUnit('scout', 1, 3, 23); // Adjacent to node at (4,4), within base radius
 
     const result = resourceManager.gatherResources(scout.id);
 
@@ -74,7 +74,7 @@ describe('ResourceManager', () => {
   });
 
   test('should not gather when no resource nodes in range', () => {
-    const worker = gameState.createUnit('worker', 1, 2, 5); // Within base radius but far from resource nodes
+    const worker = gameState.createUnit('worker', 1, 0, 23); // Within base radius but far from resource nodes
 
     const result = resourceManager.gatherResources(worker.id);
 
@@ -83,7 +83,7 @@ describe('ResourceManager', () => {
   });
 
   test('should not gather when unit has no actions left', () => {
-    const worker = gameState.createUnit('worker', 1, 4, 5); // Adjacent to node at (4,4), within base radius
+    const worker = gameState.createUnit('worker', 1, 3, 23); // Adjacent to node at (4,4), within base radius
     worker.actionsUsed = worker.maxActions; // Use all actions
 
     const result = resourceManager.gatherResources(worker.id);
@@ -93,7 +93,7 @@ describe('ResourceManager', () => {
   });
 
   test('should only allow gathering during Resource phase', () => {
-    const worker = gameState.createUnit('worker', 1, 4, 5); // Adjacent to node at (4,4), within base radius
+    const worker = gameState.createUnit('worker', 1, 3, 23); // Adjacent to node at (4,4), within base radius
 
     // Test gathering during resource phase (should work)
     gameState.currentPhase = 'resource';
@@ -121,7 +121,7 @@ describe('ResourceManager', () => {
   });
 
   test('should enforce gathering cooldown', () => {
-    const worker = gameState.createUnit('worker', 1, 4, 5); // Adjacent to node at (4,4), within base radius
+    const worker = gameState.createUnit('worker', 1, 3, 23); // Adjacent to node at (4,4), within base radius
 
     // First gather should succeed
     const result1 = resourceManager.gatherResources(worker.id);
@@ -145,7 +145,7 @@ describe('ResourceManager', () => {
   });
 
   test('should reduce resource node value when gathered', () => {
-    const worker = gameState.createUnit('worker', 1, 4, 5); // Adjacent to node at (4,4), within base radius
+    const worker = gameState.createUnit('worker', 1, 3, 23); // Adjacent to node at (4,4), within base radius
     const nearbyNode = resourceManager.getResourceNodeAt(4, 4);
     const initialValue = nearbyNode.value;
 
@@ -156,7 +156,7 @@ describe('ResourceManager', () => {
   });
 
   test('should not gather from depleted resource nodes', () => {
-    const worker = gameState.createUnit('worker', 1, 4, 5); // Adjacent to node at (4,4), within base radius
+    const worker = gameState.createUnit('worker', 1, 3, 23); // Adjacent to node at (4,4), within base radius
     const nearbyNode = resourceManager.getResourceNodeAt(4, 4);
     nearbyNode.value = 0; // Deplete the node
 
@@ -224,8 +224,8 @@ describe('ResourceManager', () => {
   });
 
   test('should check if unit can gather at position', () => {
-    const worker = gameState.createUnit('worker', 1, 4, 5); // Adjacent to node at (4,4), within base radius
-    const scout = gameState.createUnit('scout', 1, 5, 4); // Within base radius
+    const worker = gameState.createUnit('worker', 1, 3, 23); // Adjacent to node at (4,4), within base radius
+    const scout = gameState.createUnit('scout', 1, 0, 23); // Within base radius
 
     expect(resourceManager.canGatherAtPosition(worker.id)).toBe(true);
     expect(resourceManager.canGatherAtPosition(scout.id)).toBe(false);
@@ -252,9 +252,9 @@ describe('ResourceManager', () => {
 
   test('should calculate player resource income potential', () => {
     // Create workers at different positions
-    gameState.createUnit('worker', 1, 4, 5); // Near corner node
-    gameState.createUnit('worker', 1, 5, 4); // Near corner node
-    gameState.createUnit('scout', 1, 6, 5); // Scout doesn't count
+    gameState.createUnit('worker', 1, 3, 23); // Near corner node
+    gameState.createUnit('worker', 1, 0, 23); // Near corner node
+    gameState.createUnit('scout', 1, 2, 22); // Scout doesn't count
 
     const income = resourceManager.calculatePlayerResourceIncome(1);
     expect(income).toBeGreaterThan(0);
@@ -276,7 +276,7 @@ describe('ResourceManager', () => {
   });
 
   test('should clear gathering cooldowns', () => {
-    const worker = gameState.createUnit('worker', 1, 4, 5); // Adjacent to node at (4,4), within base radius
+    const worker = gameState.createUnit('worker', 1, 3, 23); // Adjacent to node at (4,4), within base radius
 
     // Trigger cooldown
     resourceManager.gatherResources(worker.id);
@@ -290,7 +290,7 @@ describe('ResourceManager', () => {
   test('should serialize and deserialize correctly', () => {
     // Modify some resource values
     resourceManager.resourceNodes[0].value = 10;
-    const worker = gameState.createUnit('worker', 1, 4, 5); // Adjacent to node at (4,4), within base radius
+    const worker = gameState.createUnit('worker', 1, 3, 23); // Adjacent to node at (4,4), within base radius
     resourceManager.gatherResources(worker.id); // Add cooldown, reduces value by 5
 
     const serialized = resourceManager.serialize();
@@ -309,7 +309,7 @@ describe('ResourceManager', () => {
     gameState.on('resourceNodeRegenerated', regenCallback);
 
     // Test gathering event
-    const worker = gameState.createUnit('worker', 1, 4, 5); // Adjacent to node at (4,4), within base radius
+    const worker = gameState.createUnit('worker', 1, 3, 23); // Adjacent to node at (4,4), within base radius
     resourceManager.gatherResources(worker.id);
 
     expect(gatherCallback).toHaveBeenCalledWith(

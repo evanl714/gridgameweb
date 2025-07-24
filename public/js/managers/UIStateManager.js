@@ -7,10 +7,10 @@ export class UIStateManager {
   constructor(gameState, turnManager) {
     this.gameState = gameState;
     this.turnManager = turnManager;
-    
+
     // Cache DOM elements for performance
     this.elements = this.cacheElements();
-    
+
     // Setup UI event listeners
     this.setupUIListeners();
   }
@@ -24,19 +24,19 @@ export class UIStateManager {
       turnDisplay: document.getElementById('turnDisplay'),
       gamePhase: document.getElementById('gamePhase'),
       phaseDisplay: document.getElementById('phaseDisplay'),
-      
+
       // Player info displays
       playerEnergy: document.getElementById('playerEnergy'),
       playerActions: document.getElementById('playerActions'),
       playerUnits: document.getElementById('playerUnits'),
       selectedUnit: document.getElementById('selectedUnit'),
-      
+
       // Control buttons
       gatherBtn: document.getElementById('gatherBtn'),
       newGameBtn: document.getElementById('newGameBtn'),
       nextPhaseBtn: document.getElementById('nextPhaseBtn'),
       surrenderBtn: document.getElementById('surrenderBtn'),
-      
+
       // Optional elements that might not exist
       playerResources: document.getElementById('playerResources'),
       territoryControl: document.getElementById('territoryControl'),
@@ -83,7 +83,7 @@ export class UIStateManager {
     if (this.elements.turnNumber) {
       this.elements.turnNumber.textContent = `Turn: ${this.gameState.turnNumber}`;
     }
-    
+
     if (this.elements.turnDisplay) {
       this.elements.turnDisplay.textContent = this.gameState.turnNumber;
     }
@@ -92,7 +92,7 @@ export class UIStateManager {
     if (this.elements.gamePhase) {
       this.elements.gamePhase.textContent = `Phase: ${this.gameState.currentPhase}`;
     }
-    
+
     if (this.elements.phaseDisplay) {
       this.elements.phaseDisplay.textContent = this.gameState.currentPhase;
     }
@@ -191,19 +191,19 @@ export class UIStateManager {
   // Utility methods
   calculateTerritoryControl(playerId) {
     if (!this.gameState) return 0;
-    
+
     // Calculate based on units and bases owned
     const playerUnits = Array.from(this.gameState.units.values())
       .filter(unit => unit.playerId === playerId).length;
     const playerBases = Array.from(this.gameState.bases.values())
       .filter(base => base.playerId === playerId && !base.isDestroyed).length;
-    
+
     const totalUnits = this.gameState.units.size;
     const totalBases = Array.from(this.gameState.bases.values())
       .filter(base => !base.isDestroyed).length;
-    
+
     if (totalUnits + totalBases === 0) return 0;
-    
+
     return Math.round(((playerUnits + playerBases * 2) / (totalUnits + totalBases * 2)) * 100);
   }
 
@@ -224,9 +224,9 @@ export class UIStateManager {
       z-index: 1000;
       transition: all 0.3s ease;
     `;
-    
+
     document.body.appendChild(messageDiv);
-    
+
     // Auto-remove after 3 seconds
     setTimeout(() => {
       if (messageDiv.parentNode) {
@@ -278,7 +278,7 @@ export class UIStateManager {
       this.gameState.removeAllListeners('unitMoved');
       this.gameState.removeAllListeners('resourcesGathered');
     }
-    
+
     // Clear element cache
     this.elements = {};
   }

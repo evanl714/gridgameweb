@@ -58,7 +58,7 @@ describe('ISSUE-039: Event Handler Architecture Conflicts - Verification Tests',
       // First call should throw but reset flag
       expect(() => endTurnWithException()).toThrow('Simulated error');
       expect(flagResetted).toBe(true);
-      
+
       // Second call should not be blocked since flag was reset
       flagResetted = false; // Reset test flag
       expect(() => endTurnWithException()).toThrow('Simulated error');
