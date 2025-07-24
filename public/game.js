@@ -32,6 +32,14 @@ import { InputController } from './js/controllers/InputController.js';
 import { GameRenderer } from './js/rendering/GameRenderer.js';
 import { UIStateManager } from './js/managers/UIStateManager.js';
 
+// Import design patterns
+import { 
+  CommandManager, 
+  EntityFactory, 
+  PatternIntegrator,
+  GameEventTypes 
+} from './js/patterns/index.js';
+
 class Game {
   constructor() {
     // Canvas is optional for grid-based UI
@@ -58,6 +66,12 @@ class Game {
 
     // Initialize rendering system
     this.renderer = new GameRenderer(this.gameState, this.resourceManager);
+
+    // Initialize design patterns
+    const patterns = PatternIntegrator.setupPatterns(this);
+    this.commandManager = patterns.commandManager;
+    this.entityFactory = patterns.entityFactory;
+    this.actionHandlers = PatternIntegrator.createActionHandlers(this, this.commandManager);
 
     // Initialize input controller after other components
     this.inputController = new InputController(this.gameState, this.turnManager, this.uiManager, this.renderer);
@@ -206,6 +220,9 @@ class Game {
     if (this.uiStateManager) {
       this.uiStateManager.destroy();
     }
+    if (this.commandManager) {
+      this.commandManager.clear();
+    }
     if (this.resourceManager) {
       // Add cleanup if resourceManager has destroy method
     }
@@ -228,6 +245,11 @@ class Game {
     this.uiManager = new UIManager(this.gameState, this.turnManager);
     this.victoryScreen = new VictoryScreen(this.gameState);
     this.uiStateManager = new UIStateManager(this.gameState, this.turnManager);
+    
+    // Reinitialize design patterns
+    const patterns = PatternIntegrator.setupPatterns(this);
+    this.commandManager = patterns.commandManager;
+    this.actionHandlers = PatternIntegrator.createActionHandlers(this, this.commandManager);
 
     // Setup event listeners for new game state
     this.setupGameEventListeners();
@@ -272,6 +294,135 @@ class Game {
     if (this.uiStateManager) {
       this.uiStateManager.updateStatus(message);
     }
+  }
+
+  // Enhanced methods using design patterns
+  
+  /**
+   * Execute a unit move using Command pattern
+   * @param {string} unitId Unit ID
+   * @param {Object} targetPosition Target position {x, y}
+   * @returns {Object} Execution result
+   */
+  executeUnitMove(unitId, targetPosition) {
+    if (this.actionHandlers) {
+      return this.actionHandlers.moveUnit(unitId, targetPosition);
+    }
+    
+    // Fallback to direct method
+    return this.gameState.moveUnit(unitId, targetPosition.x, targetPosition.y);
+  }
+
+  /**
+   * Execute an attack using Command pattern
+   * @param {string} attackerUnitId Attacker unit ID
+   * @param {Object} targetPosition Target position {x, y}
+   * @returns {Object} Execution result
+   */
+  executeAttack(attackerUnitId, targetPosition) {
+    if (this.actionHandlers) {
+      return this.actionHandlers.attackTarget(attackerUnitId, targetPosition);
+    }
+    
+    // Fallback to direct method
+    return this.gameState.attackUnit(attackerUnitId, targetPosition.x, targetPosition.y);
+  }
+
+  /**
+   * Create a unit using Factory pattern
+   * @param {string} unitType Unit type
+   * @param {number} playerId Player ID
+   * @param {Object} position Position {x, y}
+   * @returns {Object} Creation result
+   */
+  createUnitWithFactory(unitType, playerId, position) {
+    if (this.entityFactory) {
+      const validation = this.entityFactory.validateCreation('unit', {
+        unitType,
+        playerId,
+        x: position.x,
+        y: position.y
+      });
+      
+      if (!validation.valid) {
+        return {
+          success: false,
+          errors: validation.errors
+        };
+      }
+      
+      return this.entityFactory.createEntity('unit', {
+        unitType,
+        playerId,
+        x: position.x,
+        y: position.y
+      });
+    }
+    
+    // Fallback to gameState method
+    return this.gameState.createUnit(unitType, playerId, position.x, position.y);
+  }
+
+  /**
+   * Undo the last action
+   * @returns {Object} Undo result
+   */
+  undoLastAction() {
+    if (this.actionHandlers) {
+      return this.actionHandlers.undo();
+    }
+    
+    return { success: false, error: 'Undo not available' };
+  }
+
+  /**
+   * Redo the last undone action
+   * @returns {Object} Redo result
+   */
+  redoLastAction() {
+    if (this.actionHandlers) {
+      return this.actionHandlers.redo();
+    }
+    
+    return { success: false, error: 'Redo not available' };
+  }
+
+  /**
+   * Get command history for debugging
+   * @returns {Array} Command history
+   */
+  getCommandHistory() {
+    if (this.commandManager) {
+      return this.commandManager.getHistory();
+    }
+    
+    return [];
+  }
+
+  /**
+   * Get pattern usage statistics
+   * @returns {Object} Pattern statistics
+   */
+  getPatternStatistics() {
+    const stats = {
+      commandManager: null,
+      gameStateEvents: null,
+      uiStateEvents: null
+    };
+    
+    if (this.commandManager) {
+      stats.commandManager = this.commandManager.getStatistics();
+    }
+    
+    if (this.gameState && typeof this.gameState.getStatistics === 'function') {
+      stats.gameStateEvents = this.gameState.getStatistics();
+    }
+    
+    if (this.uiStateManager && typeof this.uiStateManager.getStatistics === 'function') {
+      stats.uiStateEvents = this.uiStateManager.getStatistics();
+    }
+    
+    return stats;
   }
 
   endTurn() {
@@ -370,10 +521,18 @@ class Game {
       if (this.turnManager) {
         this.turnManager.destroy();
       }
+      if (this.commandManager) {
+        this.commandManager.clear();
+      }
       
       this.gameState = result.gameState;
       this.turnManager = new TurnManager(this.gameState);
       this.resourceManager = result.resourceManager;
+      
+      // Reinitialize patterns after loading
+      const patterns = PatternIntegrator.setupPatterns(this);
+      this.commandManager = patterns.commandManager;
+      this.actionHandlers = PatternIntegrator.createActionHandlers(this, this.commandManager);
 
       this.setupGameEventListeners();
       this.render();
