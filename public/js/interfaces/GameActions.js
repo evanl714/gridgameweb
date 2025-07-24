@@ -8,9 +8,9 @@ export class GameActions {
     this.gameInstance = gameInstance;
   }
 
-  newGame() {
+  async newGame() {
     if (this.gameInstance && typeof this.gameInstance.newGame === 'function') {
-      return this.gameInstance.newGame();
+      return await this.gameInstance.newGame();
     }
   }
 
@@ -38,9 +38,9 @@ export class GameActions {
     }
   }
 
-  loadGame() {
+  async loadGame() {
     if (this.gameInstance && typeof this.gameInstance.loadGame === 'function') {
-      return this.gameInstance.loadGame();
+      return await this.gameInstance.loadGame();
     }
   }
 

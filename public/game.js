@@ -67,27 +67,47 @@ class Game {
     // Initialize rendering system
     this.renderer = new GameRenderer(this.gameState, this.resourceManager);
 
-    // Initialize design patterns
-    const patterns = PatternIntegrator.setupPatterns(this);
-    this.commandManager = patterns.commandManager;
-    this.entityFactory = patterns.entityFactory;
-    this.actionHandlers = PatternIntegrator.createActionHandlers(this, this.commandManager);
-
-    // Initialize input controller after other components
-    this.inputController = new InputController(this.gameState, this.turnManager, this.uiManager, this.renderer);
+    // Pattern-related properties will be initialized async
+    this.commandManager = null;
+    this.entityFactory = null;
+    this.actionHandlers = null;
+    
+    // Input controller will be initialized after patterns
+    this.inputController = null;
 
     // Make game accessible globally for victory screen buttons
     window.game = this;
-
-    this.init();
   }
 
-  init() {
+  /**
+   * Async initialization of patterns and final setup
+   */
+  async initialize() {
+    try {
+      // Initialize design patterns asynchronously
+      const patterns = await PatternIntegrator.setupPatterns(this);
+      this.commandManager = patterns.commandManager;
+      this.entityFactory = patterns.entityFactory;
+      this.actionHandlers = await PatternIntegrator.createActionHandlers(this, this.commandManager);
+
+      // Initialize input controller after patterns are ready
+      this.inputController = new InputController(this.gameState, this.turnManager, this.uiManager, this.renderer);
+
+      // Complete initialization
+      this.finishInitialization();
+      
+      console.log('Grid Strategy Game initialized with patterns and InputController');
+    } catch (error) {
+      console.error('Failed to initialize game patterns:', error);
+      throw error;
+    }
+  }
+
+  finishInitialization() {
     this.setupGameEventListeners();
     this.updateCanvasSize();
     this.render();
     this.updateUI();
-    console.log('Grid Strategy Game initialized with state management and InputController');
   }
 
   cleanupGameEventListeners() {
@@ -203,7 +223,7 @@ class Game {
 
   // Movement preview drawing moved to GameRenderer
 
-  newGame() {
+  async newGame() {
     // Clean up existing event listeners first
     this.cleanupGameEventListeners();
 
@@ -247,9 +267,9 @@ class Game {
     this.uiStateManager = new UIStateManager(this.gameState, this.turnManager);
     
     // Reinitialize design patterns
-    const patterns = PatternIntegrator.setupPatterns(this);
+    const patterns = await PatternIntegrator.setupPatterns(this);
     this.commandManager = patterns.commandManager;
-    this.actionHandlers = PatternIntegrator.createActionHandlers(this, this.commandManager);
+    this.actionHandlers = await PatternIntegrator.createActionHandlers(this, this.commandManager);
 
     // Setup event listeners for new game state
     this.setupGameEventListeners();
@@ -263,8 +283,8 @@ class Game {
     console.log('New game started with state management');
   }
 
-  reset() {
-    this.newGame();
+  async reset() {
+    await this.newGame();
     this.updateStatus('Game reset');
     console.log('Game reset');
   }
@@ -514,7 +534,7 @@ class Game {
     }
   }
 
-  loadGame() {
+  async loadGame() {
     const result = this.persistenceManager.loadGame();
     if (result.success) {
       // Clean up existing instances before loading
@@ -530,9 +550,9 @@ class Game {
       this.resourceManager = result.resourceManager;
       
       // Reinitialize patterns after loading
-      const patterns = PatternIntegrator.setupPatterns(this);
+      const patterns = await PatternIntegrator.setupPatterns(this);
       this.commandManager = patterns.commandManager;
-      this.actionHandlers = PatternIntegrator.createActionHandlers(this, this.commandManager);
+      this.actionHandlers = await PatternIntegrator.createActionHandlers(this, this.commandManager);
 
       this.setupGameEventListeners();
       this.render();
@@ -545,6 +565,12 @@ class Game {
 }
 
 // Initialize game when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-  window.game = new Game();
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    window.game = new Game();
+    await window.game.initialize();
+    console.log('Game fully initialized');
+  } catch (error) {
+    console.error('Failed to initialize game:', error);
+  }
 });

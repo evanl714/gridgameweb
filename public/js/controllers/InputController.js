@@ -352,8 +352,8 @@ export class InputController {
   }
 
   // Button handler methods - delegate to game actions
-  handleNewGame() {
-    this.gameActions.newGame();
+  async handleNewGame() {
+    await this.gameActions.newGame();
   }
 
   handleNextPhase() {
@@ -372,8 +372,8 @@ export class InputController {
     this.gameActions.offerDraw();
   }
 
-  handleLoadGame() {
-    this.gameActions.loadGame();
+  async handleLoadGame() {
+    await this.gameActions.loadGame();
   }
 
   // Utility methods

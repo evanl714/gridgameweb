@@ -97,7 +97,7 @@ export class VictoryScreen {
         </div>
 
         <div class="victory-actions">
-          <button class="play-again-btn" onclick="window.game.newGame()">
+          <button class="play-again-btn" onclick="(async () => await window.game.newGame())()">
             🔄 Play Again
           </button>
           <button class="main-menu-btn" onclick="window.location.reload()">
@@ -195,7 +195,7 @@ export class VictoryScreen {
     } else if (event.key === 'Enter' || event.key === ' ') {
       // Start new game on Enter/Space
       if (window.game) {
-        window.game.newGame();
+        (async () => await window.game.newGame())();
       }
     }
   }

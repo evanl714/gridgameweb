@@ -76,9 +76,11 @@ export class PatternIntegrator {
   /**
    * Setup patterns for a game instance
    * @param {Object} game Game instance
-   * @returns {Object} Pattern instances
+   * @returns {Promise<Object>} Pattern instances
    */
-  static setupPatterns(game) {
+  static async setupPatterns(game) {
+    // Use dynamic import to ensure module is fully loaded
+    const { CommandManager } = await import('../commands/CommandManager.js');
     const commandManager = new CommandManager();
     
     // Setup command event listeners
@@ -106,7 +108,12 @@ export class PatternIntegrator {
    * @param {CommandManager} commandManager Command manager
    * @returns {Object} Action handlers
    */
-  static createActionHandlers(game, commandManager) {
+  static async createActionHandlers(game, commandManager) {
+    // Use dynamic imports to ensure all command classes are loaded
+    const { MoveCommand } = await import('../commands/MoveCommand.js');
+    const { AttackCommand } = await import('../commands/AttackCommand.js');
+    const { BuildCommand } = await import('../commands/BuildCommand.js');
+    
     return {
       moveUnit: (unitId, targetPos) => {
         const command = new MoveCommand(
