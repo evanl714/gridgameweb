@@ -27,6 +27,9 @@ import { VictoryScreen } from './ui/victoryScreen.js';
 import { BuildPanelSidebar } from './ui/buildPanelSidebar.js';
 import { UnitInfoSidebar } from './ui/unitInfoSidebar.js';
 
+// Import controllers
+import { InputController } from './js/controllers/InputController.js';
+
 class Game {
   constructor() {
     // Canvas is optional for grid-based UI
@@ -35,12 +38,8 @@ class Game {
     this.gridSize = GAME_CONFIG.GRID_SIZE; // 25x25
     this.cellSize = GAME_CONFIG.CELL_SIZE; // 32 pixels per cell
 
-    // UI state
-    this.selectedCell = null;
-    this.hoveredCell = null;
-    this.selectedUnit = null;
-    this.movementPreview = null; // Stores {x, y, cost} for hover preview
-    this.showMovementRange = false; // Toggle for movement range display
+    // Input controller handles UI state and interaction
+    this.inputController = null; // Will be initialized after other components
 
     // Initialize game state management
     this.gameState = new GameState();
@@ -52,6 +51,9 @@ class Game {
     this.uiManager = new UIManager(this.gameState, this.turnManager);
     this.victoryScreen = new VictoryScreen(this.gameState);
 
+    // Initialize input controller after other components
+    this.inputController = new InputController(this.gameState, this.turnManager, this.uiManager, this);
+
     // Make game accessible globally for victory screen buttons
     window.game = this;
 
@@ -59,12 +61,11 @@ class Game {
   }
 
   init() {
-    this.setupEventListeners();
     this.setupGameEventListeners();
     this.updateCanvasSize();
     this.render();
     this.updateUI();
-    console.log('Grid Strategy Game initialized with state management');
+    console.log('Grid Strategy Game initialized with state management and InputController');
   }
 
   cleanupGameEventListeners() {
@@ -122,49 +123,7 @@ class Game {
     });
   }
 
-  setupEventListeners() {
-    // Only set up canvas listeners if canvas exists (grid UI doesn't use canvas)
-    if (this.canvas) {
-      this.canvas.addEventListener('click', (e) => this.handleClick(e));
-      this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
-      this.canvas.addEventListener('mouseleave', () => this.handleMouseLeave());
-    }
-
-    // Keyboard shortcuts
-    document.addEventListener('keydown', (e) => this.handleKeyDown(e));
-
-    document.getElementById('newGameBtn').addEventListener('click', () => this.newGame());
-
-    // End Turn button is handled by turnInterface.js - removed duplicate handler
-
-    const nextPhaseBtn = document.getElementById('nextPhaseBtn');
-    if (nextPhaseBtn) {
-      nextPhaseBtn.addEventListener('click', () => this.nextPhase());
-    }
-
-    const gatherBtn = document.getElementById('gatherBtn');
-    if (gatherBtn) {
-      gatherBtn.addEventListener('click', () => this.gatherResources());
-    }
-
-    const surrenderBtn = document.getElementById('surrenderBtn');
-    if (surrenderBtn) {
-      surrenderBtn.addEventListener('click', () => this.surrender());
-    }
-
-    const drawBtn = document.getElementById('drawBtn');
-    if (drawBtn) {
-      drawBtn.addEventListener('click', () => this.offerDraw());
-    }
-
-
-    const loadBtn = document.getElementById('loadBtn');
-    if (loadBtn) {
-      loadBtn.addEventListener('click', () => this.loadGame());
-    }
-
-    window.addEventListener('resize', () => this.updateCanvasSize());
-  }
+  // Event listeners now handled by InputController
 
   updateCanvasSize() {
     if (this.canvas) {
@@ -174,232 +133,27 @@ class Game {
     }
   }
 
-  handleClick(event) {
-    const coords = this.getGridCoordinates(event);
-    if (coords) {
-      this.handleCellClick(coords.x, coords.y);
-    }
-  }
+  // Input handling now managed by InputController
 
+  // Cell click handling moved to InputController
+
+  // Unit creation dialog handling moved to InputController
+
+  // Mouse move handling moved to InputController
+
+  // Mouse leave handling moved to InputController
+
+  // Keyboard input handling moved to InputController
+
+  // Grid coordinate calculation moved to InputController
+
+  // Cell selection moved to InputController
+
+  // Public method for external cell click handling (called from HTML grid)
   handleCellClick(x, y) {
-    // Disable all actions if game has ended
-    if (this.gameState.status === GAME_STATES.ENDED) {
-      this.updateStatus(`Game Over! Player ${this.gameState.winner} wins!`);
-      return;
+    if (this.inputController) {
+      this.inputController.handleCellClickExternal(x, y);
     }
-
-    const unit = this.gameState.getUnitAt(x, y);
-
-    if (this.selectedUnit) {
-      // Try to attack or move selected unit
-      if (this.selectedUnit.playerId === this.gameState.currentPlayer) {
-        // Check if this is a valid attack (only during action phase)
-        const canAttack = this.gameState.currentPhase === 'action' && this.gameState.canUnitAttack(this.selectedUnit.id, x, y);
-        if (canAttack) {
-          const targetEntity = this.gameState.getEntityAt(x, y);
-          const attacked = this.gameState.attackUnit(this.selectedUnit.id, x, y);
-          if (attacked) {
-            this.turnManager.usePlayerAction();
-            this.selectedUnit = null;
-            this.selectedCell = null;
-            this.showMovementRange = false;
-            this.movementPreview = null;
-            this.gameState.emit('unitDeselected');
-            this.updateStatus(`Attack successful! Target: ${targetEntity.type}`);
-          }
-        } else {
-          // Try to move selected unit
-          const canMove = this.gameState.canUnitMoveTo(this.selectedUnit.id, x, y);
-          if (canMove) {
-            const movementCost = this.gameState.calculateMovementCost(this.selectedUnit.id, x, y);
-            const moved = this.gameState.moveUnit(this.selectedUnit.id, x, y);
-            if (moved) {
-              this.turnManager.usePlayerAction();
-              this.selectedUnit = null;
-              this.selectedCell = null;
-              this.showMovementRange = false;
-              this.movementPreview = null;
-              this.gameState.emit('unitDeselected');
-              this.updateStatus(`Unit moved (cost: ${movementCost})`);
-            }
-          } else if (unit && unit.playerId === this.gameState.currentPlayer) {
-            // Select different unit
-            this.selectedUnit = unit;
-            this.selectedCell = { x, y };
-            this.showMovementRange = true;
-            this.gameState.emit('unitSelected', unit);
-            this.updateStatus(`Unit selected: ${unit.type} (${unit.maxActions - unit.actionsUsed} actions left)`);
-          } else {
-            // Invalid move or attack - provide feedback
-            const distance = this.gameState.getMovementDistance(this.selectedUnit.position.x, this.selectedUnit.position.y, x, y);
-            const remaining = this.selectedUnit.maxActions - this.selectedUnit.actionsUsed;
-            if (distance > remaining) {
-              this.updateStatus(`Cannot move: distance ${distance} > ${remaining} actions remaining`);
-            } else if (!this.gameState.isPositionEmpty(x, y)) {
-              const targetEntity = this.gameState.getEntityAt(x, y);
-              if (targetEntity && targetEntity.entity.playerId === this.selectedUnit.playerId) {
-                this.updateStatus('Cannot attack: friendly unit/base');
-              } else {
-                this.updateStatus('Cannot attack: target out of range (must be adjacent)');
-              }
-            }
-          }
-        }
-      }
-    } else if (unit && unit.playerId === this.gameState.currentPlayer) {
-      // Select unit and show movement range
-      this.selectedUnit = unit;
-      this.selectedCell = { x, y };
-      this.showMovementRange = true;
-      this.gameState.emit('unitSelected', unit);
-      this.updateStatus(`Unit selected: ${unit.type} (${unit.maxActions - unit.actionsUsed} actions left)`);
-    } else {
-      // Deselect or try to create unit
-      if (this.gameState.currentPhase === 'build' && this.gameState.isPositionEmpty(x, y)) {
-        this.selectedCell = { x, y };
-        
-        // Notify BuildPanelSidebar of selected position for building
-        if (this.uiManager && this.uiManager.buildPanelSidebar) {
-          this.uiManager.buildPanelSidebar.setSelectedPosition({ x, y });
-        }
-        
-        // Emit event for other components
-        this.gameState.emit('cellSelected', { position: { x, y } });
-        
-        this.showUnitCreationDialog(x, y);
-      } else {
-        this.selectedCell = { x, y };
-        
-        // Notify BuildPanelSidebar of selected position for building
-        if (this.gameState.isPositionEmpty(x, y) && this.uiManager && this.uiManager.buildPanelSidebar) {
-          this.uiManager.buildPanelSidebar.setSelectedPosition({ x, y });
-        }
-        
-        // Emit event for other components
-        this.gameState.emit('cellSelected', { position: { x, y } });
-        this.selectedUnit = null;
-        this.showMovementRange = false;
-        this.movementPreview = null;
-        this.gameState.emit('unitDeselected');
-        this.updateStatus(`Selected cell: (${x}, ${y})`);
-      }
-    }
-
-    this.render();
-    this.updateUI();
-  }
-
-  showUnitCreationDialog(x, y) {
-    // Use the new build panel instead of prompt dialog
-    const buildPanel = this.uiManager.getComponent('build');
-    if (buildPanel) {
-      buildPanel.show({ x, y });
-    }
-  }
-
-  handleMouseMove(event) {
-    const coords = this.getGridCoordinates(event);
-    if (coords) {
-      if (!this.hoveredCell || this.hoveredCell.x !== coords.x || this.hoveredCell.y !== coords.y) {
-        this.hoveredCell = coords;
-
-        // Update movement preview
-        if (this.selectedUnit && this.showMovementRange) {
-          const movementCost = this.gameState.calculateMovementCost(this.selectedUnit.id, coords.x, coords.y);
-          if (movementCost > 0) {
-            this.movementPreview = { x: coords.x, y: coords.y, cost: movementCost };
-          } else {
-            this.movementPreview = null;
-          }
-        } else {
-          this.movementPreview = null;
-        }
-
-        this.render();
-      }
-    }
-  }
-
-  handleMouseLeave() {
-    if (this.hoveredCell) {
-      this.hoveredCell = null;
-      this.movementPreview = null;
-      this.render();
-    }
-  }
-
-  handleKeyDown(event) {
-    // Disable all keyboard actions if game has ended
-    if (this.gameState.status === GAME_STATES.ENDED) {
-      return;
-    }
-
-    switch(event.key) {
-    case 'r':
-    case 'R':
-      // Toggle movement range display
-      if (this.selectedUnit) {
-        this.showMovementRange = !this.showMovementRange;
-        if (!this.showMovementRange) {
-          this.movementPreview = null;
-        }
-        this.render();
-        this.updateStatus(this.showMovementRange ? 'Movement range shown' : 'Movement range hidden');
-      }
-      break;
-    case 'g':
-    case 'G':
-      // Gather resources with selected worker
-      if (this.selectedUnit && this.selectedUnit.type === 'worker' &&
-                    this.gameState.currentPhase === 'resource') {
-        this.gatherResources();
-      } else if (!this.selectedUnit) {
-        this.updateStatus('Select a worker unit first to gather resources');
-      } else if (this.selectedUnit.type !== 'worker') {
-        this.updateStatus('Only worker units can gather resources');
-      } else if (this.gameState.currentPhase !== 'resource') {
-        this.updateStatus('Can only gather during Resource phase');
-      }
-      break;
-    case 'Escape':
-      // Deselect unit
-      this.selectedUnit = null;
-      this.selectedCell = null;
-      this.showMovementRange = false;
-      this.movementPreview = null;
-      this.gameState.emit('unitDeselected');
-      this.render();
-      this.updateStatus('Unit deselected');
-      break;
-    }
-  }
-
-  getGridCoordinates(event) {
-    const rect = this.canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-
-    // Account for canvas scaling
-    const scaleX = this.canvas.width / rect.width;
-    const scaleY = this.canvas.height / rect.height;
-
-    const adjustedX = x * scaleX;
-    const adjustedY = y * scaleY;
-
-    const gridX = Math.floor(adjustedX / this.cellSize);
-    const gridY = Math.floor(adjustedY / this.cellSize);
-
-    if (gridX >= 0 && gridX < this.gridSize && gridY >= 0 && gridY < this.gridSize) {
-      return { x: gridX, y: gridY };
-    }
-    return null;
-  }
-
-  selectCell(x, y) {
-    this.selectedCell = { x, y };
-    this.render();
-    this.updateStatus(`Selected cell: (${x}, ${y})`);
-    console.log(`Cell selected: (${x}, ${y})`);
   }
 
   render() {
@@ -505,11 +259,12 @@ class Game {
   }
 
   drawHover() {
-    if (this.hoveredCell) {
+    const hoveredCell = this.inputController ? this.inputController.getHoveredCell() : null;
+    if (hoveredCell) {
       this.ctx.fillStyle = UI_COLORS.HOVER;
       this.ctx.fillRect(
-        this.hoveredCell.x * this.cellSize,
-        this.hoveredCell.y * this.cellSize,
+        hoveredCell.x * this.cellSize,
+        hoveredCell.y * this.cellSize,
         this.cellSize,
         this.cellSize
       );
@@ -517,11 +272,12 @@ class Game {
   }
 
   drawSelection() {
-    if (this.selectedCell) {
+    const selectedCell = this.inputController ? this.inputController.getSelectedCell() : null;
+    if (selectedCell) {
       this.ctx.fillStyle = UI_COLORS.SELECTION;
       this.ctx.fillRect(
-        this.selectedCell.x * this.cellSize,
-        this.selectedCell.y * this.cellSize,
+        selectedCell.x * this.cellSize,
+        selectedCell.y * this.cellSize,
         this.cellSize,
         this.cellSize
       );
@@ -529,8 +285,8 @@ class Game {
       this.ctx.strokeStyle = UI_COLORS.SELECTION_BORDER;
       this.ctx.lineWidth = 3;
       this.ctx.strokeRect(
-        this.selectedCell.x * this.cellSize,
-        this.selectedCell.y * this.cellSize,
+        selectedCell.x * this.cellSize,
+        selectedCell.y * this.cellSize,
         this.cellSize,
         this.cellSize
       );
@@ -547,12 +303,13 @@ class Game {
       const radius = this.cellSize * 0.3;
 
       // Check if this node is gatherable by selected worker
-      const isGatherable = this.selectedUnit &&
-                               this.selectedUnit.type === 'worker' &&
+      const selectedUnit = this.inputController ? this.inputController.getSelectedUnit() : null;
+      const isGatherable = selectedUnit &&
+                               selectedUnit.type === 'worker' &&
                                this.gameState.currentPhase === 'resource' &&
                                nodeInfo.value > 0 &&
-                               Math.abs(node.x - this.selectedUnit.position.x) <= 1 &&
-                               Math.abs(node.y - this.selectedUnit.position.y) <= 1;
+                               Math.abs(node.x - selectedUnit.position.x) <= 1 &&
+                               Math.abs(node.y - selectedUnit.position.y) <= 1;
 
       // Highlight gatherable nodes
       if (isGatherable) {
@@ -716,9 +473,10 @@ class Game {
   }
 
   drawUnitSelection() {
-    if (this.selectedUnit) {
-      const centerX = this.selectedUnit.position.x * this.cellSize + this.cellSize / 2;
-      const centerY = this.selectedUnit.position.y * this.cellSize + this.cellSize / 2;
+    const selectedUnit = this.inputController ? this.inputController.getSelectedUnit() : null;
+    if (selectedUnit) {
+      const centerX = selectedUnit.position.x * this.cellSize + this.cellSize / 2;
+      const centerY = selectedUnit.position.y * this.cellSize + this.cellSize / 2;
       const radius = this.cellSize * 0.4;
 
       // Draw selection ring
@@ -733,8 +491,10 @@ class Game {
   }
 
   drawMovementRange() {
-    if (this.selectedUnit && this.showMovementRange) {
-      const validMoves = this.gameState.getValidMovePositions(this.selectedUnit.id);
+    const selectedUnit = this.inputController ? this.inputController.getSelectedUnit() : null;
+    const showMovementRange = this.inputController ? this.inputController.getShowMovementRange() : false;
+    if (selectedUnit && showMovementRange) {
+      const validMoves = this.gameState.getValidMovePositions(selectedUnit.id);
 
       for (const move of validMoves) {
         const x = move.x * this.cellSize;
@@ -766,9 +526,11 @@ class Game {
   }
 
   drawMovementPreview() {
-    if (this.movementPreview && this.selectedUnit) {
-      const x = this.movementPreview.x * this.cellSize;
-      const y = this.movementPreview.y * this.cellSize;
+    const movementPreview = this.inputController ? this.inputController.getMovementPreview() : null;
+    const selectedUnit = this.inputController ? this.inputController.getSelectedUnit() : null;
+    if (movementPreview && selectedUnit) {
+      const x = movementPreview.x * this.cellSize;
+      const y = movementPreview.y * this.cellSize;
 
       // Draw preview highlight
       this.ctx.fillStyle = MOVEMENT_COLORS.PATH_PREVIEW;
@@ -785,7 +547,7 @@ class Game {
       this.ctx.textAlign = 'center';
       this.ctx.textBaseline = 'middle';
       this.ctx.fillText(
-        `${this.movementPreview.cost}`,
+        `${movementPreview.cost}`,
         x + this.cellSize / 2,
         y + this.cellSize / 2 + 8
       );
@@ -816,11 +578,12 @@ class Game {
     this.resourceManager = new ResourceManager(this.gameState);
 
     // Reset UI state
-    this.selectedCell = null;
-    this.hoveredCell = null;
-    this.selectedUnit = null;
-    this.movementPreview = null;
-    this.showMovementRange = false;
+    // Clear selection through InputController
+    if (this.inputController) {
+      this.inputController.setSelectedUnit(null);
+      this.inputController.setSelectedCell(null);
+      this.inputController.setShowMovementRange(false);
+    }
     this.gameState.emit('unitDeselected');
 
     // Reinitialize UI system with new game state
@@ -916,12 +679,13 @@ class Game {
     // Update selected unit info
     const selectedUnitElement = document.getElementById('selectedUnit');
     if (selectedUnitElement) {
-      if (this.selectedUnit) {
-        const stats = this.selectedUnit.getStats();
+      const selectedUnit = this.inputController ? this.inputController.getSelectedUnit() : null;
+      if (selectedUnit) {
+        const stats = selectedUnit.getStats();
         selectedUnitElement.innerHTML = `
                     <strong>${stats.name}</strong><br>
-                    Health: ${this.selectedUnit.health}/${this.selectedUnit.maxHealth}<br>
-                    Actions: ${this.selectedUnit.actionsUsed}/${this.selectedUnit.maxActions}
+                    Health: ${selectedUnit.health}/${selectedUnit.maxHealth}<br>
+                    Actions: ${selectedUnit.actionsUsed}/${selectedUnit.maxActions}
                 `;
       } else {
         selectedUnitElement.innerHTML = 'No unit selected';
@@ -931,23 +695,24 @@ class Game {
     // Update gather button state
     const gatherBtn = document.getElementById('gatherBtn');
     if (gatherBtn) {
-      const canGather = this.selectedUnit &&
-                             this.selectedUnit.type === 'worker' &&
+      const selectedUnit = this.inputController ? this.inputController.getSelectedUnit() : null;
+      const canGather = selectedUnit &&
+                             selectedUnit.type === 'worker' &&
                              this.gameState.currentPhase === 'resource' &&
-                             this.selectedUnit.canAct() &&
-                             this.resourceManager.canGatherAtPosition(this.selectedUnit.id);
+                             selectedUnit.canAct() &&
+                             this.resourceManager.canGatherAtPosition(selectedUnit.id);
 
       gatherBtn.disabled = !canGather;
 
       if (canGather) {
         gatherBtn.textContent = 'Gather Resources (G)';
-      } else if (!this.selectedUnit) {
+      } else if (!selectedUnit) {
         gatherBtn.textContent = 'Select Worker';
-      } else if (this.selectedUnit.type !== 'worker') {
+      } else if (selectedUnit.type !== 'worker') {
         gatherBtn.textContent = 'Worker Only';
       } else if (this.gameState.currentPhase !== 'resource') {
         gatherBtn.textContent = 'Resource Phase Only';
-      } else if (!this.selectedUnit.canAct()) {
+      } else if (!selectedUnit.canAct()) {
         gatherBtn.textContent = 'No Actions Left';
       } else {
         gatherBtn.textContent = 'No Resources Nearby';
@@ -969,8 +734,11 @@ class Game {
     }
 
     this.turnManager.forceEndTurn();
-    this.selectedUnit = null;
-    this.selectedCell = null;
+    // Clear selection through InputController
+    if (this.inputController) {
+      this.inputController.setSelectedUnit(null);
+      this.inputController.setSelectedCell(null);
+    }
     this.gameState.emit('unitDeselected');
     this.updateUI();
   }
@@ -991,8 +759,9 @@ class Game {
       return;
     }
 
-    if (this.selectedUnit && this.selectedUnit.type === 'worker') {
-      const result = this.resourceManager.gatherResources(this.selectedUnit.id);
+    const selectedUnit = this.inputController ? this.inputController.getSelectedUnit() : null;
+    if (selectedUnit && selectedUnit.type === 'worker') {
+      const result = this.resourceManager.gatherResources(selectedUnit.id);
       if (result.success) {
         this.updateStatus(`Gathered ${result.amount} resources`);
       } else {
