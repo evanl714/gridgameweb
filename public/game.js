@@ -27,8 +27,9 @@ import { VictoryScreen } from './ui/victoryScreen.js';
 import { BuildPanelSidebar } from './ui/buildPanelSidebar.js';
 import { UnitInfoSidebar } from './ui/unitInfoSidebar.js';
 
-// Import controllers
+// Import controllers and rendering
 import { InputController } from './js/controllers/InputController.js';
+import { GameRenderer } from './js/rendering/GameRenderer.js';
 
 class Game {
   constructor() {
@@ -51,8 +52,11 @@ class Game {
     this.uiManager = new UIManager(this.gameState, this.turnManager);
     this.victoryScreen = new VictoryScreen(this.gameState);
 
+    // Initialize rendering system
+    this.renderer = new GameRenderer(this.gameState, this.resourceManager);
+
     // Initialize input controller after other components
-    this.inputController = new InputController(this.gameState, this.turnManager, this.uiManager, this);
+    this.inputController = new InputController(this.gameState, this.turnManager, this.uiManager, this.renderer);
 
     // Make game accessible globally for victory screen buttons
     window.game = this;
@@ -157,402 +161,29 @@ class Game {
   }
 
   render() {
-    // Only render to canvas if canvas exists
-    if (this.ctx) {
-      this.clearCanvas();
-      this.drawGrid();
-      this.drawHover();
-      this.drawSelection();
-      this.drawMovementRange();
-      this.drawMovementPreview();
-      this.drawResourceNodes();
-      this.drawBases();
-      this.drawUnits();
-      this.drawUnitSelection();
-    }
-    // Grid rendering will be handled by the adapter in HTML
-  }
-
-  clearCanvas() {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-  }
-
-  drawGrid() {
-    // Fill entire canvas with dark tactical background
-    this.ctx.fillStyle = UI_COLORS.GRID_BG;
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    
-    // Draw alternating tactical grid pattern with StarCraft 2 aesthetic
-    for (let x = 0; x < this.gridSize; x++) {
-      for (let y = 0; y < this.gridSize; y++) {
-        // Determine if this square should be light or dark
-        const isLight = (x + y) % 2 === 0;
-        this.ctx.fillStyle = isLight ? UI_COLORS.GRID_LIGHT : UI_COLORS.GRID_DARK;
-        
-        // Draw base cell
-        this.ctx.fillRect(
-          x * this.cellSize,
-          y * this.cellSize,
-          this.cellSize,
-          this.cellSize
-        );
-        
-        // Add subtle inner glow effect for strategic feel
-        if (isLight) {
-          this.ctx.fillStyle = UI_COLORS.GRID_ACCENT;
-          this.ctx.fillRect(
-            x * this.cellSize + 1,
-            y * this.cellSize + 1,
-            this.cellSize - 2,
-            this.cellSize - 2
-          );
-        }
-      }
-    }
-    
-    // Draw tactical grid lines with enhanced visibility
-    this.ctx.strokeStyle = UI_COLORS.GRID_LINE;
-    this.ctx.lineWidth = 0.5;
-    this.ctx.globalAlpha = 0.8;
-    
-    // Draw vertical lines
-    for (let i = 0; i <= this.gridSize; i++) {
-      const x = i * this.cellSize;
-      this.ctx.beginPath();
-      this.ctx.moveTo(x, 0);
-      this.ctx.lineTo(x, this.canvas.height);
-      this.ctx.stroke();
-    }
-    
-    // Draw horizontal lines
-    for (let i = 0; i <= this.gridSize; i++) {
-      const y = i * this.cellSize;
-      this.ctx.beginPath();
-      this.ctx.moveTo(0, y);
-      this.ctx.lineTo(this.canvas.width, y);
-      this.ctx.stroke();
-    }
-    
-    // Draw enhanced border lines every 5 cells for tactical reference
-    this.ctx.strokeStyle = UI_COLORS.GRID_BORDER_GLOW;
-    this.ctx.lineWidth = 1;
-    this.ctx.globalAlpha = 0.6;
-    
-    for (let i = 0; i <= this.gridSize; i += 5) {
-      const pos = i * this.cellSize;
-      
-      // Vertical tactical lines
-      this.ctx.beginPath();
-      this.ctx.moveTo(pos, 0);
-      this.ctx.lineTo(pos, this.canvas.height);
-      this.ctx.stroke();
-      
-      // Horizontal tactical lines
-      this.ctx.beginPath();
-      this.ctx.moveTo(0, pos);
-      this.ctx.lineTo(this.canvas.width, pos);
-      this.ctx.stroke();
-    }
-    
-    // Reset alpha for other drawing operations
-    this.ctx.globalAlpha = 1.0;
-  }
-
-  drawHover() {
-    const hoveredCell = this.inputController ? this.inputController.getHoveredCell() : null;
-    if (hoveredCell) {
-      this.ctx.fillStyle = UI_COLORS.HOVER;
-      this.ctx.fillRect(
-        hoveredCell.x * this.cellSize,
-        hoveredCell.y * this.cellSize,
-        this.cellSize,
-        this.cellSize
-      );
+    // Use unified renderer for both canvas and grid rendering
+    if (this.renderer) {
+      this.renderer.render(this.inputController);
     }
   }
 
-  drawSelection() {
-    const selectedCell = this.inputController ? this.inputController.getSelectedCell() : null;
-    if (selectedCell) {
-      this.ctx.fillStyle = UI_COLORS.SELECTION;
-      this.ctx.fillRect(
-        selectedCell.x * this.cellSize,
-        selectedCell.y * this.cellSize,
-        this.cellSize,
-        this.cellSize
-      );
+  // Canvas rendering methods moved to GameRenderer
 
-      this.ctx.strokeStyle = UI_COLORS.SELECTION_BORDER;
-      this.ctx.lineWidth = 3;
-      this.ctx.strokeRect(
-        selectedCell.x * this.cellSize,
-        selectedCell.y * this.cellSize,
-        this.cellSize,
-        this.cellSize
-      );
-    }
-  }
+  // Hover drawing moved to GameRenderer
 
-  drawResourceNodes() {
-    const resourceInfo = this.resourceManager.getResourceNodeInfo();
-    resourceInfo.forEach(nodeInfo => {
-      const node = nodeInfo.position;
-      // Draw resource node as a filled circle
-      const centerX = node.x * this.cellSize + this.cellSize / 2;
-      const centerY = node.y * this.cellSize + this.cellSize / 2;
-      const radius = this.cellSize * 0.3;
+  // Selection drawing moved to GameRenderer
 
-      // Check if this node is gatherable by selected worker
-      const selectedUnit = this.inputController ? this.inputController.getSelectedUnit() : null;
-      const isGatherable = selectedUnit &&
-                               selectedUnit.type === 'worker' &&
-                               this.gameState.currentPhase === 'resource' &&
-                               nodeInfo.value > 0 &&
-                               Math.abs(node.x - selectedUnit.position.x) <= 1 &&
-                               Math.abs(node.y - selectedUnit.position.y) <= 1;
+  // Resource node drawing moved to GameRenderer
 
-      // Highlight gatherable nodes
-      if (isGatherable) {
-        this.ctx.fillStyle = 'rgba(255, 215, 0, 0.3)'; // Gold highlight
-        this.ctx.fillRect(
-          node.x * this.cellSize,
-          node.y * this.cellSize,
-          this.cellSize,
-          this.cellSize
-        );
-      }
+  // Base drawing moved to GameRenderer
 
-      // Color based on resource availability
-      const efficiency = nodeInfo.efficiency;
-      const alpha = 0.3 + (efficiency * 0.7); // More transparent when depleted
-      this.ctx.fillStyle = `rgba(50, 205, 50, ${alpha})`;
-      this.ctx.beginPath();
-      this.ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-      this.ctx.fill();
+  // Unit drawing moved to GameRenderer
 
-      // Add border - gold for gatherable, dark green for normal
-      this.ctx.strokeStyle = isGatherable ? '#FFD700' : '#228B22';
-      this.ctx.lineWidth = isGatherable ? 3 : 2;
-      this.ctx.stroke();
+  // Unit selection drawing moved to GameRenderer
 
-      // Draw resource value text
-      this.ctx.fillStyle = '#000000';
-      this.ctx.font = '12px Arial';
-      this.ctx.textAlign = 'center';
-      this.ctx.textBaseline = 'middle';
-      this.ctx.fillText(
-        nodeInfo.value.toString(),
-        centerX,
-        centerY
-      );
-    });
-  }
+  // Movement range drawing moved to GameRenderer
 
-  drawBases() {
-    Array.from(this.gameState.bases.values()).forEach(base => {
-      if (base.isDestroyed) return; // Don't draw destroyed bases
-
-      const centerX = base.position.x * this.cellSize + this.cellSize / 2;
-      const centerY = base.position.y * this.cellSize + this.cellSize / 2;
-
-      // Get player color and base character
-      const color = PLAYER_COLORS[base.playerId] || '#666666';
-      const character = ENTITY_CHARACTERS.base || '⬛';
-
-      // Set font for Unicode character rendering
-      const fontSize = this.cellSize * 0.8; // Slightly larger than units
-      this.ctx.font = `${fontSize}px serif`;
-      this.ctx.textAlign = 'center';
-      this.ctx.textBaseline = 'middle';
-
-      // Add subtle text shadow for better visibility
-      this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-      this.ctx.shadowOffsetX = 1;
-      this.ctx.shadowOffsetY = 1;
-      this.ctx.shadowBlur = 2;
-
-      // Draw base character
-      this.ctx.fillStyle = color;
-      this.ctx.fillText(character, centerX, centerY);
-
-      // Reset shadow
-      this.ctx.shadowColor = 'transparent';
-      this.ctx.shadowOffsetX = 0;
-      this.ctx.shadowOffsetY = 0;
-      this.ctx.shadowBlur = 0;
-
-      // Draw health bar for bases if damaged
-      if (base.health < base.maxHealth) {
-        const barWidth = this.cellSize * 0.8;
-        const barHeight = 4;
-        const barX = base.position.x * this.cellSize + (this.cellSize - barWidth) / 2;
-        const barY = base.position.y * this.cellSize + this.cellSize - 8;
-
-        // Background
-        this.ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
-        this.ctx.fillRect(barX, barY, barWidth, barHeight);
-
-        // Health portion
-        const healthPercent = base.health / base.maxHealth;
-        this.ctx.fillStyle = 'rgba(0, 255, 0, 0.8)';
-        this.ctx.fillRect(barX, barY, barWidth * healthPercent, barHeight);
-      }
-    });
-  }
-
-  drawUnits() {
-    Array.from(this.gameState.units.values()).forEach(unit => {
-      const centerX = unit.position.x * this.cellSize + this.cellSize / 2;
-      const centerY = unit.position.y * this.cellSize + this.cellSize / 2;
-
-      // Get player color and Unicode character
-      const color = PLAYER_COLORS[unit.playerId] || '#666666';
-      const character = UNIT_CHARACTERS[unit.type] || '?';
-
-      // Set font for Unicode character rendering
-      const fontSize = this.cellSize * 0.6; // Slightly smaller than full cell
-      this.ctx.font = `${fontSize}px serif`; // Serif fonts typically have better Unicode support
-      this.ctx.textAlign = 'center';
-      this.ctx.textBaseline = 'middle';
-
-      // Add subtle text shadow for better visibility
-      this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-      this.ctx.shadowOffsetX = 1;
-      this.ctx.shadowOffsetY = 1;
-      this.ctx.shadowBlur = 2;
-
-      // Draw Unicode character
-      this.ctx.fillStyle = color;
-      this.ctx.fillText(character, centerX, centerY);
-
-      // Reset shadow
-      this.ctx.shadowColor = 'transparent';
-      this.ctx.shadowOffsetX = 0;
-      this.ctx.shadowOffsetY = 0;
-      this.ctx.shadowBlur = 0;
-
-      // Draw health bar above the unit
-      const healthBarY = centerY - fontSize / 2 - 8;
-      this.drawUnitHealthBar(unit, centerX, healthBarY);
-
-      // Draw action indicator
-      const indicatorX = centerX + fontSize / 2;
-      const indicatorY = centerY - fontSize / 2;
-      if (unit.actionsUsed >= unit.maxActions) {
-        this.drawActionIndicator(indicatorX, indicatorY, 'exhausted');
-      } else if (unit.actionsUsed > 0) {
-        this.drawActionIndicator(indicatorX, indicatorY, 'partial');
-      }
-    });
-  }
-
-  drawUnitHealthBar(unit, centerX, y) {
-    const barWidth = this.cellSize * 0.6;
-    const barHeight = 4;
-    const healthPercent = unit.health / unit.maxHealth;
-
-    // Background
-    this.ctx.fillStyle = '#333333';
-    this.ctx.fillRect(centerX - barWidth/2, y, barWidth, barHeight);
-
-    // Health bar
-    const healthColor = healthPercent > 0.6 ? '#4CAF50' :
-      healthPercent > 0.3 ? '#FF9800' : '#F44336';
-    this.ctx.fillStyle = healthColor;
-    this.ctx.fillRect(centerX - barWidth/2, y, barWidth * healthPercent, barHeight);
-  }
-
-  drawActionIndicator(x, y, status) {
-    const size = 6;
-    const color = status === 'exhausted' ? '#F44336' : '#FF9800';
-
-    this.ctx.fillStyle = color;
-    this.ctx.beginPath();
-    this.ctx.arc(x, y, size/2, 0, 2 * Math.PI);
-    this.ctx.fill();
-  }
-
-  drawUnitSelection() {
-    const selectedUnit = this.inputController ? this.inputController.getSelectedUnit() : null;
-    if (selectedUnit) {
-      const centerX = selectedUnit.position.x * this.cellSize + this.cellSize / 2;
-      const centerY = selectedUnit.position.y * this.cellSize + this.cellSize / 2;
-      const radius = this.cellSize * 0.4;
-
-      // Draw selection ring
-      this.ctx.strokeStyle = '#FFD700';
-      this.ctx.lineWidth = 3;
-      this.ctx.setLineDash([5, 5]);
-      this.ctx.beginPath();
-      this.ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-      this.ctx.stroke();
-      this.ctx.setLineDash([]);
-    }
-  }
-
-  drawMovementRange() {
-    const selectedUnit = this.inputController ? this.inputController.getSelectedUnit() : null;
-    const showMovementRange = this.inputController ? this.inputController.getShowMovementRange() : false;
-    if (selectedUnit && showMovementRange) {
-      const validMoves = this.gameState.getValidMovePositions(selectedUnit.id);
-
-      for (const move of validMoves) {
-        const x = move.x * this.cellSize;
-        const y = move.y * this.cellSize;
-
-        // Draw valid move highlight
-        this.ctx.fillStyle = MOVEMENT_COLORS.VALID_MOVE;
-        this.ctx.fillRect(x, y, this.cellSize, this.cellSize);
-
-        // Draw border
-        this.ctx.strokeStyle = MOVEMENT_COLORS.VALID_MOVE_BORDER;
-        this.ctx.lineWidth = 2;
-        this.ctx.strokeRect(x, y, this.cellSize, this.cellSize);
-
-        // Draw movement cost indicator
-        if (move.cost > 1) {
-          this.ctx.fillStyle = MOVEMENT_COLORS.MOVEMENT_COST;
-          this.ctx.font = '12px Arial';
-          this.ctx.textAlign = 'center';
-          this.ctx.textBaseline = 'middle';
-          this.ctx.fillText(
-            move.cost.toString(),
-            x + this.cellSize / 2,
-            y + this.cellSize / 2
-          );
-        }
-      }
-    }
-  }
-
-  drawMovementPreview() {
-    const movementPreview = this.inputController ? this.inputController.getMovementPreview() : null;
-    const selectedUnit = this.inputController ? this.inputController.getSelectedUnit() : null;
-    if (movementPreview && selectedUnit) {
-      const x = movementPreview.x * this.cellSize;
-      const y = movementPreview.y * this.cellSize;
-
-      // Draw preview highlight
-      this.ctx.fillStyle = MOVEMENT_COLORS.PATH_PREVIEW;
-      this.ctx.fillRect(x, y, this.cellSize, this.cellSize);
-
-      // Draw border
-      this.ctx.strokeStyle = MOVEMENT_COLORS.PATH_PREVIEW_BORDER;
-      this.ctx.lineWidth = 3;
-      this.ctx.strokeRect(x, y, this.cellSize, this.cellSize);
-
-      // Draw movement cost
-      this.ctx.fillStyle = MOVEMENT_COLORS.MOVEMENT_COST;
-      this.ctx.font = 'bold 14px Arial';
-      this.ctx.textAlign = 'center';
-      this.ctx.textBaseline = 'middle';
-      this.ctx.fillText(
-        `${movementPreview.cost}`,
-        x + this.cellSize / 2,
-        y + this.cellSize / 2 + 8
-      );
-    }
-  }
+  // Movement preview drawing moved to GameRenderer
 
   newGame() {
     // Clean up existing event listeners first
