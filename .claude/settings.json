@@ -30,7 +30,7 @@
       "args": ["@anthropic/claude-historian"]
     },
     "playwright": {
-      "type": "stdio", 
+      "type": "stdio",
       "command": "npx",
       "args": ["@anthropic/mcp-playwright"]
     },

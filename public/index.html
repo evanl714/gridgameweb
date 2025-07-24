@@ -4,35 +4,810 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grid Strategy Game</title>
-    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/bright_theme.css">
+    <link rel="stylesheet" href="ui/ui-styles.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-sans) !important;
+            background: var(--background) !important;
+            color: var(--foreground) !important;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 280px 1fr 280px;
+            grid-template-rows: 60px 1fr 40px;
+            height: 100vh;
+            gap: 0;
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            background: var(--card);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            border-bottom: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .left-sidebar, .right-sidebar {
+            background: var(--sidebar);
+            padding: 16px;
+            overflow-y: auto;
+            border-right: 1px solid var(--sidebar-border);
+        }
+
+        .right-sidebar {
+            border-right: none;
+            border-left: 1px solid var(--sidebar-border);
+        }
+
+        .game-area {
+            background: var(--background);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .footer {
+            grid-column: 1 / -1;
+            background: var(--card);
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            border-top: 1px solid var(--border);
+            font-size: 13px;
+        }
+
+        .section-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px;
+            margin-bottom: 14px;
+            box-shadow: var(--shadow-xs);
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--foreground);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .unit-card {
+            background: var(--muted);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 10px;
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .unit-card:hover {
+            background: var(--primary);
+            color: var(--primary-foreground);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .unit-name {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 3px;
+        }
+
+        .unit-stats {
+            font-size: 11px;
+            color: var(--muted-foreground);
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .unit-card:hover .unit-stats {
+            color: var(--primary-foreground);
+        }
+
+        .game-board {
+            width: calc(100vw - 580px);
+            height: calc(100vh - 120px);
+            max-width: none;
+            max-height: none;
+            display: grid;
+            grid-template-columns: repeat(25, 1fr);
+            grid-template-rows: repeat(25, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border: 2px solid var(--accent);
+            border-radius: var(--radius);
+            padding: 2px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .grid-cell {
+            background: var(--card);
+            transition: all 0.15s ease;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border);
+            border-radius: 1px;
+        }
+
+        .grid-cell:nth-child(even) {
+            background: var(--muted);
+        }
+
+        .grid-cell:hover {
+            background: var(--accent);
+            color: var(--accent-foreground);
+            transform: scale(1.05);
+            z-index: 10;
+            border-color: var(--accent);
+            box-shadow: var(--shadow);
+        }
+
+        .grid-cell.selected {
+            background: rgba(0, 170, 255, 0.3) !important;
+            border: 2px solid #00aaff !important;
+            box-shadow: var(--shadow);
+        }
+
+        .grid-cell.hovered {
+            background: rgba(0, 170, 255, 0.1) !important;
+        }
+
+        .grid-cell.unit {
+            border: 2px solid var(--primary);
+        }
+
+        .unit-display {
+            pointer-events: none;
+        }
+
+        .resource-node {
+            width: 14px;
+            height: 14px;
+            background: var(--primary);
+            border-radius: 50%;
+            font-size: 8px;
+            color: var(--primary-foreground);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            border: 1px solid var(--background);
+            box-shadow: var(--shadow-sm);
+        }
+
+
+        .control-button {
+            background: var(--primary);
+            color: var(--primary-foreground);
+            border: none;
+            border-radius: var(--radius);
+            padding: 10px 16px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            margin-bottom: 6px;
+            box-shadow: var(--shadow-xs);
+        }
+
+        .control-button:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .control-button.secondary {
+            background: var(--secondary);
+            color: var(--secondary-foreground);
+        }
+
+        .control-button.destructive {
+            background: var(--destructive);
+            color: var(--destructive-foreground);
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 12px;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: var(--muted-foreground);
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: var(--foreground);
+            font-weight: 600;
+        }
+
+        .activity-item {
+            padding: 8px 10px;
+            background: var(--muted);
+            border-radius: var(--radius-sm);
+            margin-bottom: 4px;
+            font-size: 11px;
+            border-left: 3px solid var(--accent);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .status-active {
+            background: var(--primary);
+        }
+
+        .status-waiting {
+            background: var(--muted-foreground);
+        }
+
+        .logo {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--foreground);
+        }
+
+        .score-display {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .territory-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--muted);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 3px;
+        }
+
+        .territory-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+    </style>
 </head>
 <body>
-    <div class="game-container">
-        <header>
-            <h1>Grid Strategy Game</h1>
-            <div class="game-info">
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">GRID STRATEGY GAME</div>
+            <div style="display: flex; align-items: center; gap: 20px; font-weight: 600;">
                 <span id="currentPlayer">Player 1's Turn</span>
+                <span>|</span>
                 <span id="gameStatus">Ready to Play</span>
             </div>
-        </header>
-        
-        <main>
-            <div class="game-board">
-                <canvas id="gameCanvas" width="800" height="800"></canvas>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <span>Turn: <span class="score-display" id="turnDisplay">1</span></span>
+                <span>Phase: <span class="score-display" id="phaseDisplay">Resource</span></span>
             </div>
-            
-            <div class="game-controls">
-                <button id="newGameBtn">New Game</button>
-                <button id="resetBtn">Reset</button>
-                <button id="nextPhaseBtn">Next Phase</button>
+        </div>
+
+        <!-- Left Sidebar -->
+        <div class="left-sidebar">
+            <div class="section-card" id="buildPanelSidebar">
+                <div class="section-title">Build Units</div>
+                
+                <div class="unit-card" data-unit-type="worker">
+                    <div class="unit-name">♦ Worker</div>
+                    <div class="unit-stats">
+                        <span>Energy: 10</span>
+                        <span>HP: 50 ATK: 5 MOV: 2</span>
+                    </div>
+                </div>
+
+                <div class="unit-card" data-unit-type="scout">
+                    <div class="unit-name">♙ Scout</div>
+                    <div class="unit-stats">
+                        <span>Energy: 15</span>
+                        <span>HP: 30 ATK: 10 MOV: 4</span>
+                    </div>
+                </div>
+
+                <div class="unit-card" data-unit-type="infantry">
+                    <div class="unit-name">♗ Infantry</div>
+                    <div class="unit-stats">
+                        <span>Energy: 25</span>
+                        <span>HP: 100 ATK: 20 MOV: 2</span>
+                    </div>
+                </div>
+
+                <div class="unit-card" data-unit-type="heavy">
+                    <div class="unit-name">♖ Heavy</div>
+                    <div class="unit-stats">
+                        <span>Energy: 50</span>
+                        <span>HP: 200 ATK: 40 MOV: 1</span>
+                    </div>
+                </div>
             </div>
-        </main>
-        
-        <footer>
-            <p>Grid Strategy Game v0.1.0</p>
-        </footer>
+
+            <div class="section-card">
+                <div class="section-title">Game Status</div>
+                <div class="info-row">
+                    <span class="info-label">Phase</span>
+                    <span class="info-value" id="gamePhase">Resource</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Turn</span>
+                    <span class="info-value" id="turnNumber">1</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Mode</span>
+                    <span class="info-value">Local PvP</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Grid Size</span>
+                    <span class="info-value">25x25</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Energy</span>
+                    <span class="info-value" id="playerEnergy">100</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Actions</span>
+                    <span class="info-value" id="playerActions">3</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Area -->
+        <div class="game-area">
+            <div class="game-board" id="gameBoard">
+                <!-- 625 cells will be generated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="right-sidebar">
+            <div class="section-card">
+                <div class="section-title">Controls</div>
+                <button class="control-button" id="newGameBtn">New Game</button>
+                <button class="control-button" id="endTurnBtn">End Turn</button>
+                <button class="control-button secondary" id="nextPhaseBtn">Next Phase</button>
+                <button class="control-button secondary" id="gatherBtn">Gather Resources</button>
+                <button class="control-button destructive" id="surrenderBtn">Surrender</button>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title">Unit Details</div>
+                <div id="unitInfoSidebar">
+                    <div class="info-row">
+                        <span class="info-label">Selected</span>
+                        <span class="info-value">None</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Health</span>
+                        <span class="info-value">--</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Energy</span>
+                        <span class="info-value">--</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Movement</span>
+                        <span class="info-value">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title">Victory Conditions</div>
+                <div class="info-row">
+                    <span class="info-label">Resource Victory</span>
+                    <span class="info-value">500</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Elimination</span>
+                    <span class="info-value">All units</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Base Capture</span>
+                    <span class="info-value">Enemy base</span>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title">Recent Activity</div>
+                <div class="activity-item">
+                    <span class="status-indicator status-active"></span>
+                    Game started
+                </div>
+                <div class="activity-item">
+                    <span class="status-indicator status-active"></span>
+                    Turn 1 begins
+                </div>
+                <div class="activity-item">
+                    <span class="status-indicator status-active"></span>
+                    Resource phase active
+                </div>
+                <div class="activity-item">
+                    <span class="status-indicator status-waiting"></span>
+                    Player 1 ready
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title">Player Status</div>
+                <div class="info-row">
+                    <span class="info-label">Units</span>
+                    <span class="info-value" id="playerUnits">0</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Resources</span>
+                    <span class="info-value" id="playerResources">0</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Territory</span>
+                    <span class="info-value" id="territoryControl">0%</span>
+                </div>
+                <div class="territory-bar">
+                    <div class="territory-fill" id="territoryBar"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer" style="display: none;">
+            <!-- Footer hidden to fix display issue -->
+        </div>
     </div>
+
+    <script>
+        // Initialize grid-based game board
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate game board with 25x25 grid
+            const gameBoard = document.getElementById('gameBoard');
+            const resourcePositions = [
+                {row: 4, col: 4}, {row: 12, col: 4}, {row: 20, col: 4},
+                {row: 4, col: 12}, {row: 12, col: 12}, {row: 20, col: 12},
+                {row: 4, col: 20}, {row: 12, col: 20}, {row: 20, col: 20}
+            ];
+
+            // Generate 625 grid cells (25x25)
+            for (let i = 0; i < 625; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'grid-cell';
+                cell.dataset.index = i;
+                
+                const row = Math.floor(i / 25);
+                const col = i % 25;
+                cell.dataset.x = col;
+                cell.dataset.y = row;
+                
+                // Add resource nodes at specified positions
+                const hasResource = resourcePositions.some(pos => pos.row === row && pos.col === col);
+                if (hasResource) {
+                    const resource = document.createElement('div');
+                    resource.className = 'resource-node';
+                    resource.textContent = '100';
+                    cell.appendChild(resource);
+                }
+                
+                gameBoard.appendChild(cell);
+            }
+
+            // Add unit card selection functionality
+            document.querySelectorAll('.unit-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    // Reset all cards
+                    document.querySelectorAll('.unit-card').forEach(c => {
+                        c.style.background = '';
+                        c.style.color = '';
+                    });
+                    // Highlight selected card
+                    this.style.background = 'var(--accent)';
+                    this.style.color = 'var(--accent-foreground)';
+                    
+                    // Store selected unit type for building
+                    window.selectedUnitType = this.dataset.unitType;
+                });
+            });
+
+            // Grid cell click handling - using event delegation to survive DOM updates
+            gameBoard.addEventListener('click', function(e) {
+                // Find the closest grid cell element
+                const cell = e.target.closest('.grid-cell');
+                if (cell) {
+                    const x = parseInt(cell.dataset.x);
+                    const y = parseInt(cell.dataset.y);
+                    
+                    // If we have a game instance, use its click handler
+                    if (window.game) {
+                        window.game.handleCellClick(x, y);
+                    } else {
+                        // Fallback for demo purposes
+                        console.log(`Clicked cell at (${x}, ${y})`);
+                        
+                        // Update unit info sidebar
+                        const unitInfo = document.getElementById('unitInfoSidebar');
+                        unitInfo.innerHTML = `
+                            <div class="info-row">
+                                <span class="info-label">Position</span>
+                                <span class="info-value">${x},${y}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Type</span>
+                                <span class="info-value">${cell.querySelector('.resource-node') ? 'Resource' : 'Empty'}</span>
+                            </div>
+                        `;
+                    }
+                }
+            });
+        });
+    </script>
     
+    <!-- Load existing game logic -->
     <script type="module" src="game.js"></script>
+    
+    <!-- Simplified Grid Initialization -->
+    <script>
+        // Initialize game and grid in proper sequence
+        async function initializeGame() {
+            try {
+                console.log('🎮 Starting game initialization...');
+                
+                // Wait for DOM and ensure grid cells are created
+                if (document.querySelectorAll('.grid-cell').length === 0) {
+                    console.log('⏳ Waiting for grid cells to be generated...');
+                    await new Promise(resolve => {
+                        const checkCells = setInterval(() => {
+                            if (document.querySelectorAll('.grid-cell').length > 0) {
+                                clearInterval(checkCells);
+                                resolve();
+                            }
+                        }, 50);
+                    });
+                }
+                
+                // Wait for game module to load
+                if (!window.game) {
+                    console.log('⏳ Waiting for game module to load...');
+                    await new Promise(resolve => {
+                        const checkGame = setInterval(() => {
+                            if (window.game) {
+                                clearInterval(checkGame);
+                                resolve();
+                            }
+                        }, 50);
+                    });
+                }
+                
+                console.log('✅ Game and grid ready - initializing adapter...');
+                
+                // Override render method to use grid-only rendering
+                window.game.render = function() {
+                    try {
+                        this.renderToGrid();
+                    } catch (error) {
+                        console.error('Error in grid render:', error);
+                    }
+                };
+                    
+                    // Add grid rendering capability with error handling
+                    window.game.renderToGrid = function() {
+                        try {
+                            const cells = document.querySelectorAll('.grid-cell');
+                            
+                            if (cells.length === 0) {
+                                console.warn('No grid cells found for rendering');
+                                return;
+                            }
+                            
+                            console.log('🔧 DEBUG: renderToGrid called, found', cells.length, 'cells');
+                            
+                            // Clear all cells safely - preserve grid structure
+                            cells.forEach((cell, index) => {
+                                if (cell) {
+                                    // Preserve essential grid cell attributes
+                                    const originalClasses = cell.className;
+                                    const dataIndex = cell.dataset.index;
+                                    const dataX = cell.dataset.x;
+                                    const dataY = cell.dataset.y;
+                                    
+                                    cell.classList.remove('selected', 'hovered', 'unit', 'base', 'player1', 'player2', 'player1-base', 'player2-base');
+                                    const existingUnit = cell.querySelector('.unit-display');
+                                    const existingBase = cell.querySelector('.base-display');
+                                    if (existingUnit) existingUnit.remove();
+                                    if (existingBase) existingBase.remove();
+                                    
+                                    // Only clear background if it was explicitly set (for bases/units)
+                                    if (cell.style.background && (cell.style.background.includes('#4CAF50') || cell.style.background.includes('#F44336'))) {
+                                        cell.style.background = '';
+                                    }
+                                    
+                                    // Ensure grid-cell class is preserved
+                                    if (!cell.classList.contains('grid-cell')) {
+                                        cell.classList.add('grid-cell');
+                                    }
+                                    
+                                    // Restore data attributes if missing
+                                    if (!cell.dataset.index) cell.dataset.index = dataIndex || index;
+                                    if (!cell.dataset.x) cell.dataset.x = dataX || (index % 25);
+                                    if (!cell.dataset.y) cell.dataset.y = dataY || Math.floor(index / 25);
+                                }
+                            });
+                        
+                        // Render selected cell
+                        if (this.selectedCell) {
+                            const selectedIndex = this.selectedCell.y * 25 + this.selectedCell.x;
+                            const selectedElement = cells[selectedIndex];
+                            if (selectedElement) {
+                                selectedElement.classList.add('selected');
+                            }
+                        }
+                        
+                        // Render hovered cell
+                        if (this.hoveredCell) {
+                            const hoveredIndex = this.hoveredCell.y * 25 + this.hoveredCell.x;
+                            const hoveredElement = cells[hoveredIndex];
+                            if (hoveredElement) {
+                                hoveredElement.classList.add('hovered');
+                            }
+                        }
+                        
+                            // Render bases first
+                            if (this.gameState && this.gameState.bases) {
+                                Array.from(this.gameState.bases.values()).forEach(base => {
+                                    if (base && base.position && 
+                                        typeof base.position.x === 'number' && 
+                                        typeof base.position.y === 'number' &&
+                                        base.position.x >= 0 && base.position.x < 25 &&
+                                        base.position.y >= 0 && base.position.y < 25) {
+                                        
+                                        const baseIndex = base.position.y * 25 + base.position.x;
+                                        const baseCell = cells[baseIndex];
+                                        if (baseCell) {
+                                            const baseDisplay = document.createElement('div');
+                                            baseDisplay.className = 'base-display';
+                                            baseDisplay.textContent = '🏛️';
+                                            baseDisplay.style.cssText = `
+                                                position: absolute;
+                                                font-size: 20px;
+                                                z-index: 4;
+                                                top: 50%;
+                                                left: 50%;
+                                                transform: translate(-50%, -50%);
+                                            `;
+                                            baseCell.appendChild(baseDisplay);
+                                            baseCell.classList.add('base', `player${base.playerId}-base`);
+                                            baseCell.style.background = base.playerId === 1 ? '#4CAF50' : '#F44336';
+                                        }
+                                    }
+                                });
+                            }
+                            
+                            // Render units with validation
+                            if (this.gameState && this.gameState.units) {
+                                Array.from(this.gameState.units.values()).forEach(unit => {
+                                    if (unit && unit.position && 
+                                        typeof unit.position.x === 'number' && 
+                                        typeof unit.position.y === 'number' &&
+                                        unit.position.x >= 0 && unit.position.x < 25 &&
+                                        unit.position.y >= 0 && unit.position.y < 25) {
+                                        
+                                        const unitIndex = unit.position.y * 25 + unit.position.x;
+                                        const unitCell = cells[unitIndex];
+                                        if (unitCell) {
+                                            const unitDisplay = document.createElement('div');
+                                            unitDisplay.className = 'unit-display';
+                                            unitDisplay.textContent = this.getUnitSymbol(unit.type);
+                                            unitDisplay.style.cssText = `
+                                                position: absolute;
+                                                font-size: 16px;
+                                                font-weight: bold;
+                                                color: ${unit.playerId === 1 ? '#00aaff' : '#F44336'};
+                                                z-index: 5;
+                                                top: 50%;
+                                                left: 50%;
+                                                transform: translate(-50%, -50%);
+                                            `;
+                                            unitCell.appendChild(unitDisplay);
+                                            unitCell.classList.add('unit', `player${unit.playerId}`);
+                                        }
+                                    }
+                                });
+                            }
+                        } catch (error) {
+                            console.error('Error in renderToGrid:', error);
+                        }
+                    };
+                    
+                    // Add helper method for unit symbols
+                    window.game.getUnitSymbol = function(unitType) {
+                        const symbols = {
+                            worker: '♦',
+                            scout: '♙', 
+                            infantry: '♗',
+                            heavy: '♖'
+                        };
+                        return symbols[unitType] || '?';
+                    };
+                    
+                    // Override canvas-specific methods to work with grid
+                    window.game.updateCanvasSize = function() {
+                        // No-op for grid-based version
+                    };
+                    
+                    // Ensure grid coordinates work properly
+                    window.game.getGridCoordinates = function(event) {
+                        // This will be handled by the grid cell click handlers
+                        return null;
+                    };
+                    
+                    // Hook up control buttons
+                    document.getElementById('newGameBtn')?.addEventListener('click', () => window.game.newGame());
+                    document.getElementById('nextPhaseBtn')?.addEventListener('click', () => window.game.nextPhase());
+                    document.getElementById('gatherBtn')?.addEventListener('click', () => window.game.gatherResources());
+                    document.getElementById('saveGameBtn')?.addEventListener('click', () => window.game.saveGame());
+                    document.getElementById('resetBtn')?.addEventListener('click', () => window.game.resetGame());
+                    document.getElementById('surrenderBtn')?.addEventListener('click', () => window.game.surrender());
+                    
+                    // Mark adapter as initialized
+                    window.game.gridAdapterInitialized = true;
+                    
+                    // Initial render
+                    setTimeout(() => {
+                        try {
+                            window.game.render();
+                            console.log('✅ Grid adapter initialized successfully');
+                        } catch (error) {
+                            console.error('❌ Error during initial render:', error);
+                        }
+                    }, 100);
+                    
+                } catch (error) {
+                    console.error('❌ Grid adapter initialization failed:', error);
+                }
+            }
+        
+        // Start initialization when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeGame);
+        } else {
+            initializeGame();
+        }
+    </script>
 </body>
 </html>

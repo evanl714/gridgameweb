@@ -68,14 +68,14 @@ describe('Unit', () => {
   let unit;
 
   beforeEach(() => {
-    unit = new Unit('worker', 1, 5, 5);
+    unit = new Unit('worker', 1, 2, 23);
   });
 
   test('should initialize with correct values', () => {
     expect(unit.type).toBe('worker');
     expect(unit.playerId).toBe(1);
-    expect(unit.position.x).toBe(5);
-    expect(unit.position.y).toBe(5);
+    expect(unit.position.x).toBe(2);
+    expect(unit.position.y).toBe(23);
     expect(unit.health).toBe(50); // worker health from constants
     expect(unit.maxHealth).toBe(50);
     expect(unit.actionsUsed).toBe(0);
@@ -108,7 +108,7 @@ describe('Unit', () => {
 
   test('should manage actions correctly', () => {
     expect(unit.canAct()).toBe(true);
-    
+
     unit.useAction();
     expect(unit.actionsUsed).toBe(1);
     expect(unit.canAct()).toBe(true);
@@ -171,35 +171,35 @@ describe('GameState', () => {
   });
 
   test('should check position emptiness correctly', () => {
-    expect(gameState.isPositionEmpty(5, 5)).toBe(true);
-    
+    expect(gameState.isPositionEmpty(2, 23)).toBe(true); // Near player 1 base, not on base
+
     // Create a unit and check position is no longer empty
-    const unit = gameState.createUnit('worker', 1, 5, 5);
-    expect(gameState.isPositionEmpty(5, 5)).toBe(false);
-    expect(gameState.getUnitAt(5, 5)).toBe(unit);
+    const unit = gameState.createUnit('worker', 1, 2, 23);
+    expect(gameState.isPositionEmpty(2, 23)).toBe(false);
+    expect(gameState.getUnitAt(2, 23)).toBe(unit);
   });
 
   test('should create units correctly', () => {
-    const unit = gameState.createUnit('worker', 1, 10, 10);
-    
+    const unit = gameState.createUnit('worker', 1, 2, 22); // Near player 1 base
+
     expect(unit).toBeTruthy();
     expect(unit.type).toBe('worker');
     expect(unit.playerId).toBe(1);
-    expect(unit.position.x).toBe(10);
-    expect(unit.position.y).toBe(10);
-    
+    expect(unit.position.x).toBe(2);
+    expect(unit.position.y).toBe(22);
+
     expect(gameState.units.has(unit.id)).toBe(true);
-    expect(gameState.board[10][10]).toBe(unit.id);
-    
+    expect(gameState.board[2][22]).toBe(unit.id);
+
     const player = gameState.players.get(1);
     expect(player.unitsOwned.has(unit.id)).toBe(true);
     expect(player.energy).toBe(90); // 100 - 10 (worker cost)
   });
 
   test('should not create unit on occupied position', () => {
-    gameState.createUnit('worker', 1, 5, 5);
-    const unit2 = gameState.createUnit('scout', 2, 5, 5);
-    
+    gameState.createUnit('worker', 1, 2, 23); // Create first unit near player 1 base
+    const unit2 = gameState.createUnit('scout', 1, 2, 23); // Try to create on same position (same player)
+
     expect(unit2).toBe(null);
     expect(gameState.units.size).toBe(1);
   });
@@ -207,66 +207,66 @@ describe('GameState', () => {
   test('should not create unit with insufficient energy', () => {
     const player = gameState.players.get(1);
     player.energy = 5; // Not enough for worker (cost: 10)
-    
-    const unit = gameState.createUnit('worker', 1, 5, 5);
+
+    const unit = gameState.createUnit('worker', 1, 2, 23);
     expect(unit).toBe(null);
     expect(gameState.units.size).toBe(0);
   });
 
   test('should move units correctly', () => {
-    const unit = gameState.createUnit('worker', 1, 5, 5);
-    const moved = gameState.moveUnit(unit.id, 6, 5);
-    
+    const unit = gameState.createUnit('worker', 1, 2, 23); // Near player 1 base
+    const moved = gameState.moveUnit(unit.id, 3, 23);
+
     expect(moved).toBe(true);
-    expect(unit.position.x).toBe(6);
-    expect(unit.position.y).toBe(5);
-    expect(gameState.board[5][5]).toBe(null);
-    expect(gameState.board[6][5]).toBe(unit.id);
+    expect(unit.position.x).toBe(3);
+    expect(unit.position.y).toBe(23);
+    expect(gameState.board[2][23]).toBe(null);
+    expect(gameState.board[3][23]).toBe(unit.id);
     expect(unit.actionsUsed).toBe(1);
   });
 
   test('should not move unit to occupied position', () => {
-    const unit1 = gameState.createUnit('worker', 1, 5, 5);
-    const unit2 = gameState.createUnit('scout', 1, 6, 5);
-    
-    const moved = gameState.moveUnit(unit1.id, 6, 5);
+    const unit1 = gameState.createUnit('worker', 1, 2, 23); // Near player 1 base
+    const unit2 = gameState.createUnit('scout', 1, 3, 23); // Also near player 1 base
+
+    const moved = gameState.moveUnit(unit1.id, 3, 23);
     expect(moved).toBe(false);
-    expect(unit1.position.x).toBe(5); // Should stay in original position
+    expect(unit1.position.x).toBe(2); // Should stay in original position
   });
 
   test('should remove units correctly', () => {
-    const unit = gameState.createUnit('worker', 1, 5, 5);
+    const unit = gameState.createUnit('worker', 1, 2, 23); // Near player 1 base
     const removed = gameState.removeUnit(unit.id);
-    
+
     expect(removed).toBe(true);
     expect(gameState.units.has(unit.id)).toBe(false);
-    expect(gameState.board[5][5]).toBe(null);
-    
+    expect(gameState.board[2][23]).toBe(null);
+
     const player = gameState.players.get(1);
     expect(player.unitsOwned.has(unit.id)).toBe(false);
   });
 
   test('should get player units correctly', () => {
-    gameState.createUnit('worker', 1, 5, 5);
-    gameState.createUnit('scout', 1, 6, 5);
-    gameState.createUnit('worker', 2, 10, 10);
-    
+    gameState.createUnit('worker', 1, 2, 23); // Near player 1 base
+    gameState.createUnit('scout', 1, 3, 22); // Near player 1 base
+    gameState.createUnit('worker', 2, 22, 1); // Near player 2 base
+
     const player1Units = gameState.getPlayerUnits(1);
     const player2Units = gameState.getPlayerUnits(2);
-    
+
     expect(player1Units.length).toBe(2);
     expect(player2Units.length).toBe(1);
-    expect(player1Units.every(unit => unit.playerId === 1)).toBe(true);
-    expect(player2Units.every(unit => unit.playerId === 2)).toBe(true);
+    expect(player1Units.every((unit) => unit.playerId === 1)).toBe(true);
+    expect(player2Units.every((unit) => unit.playerId === 2)).toBe(true);
   });
 
   test('should handle event system correctly', () => {
     const mockCallback = jest.fn();
     gameState.on('testEvent', mockCallback);
-    
+
     gameState.emit('testEvent', { data: 'test' });
     expect(mockCallback).toHaveBeenCalledWith({ data: 'test' });
-    
+
     gameState.off('testEvent', mockCallback);
     gameState.emit('testEvent', { data: 'test2' });
     expect(mockCallback).toHaveBeenCalledTimes(1); // Should not be called again
@@ -275,28 +275,28 @@ describe('GameState', () => {
   test('should serialize and deserialize complete game state', () => {
     // Set up a complex game state
     gameState.startGame();
-    gameState.createUnit('worker', 1, 5, 5);
-    gameState.createUnit('scout', 2, 10, 10);
+    gameState.createUnit('worker', 1, 2, 23); // Near player 1 base
+    gameState.createUnit('scout', 2, 22, 1); // Near player 2 base
     gameState.currentPlayer = 2;
     gameState.turnNumber = 3;
-    
+
     const serialized = gameState.serialize();
     const deserialized = GameState.deserialize(serialized);
-    
+
     expect(deserialized.gameId).toBe(gameState.gameId);
     expect(deserialized.status).toBe(gameState.status);
     expect(deserialized.currentPlayer).toBe(gameState.currentPlayer);
     expect(deserialized.turnNumber).toBe(gameState.turnNumber);
     expect(deserialized.units.size).toBe(gameState.units.size);
     expect(deserialized.players.size).toBe(gameState.players.size);
-    
+
     // Check specific unit data
     const originalUnits = Array.from(gameState.units.values());
     const deserializedUnits = Array.from(deserialized.units.values());
     expect(deserializedUnits.length).toBe(originalUnits.length);
-    
-    // Verify board state
-    expect(deserialized.board[5][5]).toBeTruthy();
-    expect(deserialized.board[10][10]).toBeTruthy();
+
+    // Verify board state - check for units at valid positions
+    expect(deserialized.board[2][23]).toBeTruthy(); // Player 1 unit
+    expect(deserialized.board[22][1]).toBeTruthy(); // Player 2 unit
   });
 });

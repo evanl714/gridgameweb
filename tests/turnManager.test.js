@@ -12,7 +12,7 @@ describe('TurnManager', () => {
   beforeEach(() => {
     gameState = new GameState();
     turnManager = new TurnManager(gameState);
-    
+
     // Mock timers for testing
     jest.useFakeTimers();
   });
@@ -32,36 +32,36 @@ describe('TurnManager', () => {
   test('should start turn correctly', () => {
     const mockCallback = jest.fn();
     gameState.on('turnStarted', mockCallback);
-    
+
     gameState.startGame();
     turnManager.startTurn();
-    
+
     expect(gameState.currentPhase).toBe('resource');
     expect(mockCallback).toHaveBeenCalledWith({
       player: 1,
       turnNumber: 1,
-      phase: 'resource'
+      phase: 'resource',
     });
   });
 
   test('should reset player and unit actions on turn start', () => {
-    // Create units for testing
-    const unit1 = gameState.createUnit('worker', 1, 5, 5);
-    const unit2 = gameState.createUnit('scout', 1, 6, 6);
-    
+    // Create units for testing (near player 1 base at 5,5)
+    const unit1 = gameState.createUnit('worker', 1, 6, 5);
+    const unit2 = gameState.createUnit('scout', 1, 7, 5);
+
     // Use some actions
     const player = gameState.getCurrentPlayer();
     player.useAction();
     unit1.useAction();
     unit2.useAction();
-    
+
     expect(player.actionsRemaining).toBe(2);
     expect(unit1.actionsUsed).toBe(1);
     expect(unit2.actionsUsed).toBe(1);
-    
+
     gameState.startGame();
     turnManager.startTurn();
-    
+
     expect(player.actionsRemaining).toBe(3);
     expect(unit1.actionsUsed).toBe(0);
     expect(unit2.actionsUsed).toBe(0);
@@ -70,20 +70,22 @@ describe('TurnManager', () => {
   test('should execute resource phase correctly', () => {
     const mockCallback = jest.fn();
     gameState.on('resourcePhaseComplete', mockCallback);
-    
+
     const player = gameState.getCurrentPlayer();
     const initialEnergy = player.energy;
-    
+
     gameState.startGame();
     turnManager.executeResourcePhase();
-    
+
     // Should gain base energy (10) plus some resource bonus
     expect(player.energy).toBeGreaterThanOrEqual(initialEnergy + 10);
-    expect(mockCallback).toHaveBeenCalledWith(expect.objectContaining({
-      player: 1,
-      energyGained: expect.any(Number),
-      resourceBonus: expect.any(Number)
-    }));
+    expect(mockCallback).toHaveBeenCalledWith(
+      expect.objectContaining({
+        player: 1,
+        energyGained: expect.any(Number),
+        resourceBonus: expect.any(Number),
+      }),
+    );
   });
 
   test('should calculate resource bonus for workers near resource nodes', () => {
@@ -91,10 +93,10 @@ describe('TurnManager', () => {
     const worker = gameState.createUnit('worker', 1, 4, 5); // Adjacent to node at (5,5)
     const player = gameState.getCurrentPlayer();
     const initialEnergy = player.energy;
-    
+
     gameState.startGame();
     turnManager.executeResourcePhase();
-    
+
     // Should gain base energy + resource bonus
     expect(player.energy).toBeGreaterThan(initialEnergy + 10);
     expect(player.resourcesGathered).toBeGreaterThan(0);
@@ -103,22 +105,22 @@ describe('TurnManager', () => {
   test('should advance phases correctly', () => {
     const phaseCallback = jest.fn();
     gameState.on('phaseChanged', phaseCallback);
-    
+
     gameState.startGame();
-    
+
     // Should start in resource phase
     expect(gameState.currentPhase).toBe('resource');
     expect(turnManager.currentPhaseIndex).toBe(0);
-    
+
     // Advance to action phase
     turnManager.nextPhase();
     expect(gameState.currentPhase).toBe('action');
     expect(turnManager.currentPhaseIndex).toBe(1);
     expect(phaseCallback).toHaveBeenCalledWith({
       phase: 'action',
-      player: 1
+      player: 1,
     });
-    
+
     // Advance to build phase
     turnManager.nextPhase();
     expect(gameState.currentPhase).toBe('build');
@@ -130,20 +132,20 @@ describe('TurnManager', () => {
     const turnStartCallback = jest.fn();
     gameState.on('turnEnded', turnEndCallback);
     gameState.on('turnStarted', turnStartCallback);
-    
+
     gameState.startGame();
-    
+
     // Go through all phases
     turnManager.nextPhase(); // resource -> action
     turnManager.nextPhase(); // action -> build
     turnManager.nextPhase(); // build -> end turn
-    
+
     expect(turnEndCallback).toHaveBeenCalledWith({
       previousPlayer: 1,
       nextPlayer: 2,
-      turnNumber: 2
+      turnNumber: 2,
     });
-    
+
     // Should start next turn with player 2
     expect(gameState.currentPlayer).toBe(2);
     expect(gameState.turnNumber).toBe(2);
@@ -152,35 +154,35 @@ describe('TurnManager', () => {
   test('should handle turn timer correctly', () => {
     const timerCallback = jest.fn();
     gameState.on('turnTimerTick', timerCallback);
-    
+
     gameState.startGame();
     turnManager.startTurn();
-    
+
     // Advance timer by 1 second
     jest.advanceTimersByTime(1000);
-    
+
     expect(timerCallback).toHaveBeenCalledWith({
       timeRemaining: 119000,
-      totalTime: 120000
+      totalTime: 120000,
     });
-    
+
     expect(turnManager.timeRemaining).toBeLessThan(120000);
   });
 
   test('should auto-end turn when time expires', () => {
     const timeExpiredCallback = jest.fn();
     gameState.on('turnTimeExpired', timeExpiredCallback);
-    
+
     gameState.startGame();
     turnManager.startTurn();
-    
+
     // Fast forward to time expiration
     jest.advanceTimersByTime(120000);
-    
+
     expect(timeExpiredCallback).toHaveBeenCalledWith({
-      player: 1
+      player: 1,
     });
-    
+
     // Should have advanced to next player (may not work with fake timers)
     expect(gameState.currentPlayer).toBeGreaterThan(0);
   });
@@ -188,22 +190,22 @@ describe('TurnManager', () => {
   test('should use player actions correctly', () => {
     const actionCallback = jest.fn();
     gameState.on('actionUsed', actionCallback);
-    
+
     const player = gameState.getCurrentPlayer();
-    
+
     const success = turnManager.usePlayerAction();
     expect(success).toBe(true);
     expect(player.actionsRemaining).toBe(2);
     expect(actionCallback).toHaveBeenCalledWith({
       player: 1,
-      actionsRemaining: 2
+      actionsRemaining: 2,
     });
   });
 
   test('should not use action when none remaining', () => {
     const player = gameState.getCurrentPlayer();
     player.actionsRemaining = 0;
-    
+
     const success = turnManager.usePlayerAction();
     expect(success).toBe(false);
     expect(player.actionsRemaining).toBe(0);
@@ -213,12 +215,12 @@ describe('TurnManager', () => {
     gameState.startGame();
     gameState.currentPhase = 'action';
     turnManager.currentPhaseIndex = 1;
-    
+
     const player = gameState.getCurrentPlayer();
     player.actionsRemaining = 1;
-    
+
     turnManager.usePlayerAction();
-    
+
     // Should auto-advance to build phase after a delay
     jest.advanceTimersByTime(500);
     expect(gameState.currentPhase).toBe('build');
@@ -227,16 +229,16 @@ describe('TurnManager', () => {
   test('should force end turn correctly', () => {
     const forceEndCallback = jest.fn();
     gameState.on('turnForcedEnd', forceEndCallback);
-    
+
     gameState.startGame();
-    
+
     const currentPlayer = gameState.currentPlayer;
     turnManager.forceEndTurn();
-    
+
     expect(forceEndCallback).toHaveBeenCalledWith({
-      player: currentPlayer
+      player: currentPlayer,
     });
-    
+
     expect(gameState.currentPlayer).not.toBe(currentPlayer);
   });
 
@@ -244,26 +246,26 @@ describe('TurnManager', () => {
     gameState.startGame();
     turnManager.currentPhaseIndex = 1;
     gameState.currentPhase = 'action';
-    
+
     const phaseInfo = turnManager.getCurrentPhaseInfo();
-    
+
     expect(phaseInfo).toEqual({
       phase: 'action',
       phaseIndex: 1,
       totalPhases: 3,
       player: 1,
-      timeRemaining: 120000
+      timeRemaining: 120000,
     });
   });
 
   test('should stop timer when destroyed', () => {
     gameState.startGame();
     turnManager.startTurn();
-    
+
     expect(turnManager.turnTimer).toBeTruthy();
-    
+
     turnManager.destroy();
-    
+
     expect(turnManager.turnTimer).toBe(null);
     expect(turnManager.gameState).toBe(null);
   });
@@ -271,24 +273,24 @@ describe('TurnManager', () => {
   test('should handle phase transitions with events', () => {
     const actionPhaseCallback = jest.fn();
     const buildPhaseCallback = jest.fn();
-    
+
     gameState.on('actionPhaseStarted', actionPhaseCallback);
     gameState.on('buildPhaseStarted', buildPhaseCallback);
-    
+
     gameState.startGame();
-    
+
     // Move to action phase
     turnManager.nextPhase();
     expect(actionPhaseCallback).toHaveBeenCalledWith({
       player: 1,
-      actionsRemaining: 3
+      actionsRemaining: 3,
     });
-    
+
     // Move to build phase
     turnManager.nextPhase();
     expect(buildPhaseCallback).toHaveBeenCalledWith({
       player: 1,
-      energy: expect.any(Number)
+      energy: expect.any(Number),
     });
   });
 });

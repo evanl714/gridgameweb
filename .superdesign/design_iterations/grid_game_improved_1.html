@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid Game - Improved UI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="chess_starcraft_theme.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-sans) !important;
+            background: var(--background) !important;
+            color: var(--foreground) !important;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 280px 1fr 320px;
+            grid-template-rows: 60px 1fr 50px;
+            height: 100vh;
+            gap: 1px;
+            background: var(--border);
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            background: var(--card);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-center {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            font-weight: 500;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            font-weight: 600;
+        }
+
+        .left-sidebar {
+            background: var(--sidebar);
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid var(--sidebar-border);
+        }
+
+        .game-area {
+            background: var(--background);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .right-sidebar {
+            background: var(--sidebar);
+            padding: 20px;
+            overflow-y: auto;
+            border-left: 1px solid var(--sidebar-border);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .footer {
+            grid-column: 1 / -1;
+            background: var(--card);
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            border-top: 1px solid var(--border);
+            font-size: 14px;
+            color: var(--muted-foreground);
+        }
+
+        .section-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--foreground);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .unit-card {
+            background: var(--muted);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .unit-card:hover {
+            background: var(--accent);
+            color: var(--accent-foreground);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .unit-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .unit-stats {
+            font-size: 12px;
+            color: var(--muted-foreground);
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .unit-card:hover .unit-stats {
+            color: var(--accent-foreground);
+        }
+
+        .game-board {
+            width: 600px;
+            height: 480px;
+            display: grid;
+            grid-template-columns: repeat(25, 1fr);
+            grid-template-rows: repeat(25, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border: 2px solid var(--accent);
+            border-radius: var(--radius);
+            box-shadow: 0 0 20px var(--accent);
+            animation: boardGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes boardGlow {
+            from { box-shadow: 0 0 20px var(--accent); }
+            to { box-shadow: 0 0 30px var(--accent), 0 0 40px var(--accent); }
+        }
+
+        .grid-cell {
+            background: var(--muted);
+            transition: all 0.15s ease;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .grid-cell:nth-child(odd) {
+            background: var(--card);
+        }
+
+        .grid-cell:hover {
+            background: var(--accent);
+            transform: scale(1.1);
+            z-index: 10;
+        }
+
+        .resource-node {
+            width: 12px;
+            height: 12px;
+            background: var(--primary);
+            border-radius: 50%;
+            font-size: 8px;
+            color: var(--primary-foreground);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .control-button {
+            background: var(--primary);
+            color: var(--primary-foreground);
+            border: none;
+            border-radius: var(--radius);
+            padding: 12px 20px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .control-button:hover {
+            background: var(--primary);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .control-button:active {
+            transform: translateY(0);
+        }
+
+        .control-button.secondary {
+            background: var(--secondary);
+            color: var(--secondary-foreground);
+        }
+
+        .control-button.destructive {
+            background: var(--destructive);
+            color: var(--destructive-foreground);
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: var(--muted-foreground);
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: var(--foreground);
+            font-weight: 600;
+        }
+
+        .activity-item {
+            padding: 8px 12px;
+            background: var(--muted);
+            border-radius: var(--radius-sm);
+            margin-bottom: 6px;
+            font-size: 13px;
+            border-left: 3px solid var(--accent);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-10px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-active {
+            background: var(--primary);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .status-waiting {
+            background: var(--muted-foreground);
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--foreground);
+        }
+
+        .territory-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--muted);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .territory-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .score-display {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1400px) {
+            .main-container {
+                grid-template-columns: 260px 1fr 300px;
+            }
+            
+            .game-board {
+                width: 500px;
+                height: 400px;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 240px 1fr 280px;
+            }
+            
+            .game-board {
+                width: 450px;
+                height: 360px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <div class="logo">GRID GAME</div>
+            </div>
+            <div class="header-center">
+                <span>Turn 1</span>
+                <span>|</span>
+                <span>Resource Phase</span>
+            </div>
+            <div class="header-right">
+                <span>Territory: <span class="score-display">0%</span></span>
+                <span>Score: <span class="score-display">0</span></span>
+            </div>
+        </div>
+
+        <!-- Left Sidebar -->
+        <div class="left-sidebar">
+            <div class="section-card">
+                <div class="section-title">Build Units</div>
+                
+                <div class="unit-card">
+                    <div class="unit-name">WRK - Worker</div>
+                    <div class="unit-stats">
+                        <span>Energy: 10</span>
+                        <span>HP: 50 ATK: 5 MOV: 2</span>
+                    </div>
+                </div>
+
+                <div class="unit-card">
+                    <div class="unit-name">SCT - Scout</div>
+                    <div class="unit-stats">
+                        <span>Energy: 15</span>
+                        <span>HP: 30 ATK: 10 MOV: 4</span>
+                    </div>
+                </div>
+
+                <div class="unit-card">
+                    <div class="unit-name">INF - Infantry</div>
+                    <div class="unit-stats">
+                        <span>Energy: 25</span>
+                        <span>HP: 100 ATK: 20 MOV: 2</span>
+                    </div>
+                </div>
+
+                <div class="unit-card">
+                    <div class="unit-name">HVY - Heavy</div>
+                    <div class="unit-stats">
+                        <span>Energy: 50</span>
+                        <span>HP: 200 ATK: 40 MOV: 1</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title">Game Status</div>
+                <div class="info-row">
+                    <span class="info-label">Phase</span>
+                    <span class="info-value">Resource</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Turn</span>
+                    <span class="info-value">1</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Mode</span>
+                    <span class="info-value">Local PvP</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Grid Size</span>
+                    <span class="info-value">25x25</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Area -->
+        <div class="game-area">
+            <div class="game-board" id="gameBoard">
+                <!-- Generate 625 cells (25x25) -->
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="right-sidebar">
+            <div class="section-card">
+                <div class="section-title">Controls</div>
+                <button class="control-button">New Game</button>
+                <button class="control-button">End Turn</button>
+                <button class="control-button secondary">Next Phase</button>
+                <button class="control-button secondary">Save Game</button>
+                <button class="control-button secondary">Load Game</button>
+                <button class="control-button secondary">Reset</button>
+                <button class="control-button destructive">Surrender</button>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title">Unit Details</div>
+                <div class="info-row">
+                    <span class="info-label">Selected</span>
+                    <span class="info-value">None</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Health</span>
+                    <span class="info-value">--</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Energy</span>
+                    <span class="info-value">--</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Movement</span>
+                    <span class="info-value">--</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Actions</span>
+                    <span class="info-value">--</span>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title">Victory Conditions</div>
+                <div class="info-row">
+                    <span class="info-label">Resource Victory</span>
+                    <span class="info-value">500</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Elimination</span>
+                    <span class="info-value">All units</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Base Capture</span>
+                    <span class="info-value">Enemy base</span>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title">Recent Activity</div>
+                <div class="activity-item">
+                    <span class="status-indicator status-active"></span>
+                    Game started
+                </div>
+                <div class="activity-item">
+                    <span class="status-indicator status-active"></span>
+                    Turn 1 begins
+                </div>
+                <div class="activity-item">
+                    <span class="status-indicator status-active"></span>
+                    Resource phase active
+                </div>
+                <div class="activity-item">
+                    <span class="status-indicator status-waiting"></span>
+                    Player 1 ready
+                </div>
+                <div class="activity-item">
+                    <span class="status-indicator status-waiting"></span>
+                    Awaiting input
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title">Player Status</div>
+                <div class="info-row">
+                    <span class="info-label">Units</span>
+                    <span class="info-value">0</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Resources</span>
+                    <span class="info-value">0</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Territory</span>
+                    <span class="info-value">0%</span>
+                </div>
+                <div class="territory-bar">
+                    <div class="territory-fill"></div>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Actions</span>
+                    <span class="info-value">0/10</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <span>Turn Summary: Actions Used: 0 | Energy Remaining: 0 | Phase: Resource Collection</span>
+        </div>
+    </div>
+
+    <script>
+        // Generate game board
+        const gameBoard = document.getElementById('gameBoard');
+        const resourcePositions = [
+            {row: 2, col: 5}, {row: 2, col: 12}, {row: 2, col: 19},
+            {row: 8, col: 3}, {row: 8, col: 15}, {row: 8, col: 22},
+            {row: 16, col: 7}, {row: 16, col: 14}, {row: 16, col: 21},
+            {row: 22, col: 4}, {row: 22, col: 11}, {row: 22, col: 18}
+        ];
+
+        for (let i = 0; i < 625; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'grid-cell';
+            cell.dataset.index = i;
+            
+            const row = Math.floor(i / 25);
+            const col = i % 25;
+            
+            // Add resource nodes
+            const hasResource = resourcePositions.some(pos => pos.row === row && pos.col === col);
+            if (hasResource) {
+                const resource = document.createElement('div');
+                resource.className = 'resource-node';
+                resource.textContent = '100';
+                cell.appendChild(resource);
+            }
+            
+            gameBoard.appendChild(cell);
+        }
+
+        // Add click handlers
+        document.querySelectorAll('.grid-cell').forEach(cell => {
+            cell.addEventListener('click', function() {
+                console.log('Cell clicked:', this.dataset.index);
+            });
+        });
+
+        document.querySelectorAll('.unit-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.unit-card').forEach(c => c.style.background = '');
+                this.style.background = 'var(--accent)';
+                this.style.color = 'var(--accent-foreground)';
+            });
+        });
+
+        document.querySelectorAll('.control-button').forEach(button => {
+            button.addEventListener('click', function() {
+                console.log('Button clicked:', this.textContent);
+                
+                if (this.textContent === 'New Game') {
+                    // Simulate new game
+                    document.querySelector('.territory-fill').style.width = '15%';
+                    document.querySelector('.info-value').textContent = 'WRK';
+                }
+            });
+        });
+
+        // Animate elements on load
+        setTimeout(() => {
+            document.querySelectorAll('.section-card').forEach((card, index) => {
+                card.style.animation = `slideIn 0.4s ease-out ${index * 0.1}s both`;
+            });
+        }, 100);
+    </script>
+</body>
+</html>

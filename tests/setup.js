@@ -23,5 +23,5 @@ global.requestAnimationFrame = (callback) => {
 
 // Mock performance.now
 global.performance = {
-  now: jest.fn(() => Date.now())
+  now: jest.fn(() => Date.now()),
 };
