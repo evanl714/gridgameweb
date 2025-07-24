@@ -27,9 +27,10 @@ import { VictoryScreen } from './ui/victoryScreen.js';
 import { BuildPanelSidebar } from './ui/buildPanelSidebar.js';
 import { UnitInfoSidebar } from './ui/unitInfoSidebar.js';
 
-// Import controllers and rendering
+// Import controllers, rendering, and managers
 import { InputController } from './js/controllers/InputController.js';
 import { GameRenderer } from './js/rendering/GameRenderer.js';
+import { UIStateManager } from './js/managers/UIStateManager.js';
 
 class Game {
   constructor() {
@@ -51,6 +52,9 @@ class Game {
     // Initialize UI system
     this.uiManager = new UIManager(this.gameState, this.turnManager);
     this.victoryScreen = new VictoryScreen(this.gameState);
+
+    // Initialize UI state manager
+    this.uiStateManager = new UIStateManager(this.gameState, this.turnManager);
 
     // Initialize rendering system
     this.renderer = new GameRenderer(this.gameState, this.resourceManager);
@@ -199,6 +203,9 @@ class Game {
     if (this.turnManager) {
       this.turnManager.destroy();
     }
+    if (this.uiStateManager) {
+      this.uiStateManager.destroy();
+    }
     if (this.resourceManager) {
       // Add cleanup if resourceManager has destroy method
     }
@@ -220,6 +227,7 @@ class Game {
     // Reinitialize UI system with new game state
     this.uiManager = new UIManager(this.gameState, this.turnManager);
     this.victoryScreen = new VictoryScreen(this.gameState);
+    this.uiStateManager = new UIStateManager(this.gameState, this.turnManager);
 
     // Setup event listeners for new game state
     this.setupGameEventListeners();
@@ -245,116 +253,24 @@ class Game {
       return;
     }
 
-    // Legacy UI update - keeping for compatibility
-    this.updatePlayerDisplay();
-    this.updateGameInfo();
-
-    // New UI system updates are handled automatically via event listeners
-    // UI components subscribe to game state events and update themselves
-  }
-
-  updatePlayerDisplay() {
-    const playerElement = document.getElementById('currentPlayer');
-    if (playerElement && this.gameState) {
-      const currentPlayer = this.gameState.getCurrentPlayer();
-      if (currentPlayer) {
-        playerElement.textContent = `Player ${currentPlayer.id}'s Turn`;
-        // Add visual indication for current player
-        playerElement.className = `current-player player-${currentPlayer.id}`;
-      }
-    }
-  }
-
-  updateGameInfo() {
-    // Update turn number display (both header and sidebar)
-    const turnElement = document.getElementById('turnNumber');
-    if (turnElement) {
-      turnElement.textContent = `Turn: ${this.gameState.turnNumber}`;
-    }
-    
-    const headerTurnElement = document.getElementById('turnDisplay');
-    if (headerTurnElement) {
-      headerTurnElement.textContent = this.gameState.turnNumber;
-    }
-
-    // Update phase display (both header and sidebar)
-    const phaseElement = document.getElementById('gamePhase');
-    if (phaseElement) {
-      phaseElement.textContent = `Phase: ${this.gameState.currentPhase}`;
-    }
-    
-    const headerPhaseElement = document.getElementById('phaseDisplay');
-    if (headerPhaseElement) {
-      headerPhaseElement.textContent = this.gameState.currentPhase;
-    }
-
-    // Update player info
-    const player = this.gameState.getCurrentPlayer();
-    if (player) {
-      const energyElement = document.getElementById('playerEnergy');
-      if (energyElement) {
-        energyElement.textContent = `Energy: ${player.energy}`;
-      }
-
-      const actionsElement = document.getElementById('playerActions');
-      if (actionsElement) {
-        actionsElement.textContent = `Actions: ${player.actionsRemaining}`;
-      }
-
-      const unitsElement = document.getElementById('playerUnits');
-      if (unitsElement) {
-        unitsElement.textContent = `Units: ${player.unitsOwned.size}`;
-      }
-    }
-
-    // Update selected unit info
-    const selectedUnitElement = document.getElementById('selectedUnit');
-    if (selectedUnitElement) {
+    // Delegate to UIStateManager for centralized UI updates
+    if (this.uiStateManager) {
+      this.uiStateManager.updateAllUI();
+      
+      // Update unit info with current selection
       const selectedUnit = this.inputController ? this.inputController.getSelectedUnit() : null;
-      if (selectedUnit) {
-        const stats = selectedUnit.getStats();
-        selectedUnitElement.innerHTML = `
-                    <strong>${stats.name}</strong><br>
-                    Health: ${selectedUnit.health}/${selectedUnit.maxHealth}<br>
-                    Actions: ${selectedUnit.actionsUsed}/${selectedUnit.maxActions}
-                `;
-      } else {
-        selectedUnitElement.innerHTML = 'No unit selected';
-      }
-    }
-
-    // Update gather button state
-    const gatherBtn = document.getElementById('gatherBtn');
-    if (gatherBtn) {
-      const selectedUnit = this.inputController ? this.inputController.getSelectedUnit() : null;
-      const canGather = selectedUnit &&
-                             selectedUnit.type === 'worker' &&
-                             this.gameState.currentPhase === 'resource' &&
-                             selectedUnit.canAct() &&
-                             this.resourceManager.canGatherAtPosition(selectedUnit.id);
-
-      gatherBtn.disabled = !canGather;
-
-      if (canGather) {
-        gatherBtn.textContent = 'Gather Resources (G)';
-      } else if (!selectedUnit) {
-        gatherBtn.textContent = 'Select Worker';
-      } else if (selectedUnit.type !== 'worker') {
-        gatherBtn.textContent = 'Worker Only';
-      } else if (this.gameState.currentPhase !== 'resource') {
-        gatherBtn.textContent = 'Resource Phase Only';
-      } else if (!selectedUnit.canAct()) {
-        gatherBtn.textContent = 'No Actions Left';
-      } else {
-        gatherBtn.textContent = 'No Resources Nearby';
-      }
+      this.uiStateManager.updateUnitInfo(selectedUnit);
+      this.uiStateManager.updateControlButtons(selectedUnit, this.resourceManager);
     }
   }
+
+  // Player display now handled by UIStateManager
+
+  // Game info display now handled by UIStateManager
 
   updateStatus(message) {
-    const statusElement = document.getElementById('gameStatus');
-    if (statusElement) {
-      statusElement.textContent = message;
+    if (this.uiStateManager) {
+      this.uiStateManager.updateStatus(message);
     }
   }
 
