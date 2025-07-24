@@ -4,13 +4,15 @@
  */
 
 import { GAME_STATES, GAME_CONFIG } from '../../shared/constants.js';
+import { GameActions } from '../interfaces/GameActions.js';
 
 export class InputController {
-  constructor(gameState, turnManager, uiManager, renderer) {
+  constructor(gameState, turnManager, uiManager, renderer, gameActions = null) {
     this.gameState = gameState;
     this.turnManager = turnManager;
     this.uiManager = uiManager;
     this.renderer = renderer;
+    this.gameActions = gameActions || new GameActions(window.game); // Fallback for backward compatibility
     
     // UI state for input handling
     this.selectedCell = null;
@@ -94,42 +96,7 @@ export class InputController {
     const unit = this.gameState.getUnitAt(x, y);
 
     if (this.selectedUnit) {
-      // Try to attack or move selected unit
-      if (this.selectedUnit.playerId === this.gameState.currentPlayer) {
-        // Check if this is a valid attack (only during action phase)
-        const canAttack = this.gameState.currentPhase === 'action' && 
-                         this.gameState.canUnitAttack(this.selectedUnit.id, x, y);
-        
-        if (canAttack) {
-          const targetEntity = this.gameState.getEntityAt(x, y);
-          const attacked = this.gameState.attackUnit(this.selectedUnit.id, x, y);
-          if (attacked) {
-            this.turnManager.usePlayerAction();
-            this.clearSelection();
-            this.gameState.emit('unitDeselected');
-            this.updateStatus(`Attack successful! Target: ${targetEntity.type}`);
-          }
-        } else {
-          // Try to move selected unit
-          const canMove = this.gameState.canUnitMoveTo(this.selectedUnit.id, x, y);
-          if (canMove) {
-            const movementCost = this.gameState.calculateMovementCost(this.selectedUnit.id, x, y);
-            const moved = this.gameState.moveUnit(this.selectedUnit.id, x, y);
-            if (moved) {
-              this.turnManager.usePlayerAction();
-              this.clearSelection();
-              this.gameState.emit('unitDeselected');
-              this.updateStatus(`Unit moved (cost: ${movementCost})`);
-            }
-          } else if (unit && unit.playerId === this.gameState.currentPlayer) {
-            // Select different unit
-            this.selectUnit(unit, x, y);
-          } else {
-            // Invalid move or attack - provide feedback
-            this.provideMoveAttackFeedback(x, y);
-          }
-        }
-      }
+      this.handleSelectedUnitAction(x, y, unit);
     } else if (unit && unit.playerId === this.gameState.currentPlayer) {
       // Select unit and show movement range
       this.selectUnit(unit, x, y);
@@ -139,6 +106,60 @@ export class InputController {
     }
 
     this.refreshDisplay();
+  }
+
+  handleSelectedUnitAction(x, y, unit) {
+    // Only allow actions for units owned by current player
+    if (this.selectedUnit.playerId !== this.gameState.currentPlayer) {
+      return;
+    }
+
+    const canAttack = this.gameState.currentPhase === 'action' && 
+                     this.gameState.canUnitAttack(this.selectedUnit.id, x, y);
+    
+    if (canAttack) {
+      this.handleAttackAction(x, y);
+    } else {
+      this.handleMoveOrSelectAction(x, y, unit);
+    }
+  }
+
+  handleAttackAction(x, y) {
+    const targetEntity = this.gameState.getEntityAt(x, y);
+    const attacked = this.gameState.attackUnit(this.selectedUnit.id, x, y);
+    
+    if (attacked) {
+      this.turnManager.usePlayerAction();
+      this.clearSelection();
+      this.gameState.emit('unitDeselected');
+      this.updateStatus(`Attack successful! Target: ${targetEntity.type}`);
+    }
+  }
+
+  handleMoveOrSelectAction(x, y, unit) {
+    const canMove = this.gameState.canUnitMoveTo(this.selectedUnit.id, x, y);
+    
+    if (canMove) {
+      this.handleMoveAction(x, y);
+    } else if (unit && unit.playerId === this.gameState.currentPlayer) {
+      // Select different unit
+      this.selectUnit(unit, x, y);
+    } else {
+      // Invalid move or attack - provide feedback
+      this.provideMoveAttackFeedback(x, y);
+    }
+  }
+
+  handleMoveAction(x, y) {
+    const movementCost = this.gameState.calculateMovementCost(this.selectedUnit.id, x, y);
+    const moved = this.gameState.moveUnit(this.selectedUnit.id, x, y);
+    
+    if (moved) {
+      this.turnManager.usePlayerAction();
+      this.clearSelection();
+      this.gameState.emit('unitDeselected');
+      this.updateStatus(`Unit moved (cost: ${movementCost})`);
+    }
   }
 
   selectUnit(unit, x, y) {
@@ -330,60 +351,44 @@ export class InputController {
     }
   }
 
-  // Button handler methods - delegate to main game methods
+  // Button handler methods - delegate to game actions
   handleNewGame() {
-    if (window.game && typeof window.game.newGame === 'function') {
-      window.game.newGame();
-    }
+    this.gameActions.newGame();
   }
 
   handleNextPhase() {
-    if (window.game && typeof window.game.nextPhase === 'function') {
-      window.game.nextPhase();
-    }
+    this.gameActions.nextPhase();
   }
 
   handleGatherResources() {
-    if (window.game && typeof window.game.gatherResources === 'function') {
-      window.game.gatherResources();
-    }
+    this.gameActions.gatherResources();
   }
 
   handleSurrender() {
-    if (window.game && typeof window.game.surrender === 'function') {
-      window.game.surrender();
-    }
+    this.gameActions.surrender();
   }
 
   handleOfferDraw() {
-    if (window.game && typeof window.game.offerDraw === 'function') {
-      window.game.offerDraw();
-    }
+    this.gameActions.offerDraw();
   }
 
   handleLoadGame() {
-    if (window.game && typeof window.game.loadGame === 'function') {
-      window.game.loadGame();
-    }
+    this.gameActions.loadGame();
   }
 
   // Utility methods
   updateStatus(message) {
-    if (window.game && typeof window.game.updateStatus === 'function') {
-      window.game.updateStatus(message);
-    }
+    this.gameActions.updateStatus(message);
   }
 
   refreshDisplay() {
     if (this.renderer && typeof this.renderer.render === 'function') {
       this.renderer.render();
-    } else if (window.game && typeof window.game.render === 'function') {
-      window.game.render();
+    } else {
+      this.gameActions.render();
     }
     
-    if (window.game && typeof window.game.updateUI === 'function') {
-      window.game.updateUI();
-    }
+    this.gameActions.updateUI();
   }
 
   // Getters for accessing state

@@ -1,8 +1,9 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import dbConnection from './database/connection.js';
 import routes from './routes/index.js';
+import { DatabaseManager } from './modules/DatabaseManager.js';
+import { ServerLifecycle } from './modules/ServerLifecycle.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -58,56 +59,9 @@ app.use((error, req, res, next) => {
     });
 });
 
-// Initialize database and start server
-async function startServer() {
-    try {
-        // Initialize database
-        console.log('Initializing database...');
-        await dbConnection.initialize('./game.db');
-        
-        // Validate database integrity
-        const isValid = dbConnection.validateIntegrity();
-        if (!isValid) {
-            throw new Error('Database integrity check failed');
-        }
-        
-        // Start server
-        app.listen(port, () => {
-            console.log(`Grid Game server running at http://localhost:${port}`);
-            console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-            console.log('Database initialized and ready');
-            
-            // Schedule periodic database cleanup (every hour)
-            setInterval(() => {
-                try {
-                    const results = dbConnection.cleanup();
-                    if (results.expiredSessions > 0 || results.oldGames > 0 || results.oldAutoSaves > 0) {
-                        console.log('Periodic database cleanup:', results);
-                    }
-                } catch (error) {
-                    console.error('Periodic cleanup failed:', error);
-                }
-            }, 60 * 60 * 1000); // 1 hour
-        });
-        
-    } catch (error) {
-        console.error('Failed to start server:', error);
-        process.exit(1);
-    }
-}
-
-// Handle graceful shutdown
-process.on('SIGINT', () => {
-    console.log('\nReceived SIGINT. Graceful shutdown...');
-    dbConnection.close();
-    process.exit(0);
-});
-
-process.on('SIGTERM', () => {
-    console.log('Received SIGTERM. Graceful shutdown...');
-    dbConnection.close();
-    process.exit(0);
-});
+// Initialize managers and start server
+const databaseManager = new DatabaseManager('./game.db');
+const serverLifecycle = new ServerLifecycle(databaseManager);
 
 // Start the server
-startServer();
+serverLifecycle.startServer(app, port);
