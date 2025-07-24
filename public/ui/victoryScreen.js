@@ -56,7 +56,10 @@ export class VictoryScreen {
       return;
     }
 
-    document.body.removeChild(this.overlay);
+    // Safely remove the overlay if it's still in the DOM
+    if (this.overlay.parentNode) {
+      this.overlay.parentNode.removeChild(this.overlay);
+    }
     document.removeEventListener('keydown', this.handleKeyDown);
     this.overlay = null;
     this.isVisible = false;

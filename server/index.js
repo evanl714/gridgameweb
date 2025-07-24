@@ -36,8 +36,8 @@ if (config.security.helmet.enabled) {
     helmetConfig.contentSecurityPolicy = {
       directives: {
         defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles for game UI
-        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.tailwindcss.com", "https://fonts.googleapis.com"], // Allow inline styles and external CSS
+        scriptSrc: ["'self'", "https://cdn.tailwindcss.com"], // Allow Tailwind CSS CDN
         imgSrc: ["'self'", "data:", "https:"], // Allow data URLs and HTTPS images
         connectSrc: ["'self'"], // Allow API connections to same origin
         fontSrc: ["'self'", "https:", "data:"],

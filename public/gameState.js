@@ -4,6 +4,7 @@
  */
 
 import { GAME_CONFIG, UNIT_TYPES, TURN_CONFIG, GAME_STATES, BASE_CONFIG, COMBAT_CONFIG } from '../shared/constants.js';
+import { Observable } from './js/patterns/Observer.js';
 
 // Utility function to generate unique IDs
 function generateId() {
@@ -310,8 +311,9 @@ export class Base {
 /**
  * Main game state management class
  */
-export class GameState {
+export class GameState extends Observable {
   constructor() {
+    super();
     this.gameId = generateId();
     this.status = GAME_STATES.READY;
     this.currentPlayer = 1;
