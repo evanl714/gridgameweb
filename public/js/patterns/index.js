@@ -79,8 +79,9 @@ export class PatternIntegrator {
    * @returns {Promise<Object>} Pattern instances
    */
   static async setupPatterns(game) {
-    // Use dynamic import to ensure module is fully loaded
+    // Use dynamic imports to ensure modules are fully loaded
     const { CommandManager } = await import('../commands/CommandManager.js');
+    const { EntityFactory } = await import('../factories/EntityFactory.js');
     const commandManager = new CommandManager();
     
     // Setup command event listeners
