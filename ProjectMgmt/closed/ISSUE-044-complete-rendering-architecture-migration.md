@@ -11,6 +11,36 @@
 
 The application is caught between two rendering paradigms with a large "adapter" script in `index.html` (lines 585-811) that monkey-patches the global `window.game` object to bridge legacy canvas-based rendering and modern DOM-based grid rendering. This incomplete architectural transition is the largest source of technical debt in the codebase.
 
+## Product Requirements Definition (PRD)
+
+### Functional Requirements
+1. **Unified Rendering Interface**: Game must render through single `GameRenderer` interface
+2. **Strategy Pattern Implementation**: Support both canvas and grid rendering modes seamlessly
+3. **Automatic Mode Detection**: System auto-detects available rendering targets (grid cells vs canvas)
+4. **Preserved Functionality**: All existing game features maintained (selection, hover, units, bases, resources)
+5. **Runtime Mode Switching**: Enable switching between rendering modes without restart
+
+### Technical Requirements  
+1. **No Inline JavaScript**: Remove all rendering logic from HTML files
+2. **Clean Architecture**: Eliminate monkey-patching and global object modifications
+3. **Strategy Interface**: Both rendering strategies implement identical interface
+4. **Error Handling**: Robust fallback mechanisms between rendering modes
+5. **Performance**: No degradation in rendering performance
+
+### Implementation Constraints
+1. **Backward Compatibility**: Existing game state and save files remain functional
+2. **DOM Timing**: Preserve grid cell initialization timing for proper rendering
+3. **Event Handling**: Maintain existing input controller integration
+4. **UI Components**: No changes required to existing UI manager components
+
+### Success Metrics
+- [ ] Zero inline JavaScript in HTML files
+- [x] Single rendering pipeline through GameRenderer
+- [x] Both canvas and grid rendering modes functional
+- [x] All game interactions preserved (cell selection, hover states)
+- [x] Clean console output with no rendering errors
+- [x] Reduced technical debt (-200+ lines of adapter code)
+
 **Root Cause:**
 - Incomplete refactoring from canvas to grid rendering
 - Clean `GameRenderer` Strategy pattern exists but isn't integrated
