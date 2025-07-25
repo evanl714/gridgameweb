@@ -179,9 +179,91 @@ class Game {
     const basicNotificationService = {
       show: (message, type) => console.log(`${type}: ${message}`)
     };
+
+    // Create EventEmitter bridge for gameStateManager mock
+    const gameStateManagerBridge = {
+      getCurrentPlayer: () => this.gameState.getCurrentPlayer(),
+      getState: () => this.gameState,
+      initialized: true,
+      // EventEmitter interface
+      _listeners: new Map(),
+      on: function(event, callback) {
+        if (!this._listeners.has(event)) {
+          this._listeners.set(event, []);
+        }
+        this._listeners.get(event).push(callback);
+        return this;
+      },
+      emit: function(event, ...args) {
+        if (this._listeners.has(event)) {
+          this._listeners.get(event).forEach(callback => {
+            try {
+              callback(...args);
+            } catch (error) {
+              console.error('Error in event listener:', error);
+            }
+          });
+        }
+        return this;
+      },
+      off: function(event, callback) {
+        if (this._listeners.has(event)) {
+          const listeners = this._listeners.get(event);
+          const index = listeners.indexOf(callback);
+          if (index > -1) {
+            listeners.splice(index, 1);
+          }
+          if (listeners.length === 0) {
+            this._listeners.delete(event);
+          }
+        }
+        return this;
+      }
+    };
+
+    // Create EventEmitter bridge for turnManager mock
+    const turnManagerBridge = {
+      // Copy existing turnManager functionality
+      ...this.turnManager,
+      // EventEmitter interface
+      _listeners: new Map(),
+      on: function(event, callback) {
+        if (!this._listeners.has(event)) {
+          this._listeners.set(event, []);
+        }
+        this._listeners.get(event).push(callback);
+        return this;
+      },
+      emit: function(event, ...args) {
+        if (this._listeners.has(event)) {
+          this._listeners.get(event).forEach(callback => {
+            try {
+              callback(...args);
+            } catch (error) {
+              console.error('Error in event listener:', error);
+            }
+          });
+        }
+        return this;
+      },
+      off: function(event, callback) {
+        if (this._listeners.has(event)) {
+          const listeners = this._listeners.get(event);
+          const index = listeners.indexOf(callback);
+          if (index > -1) {
+            listeners.splice(index, 1);
+          }
+          if (listeners.length === 0) {
+            this._listeners.delete(event);
+          }
+        }
+        return this;
+      }
+    };
+
     this.uiStateManager = new UIStateManager(
-      { getCurrentPlayer: () => this.gameState.getCurrentPlayer(), getState: () => this.gameState, initialized: true },
-      this.turnManager,
+      gameStateManagerBridge,
+      turnManagerBridge,
       basicDOMProvider,
       basicNotificationService
     );
@@ -445,9 +527,91 @@ class Game {
     const basicNotificationService = {
       show: (message, type) => console.log(`${type}: ${message}`)
     };
+
+    // Create EventEmitter bridge for gameStateManager mock
+    const gameStateManagerBridge = {
+      getCurrentPlayer: () => this.gameState.getCurrentPlayer(),
+      getState: () => this.gameState,
+      initialized: true,
+      // EventEmitter interface
+      _listeners: new Map(),
+      on: function(event, callback) {
+        if (!this._listeners.has(event)) {
+          this._listeners.set(event, []);
+        }
+        this._listeners.get(event).push(callback);
+        return this;
+      },
+      emit: function(event, ...args) {
+        if (this._listeners.has(event)) {
+          this._listeners.get(event).forEach(callback => {
+            try {
+              callback(...args);
+            } catch (error) {
+              console.error('Error in event listener:', error);
+            }
+          });
+        }
+        return this;
+      },
+      off: function(event, callback) {
+        if (this._listeners.has(event)) {
+          const listeners = this._listeners.get(event);
+          const index = listeners.indexOf(callback);
+          if (index > -1) {
+            listeners.splice(index, 1);
+          }
+          if (listeners.length === 0) {
+            this._listeners.delete(event);
+          }
+        }
+        return this;
+      }
+    };
+
+    // Create EventEmitter bridge for turnManager mock
+    const turnManagerBridge = {
+      // Copy existing turnManager functionality
+      ...this.turnManager,
+      // EventEmitter interface
+      _listeners: new Map(),
+      on: function(event, callback) {
+        if (!this._listeners.has(event)) {
+          this._listeners.set(event, []);
+        }
+        this._listeners.get(event).push(callback);
+        return this;
+      },
+      emit: function(event, ...args) {
+        if (this._listeners.has(event)) {
+          this._listeners.get(event).forEach(callback => {
+            try {
+              callback(...args);
+            } catch (error) {
+              console.error('Error in event listener:', error);
+            }
+          });
+        }
+        return this;
+      },
+      off: function(event, callback) {
+        if (this._listeners.has(event)) {
+          const listeners = this._listeners.get(event);
+          const index = listeners.indexOf(callback);
+          if (index > -1) {
+            listeners.splice(index, 1);
+          }
+          if (listeners.length === 0) {
+            this._listeners.delete(event);
+          }
+        }
+        return this;
+      }
+    };
+
     this.uiStateManager = new UIStateManager(
-      { getCurrentPlayer: () => this.gameState.getCurrentPlayer(), getState: () => this.gameState, initialized: true },
-      this.turnManager,
+      gameStateManagerBridge,
+      turnManagerBridge,
       basicDOMProvider,
       basicNotificationService
     );
