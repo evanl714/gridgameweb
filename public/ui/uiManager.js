@@ -308,8 +308,13 @@ class UIManager {
   }
 }
 
+// Export as default for ES6 modules and lazy loading compatibility
+export default UIManager;
+
+// Also export as named export for backward compatibility
+export { UIManager };
+
+// CommonJS support
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = UIManager;
 }
-
-export { UIManager };
