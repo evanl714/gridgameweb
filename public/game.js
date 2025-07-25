@@ -268,7 +268,8 @@ class Game {
       basicNotificationService
     );
 
-    const GameRenderer = await lazyLoader.load('GameRenderer');
+    const GameRendererModule = await lazyLoader.load('GameRenderer');
+    const GameRenderer = GameRendererModule.GameRenderer;
     this.renderer = new GameRenderer(this.gameState, this.resourceManager);
 
     console.log('Critical UI components loaded');
