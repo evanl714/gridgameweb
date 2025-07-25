@@ -1,8 +1,8 @@
 # ISSUE-049: Multiplayer Foundation Architecture
 
-**Status:** Open
+**Status:** WIP
 **Created:** 2025-07-24
-**Assignee:** Unassigned
+**Assignee:** Claude Code
 **Priority:** Strategic
 **Labels:** multiplayer, websockets, architecture, real-time
 

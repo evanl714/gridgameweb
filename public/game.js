@@ -145,7 +145,41 @@ class Game {
     this.uiManager = new UIManager(this.gameState, this.turnManager);
 
     const UIStateManager = await lazyLoader.load('UIStateManager');
-    this.uiStateManager = new UIStateManager(this.gameState, this.turnManager);
+    // Create basic services for UIStateManager compatibility
+    const basicDOMProvider = {
+      get: (id) => document.getElementById(id),
+      updateContent: (id, content, isHTML = false) => {
+        const element = document.getElementById(id);
+        if (element) {
+          if (isHTML) {
+            element.innerHTML = content;
+          } else {
+            element.textContent = content;
+          }
+        }
+      },
+      createElement: (tag, attrs, content) => {
+        const el = document.createElement(tag);
+        Object.entries(attrs || {}).forEach(([key, value]) => {
+          if (key === 'textContent') {
+            el.textContent = value;
+          } else {
+            el.setAttribute(key, value);
+          }
+        });
+        if (content) el.textContent = content;
+        return el;
+      }
+    };
+    const basicNotificationService = {
+      show: (message, type) => console.log(`${type}: ${message}`)
+    };
+    this.uiStateManager = new UIStateManager(
+      { getCurrentPlayer: () => this.gameState.getCurrentPlayer(), getState: () => this.gameState, initialized: true },
+      this.turnManager,
+      basicDOMProvider,
+      basicNotificationService
+    );
 
     const GameRenderer = await lazyLoader.load('GameRenderer');
     this.renderer = new GameRenderer(this.gameState, this.resourceManager);
@@ -376,7 +410,42 @@ class Game {
     // Reinitialize UI system with new game state
     this.uiManager = new UIManager(this.gameState, this.turnManager);
     this.victoryScreen = new VictoryScreen(this.gameState);
-    this.uiStateManager = new UIStateManager(this.gameState, this.turnManager);
+    
+    // Create basic services for UIStateManager compatibility
+    const basicDOMProvider = {
+      get: (id) => document.getElementById(id),
+      updateContent: (id, content, isHTML = false) => {
+        const element = document.getElementById(id);
+        if (element) {
+          if (isHTML) {
+            element.innerHTML = content;
+          } else {
+            element.textContent = content;
+          }
+        }
+      },
+      createElement: (tag, attrs, content) => {
+        const el = document.createElement(tag);
+        Object.entries(attrs || {}).forEach(([key, value]) => {
+          if (key === 'textContent') {
+            el.textContent = value;
+          } else {
+            el.setAttribute(key, value);
+          }
+        });
+        if (content) el.textContent = content;
+        return el;
+      }
+    };
+    const basicNotificationService = {
+      show: (message, type) => console.log(`${type}: ${message}`)
+    };
+    this.uiStateManager = new UIStateManager(
+      { getCurrentPlayer: () => this.gameState.getCurrentPlayer(), getState: () => this.gameState, initialized: true },
+      this.turnManager,
+      basicDOMProvider,
+      basicNotificationService
+    );
 
     // Reinitialize design patterns
     const patterns = await PatternIntegrator.setupPatterns(this);

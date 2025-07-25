@@ -94,7 +94,7 @@ export function registerUIComponents() {
   });
 
   // Managers
-  lazyLoader.register('UIStateManager', () => import('../managers/UIStateManager.js'), {
+  lazyLoader.register('UIStateManager', () => import('../managers/UIStateManagerRefactored.js'), {
     priority: 8,
     preload: true
   });

@@ -3,6 +3,9 @@
  * Displays game end results with victory/defeat messages and statistics
  */
 
+// Import HTMLSanitizer for secure DOM manipulation
+import '../js/utils/HTMLSanitizer.js';
+
 export class VictoryScreen {
   constructor(gameState) {
     this.gameState = gameState;
@@ -76,39 +79,8 @@ export class VictoryScreen {
     // Determine victory message and styling
     const { title, message, celebrationClass } = this.getVictoryMessage(winner, eventData);
 
-    // Create victory screen content
-    this.overlay.innerHTML = `
-      <div class="victory-screen-content ${celebrationClass}">
-        <div class="victory-header">
-          <h1 class="victory-title">${title}</h1>
-          <p class="victory-message">${message}</p>
-        </div>
-        
-        <div class="victory-stats" style="display: none;">
-          <h3>Game Statistics</h3>
-          <div class="stats-grid">
-            <div class="stat-item">
-              <span class="stat-label">Duration:</span>
-              <span class="stat-value">${this.gameState.turnNumber} turns</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">Game Mode:</span>
-              <span class="stat-value">Player vs Player</span>
-            </div>
-            ${this.generatePlayerStats()}
-          </div>
-        </div>
-
-        <div class="victory-actions">
-          <button class="play-again-btn" onclick="(async () => await window.game.newGame())()">
-            🔄 Play Again
-          </button>
-          <button class="main-menu-btn" onclick="window.location.reload()">
-            🏠 Main Menu
-          </button>
-        </div>
-      </div>
-    `;
+    // Create victory screen content using safe DOM creation
+    this.createVictoryContent(title, message, celebrationClass);
 
     // Add click handler for overlay (close on background click)
     this.overlay.addEventListener('click', (e) => {
@@ -152,41 +124,146 @@ export class VictoryScreen {
   }
 
   /**
-   * Generate player statistics HTML
+   * Create victory screen content using safe DOM methods
    */
-  generatePlayerStats() {
+  createVictoryContent(title, message, celebrationClass) {
+    // Create main content container
+    const contentDiv = htmlSanitizer.createElement('div', {
+      class: `victory-screen-content ${celebrationClass}`
+    });
+
+    // Create header section
+    const headerDiv = htmlSanitizer.createElement('div', { class: 'victory-header' });
+    const titleElement = htmlSanitizer.createElement('h1', { class: 'victory-title' }, title);
+    const messageElement = htmlSanitizer.createElement('p', { class: 'victory-message' }, message);
+    
+    headerDiv.appendChild(titleElement);
+    headerDiv.appendChild(messageElement);
+
+    // Create stats section
+    const statsDiv = this.createStatsSection();
+    
+    // Create actions section
+    const actionsDiv = this.createActionsSection();
+
+    // Assemble the content
+    contentDiv.appendChild(headerDiv);
+    contentDiv.appendChild(statsDiv);
+    contentDiv.appendChild(actionsDiv);
+    
+    this.overlay.appendChild(contentDiv);
+  }
+
+  /**
+   * Create statistics section using safe DOM methods
+   */
+  createStatsSection() {
+    const statsDiv = htmlSanitizer.createElement('div', {
+      class: 'victory-stats',
+      style: 'display: none;'
+    });
+    
+    const statsTitle = htmlSanitizer.createElement('h3', {}, 'Game Statistics');
+    const statsGrid = htmlSanitizer.createElement('div', { class: 'stats-grid' });
+    
+    // Add duration stat
+    const durationStat = this.createStatItem('Duration:', `${this.gameState.turnNumber} turns`);
+    const gameModeStat = this.createStatItem('Game Mode:', 'Player vs Player');
+    
+    statsGrid.appendChild(durationStat);
+    statsGrid.appendChild(gameModeStat);
+    
+    // Add player stats
+    const playerStatsElements = this.generatePlayerStatsElements();
+    playerStatsElements.forEach(element => statsGrid.appendChild(element));
+    
+    statsDiv.appendChild(statsTitle);
+    statsDiv.appendChild(statsGrid);
+    
+    return statsDiv;
+  }
+
+  /**
+   * Create actions section using safe DOM methods
+   */
+  createActionsSection() {
+    const actionsDiv = htmlSanitizer.createElement('div', { class: 'victory-actions' });
+    
+    // Create play again button
+    const playAgainBtn = htmlSanitizer.createElement('button', {
+      class: 'play-again-btn'
+    }, '🔄 Play Again');
+    
+    playAgainBtn.addEventListener('click', async () => {
+      if (window.game) {
+        await window.game.newGame();
+      }
+    });
+    
+    // Create main menu button
+    const mainMenuBtn = htmlSanitizer.createElement('button', {
+      class: 'main-menu-btn'
+    }, '🏠 Main Menu');
+    
+    mainMenuBtn.addEventListener('click', () => {
+      window.location.reload();
+    });
+    
+    actionsDiv.appendChild(playAgainBtn);
+    actionsDiv.appendChild(mainMenuBtn);
+    
+    return actionsDiv;
+  }
+
+  /**
+   * Create a stat item element
+   */
+  createStatItem(label, value) {
+    const statItem = htmlSanitizer.createElement('div', { class: 'stat-item' });
+    const statLabel = htmlSanitizer.createElement('span', { class: 'stat-label' }, label);
+    const statValue = htmlSanitizer.createElement('span', { class: 'stat-value' }, value);
+    
+    statItem.appendChild(statLabel);
+    statItem.appendChild(statValue);
+    
+    return statItem;
+  }
+
+  /**
+   * Generate player statistics elements using safe DOM methods
+   */
+  generatePlayerStatsElements() {
     const players = this.gameState.getAllPlayers();
-    let statsHtml = '';
+    const elements = [];
 
     for (const player of players) {
       const units = this.gameState.getPlayerUnits(player.id);
       const base = this.gameState.getPlayerBase(player.id);
       const isWinner = player.id === this.gameState.winner;
 
-      statsHtml += `
-        <div class="player-stats ${isWinner ? 'winner-stats' : ''}">
-          <h4>Player ${player.id} ${isWinner ? '👑' : ''}</h4>
-          <div class="stat-item">
-            <span class="stat-label">Units:</span>
-            <span class="stat-value">${units.length}</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">Base Health:</span>
-            <span class="stat-value">${base ? base.health : 0}/200</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">Energy:</span>
-            <span class="stat-value">${player.energy}</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">Resources:</span>
-            <span class="stat-value">${player.resourcesGathered || 0}</span>
-          </div>
-        </div>
-      `;
+      const playerStatsDiv = htmlSanitizer.createElement('div', {
+        class: `player-stats ${isWinner ? 'winner-stats' : ''}`
+      });
+      
+      const playerTitle = htmlSanitizer.createElement('h4', {}, 
+        `Player ${player.id} ${isWinner ? '👑' : ''}`
+      );
+      
+      const unitsItem = this.createStatItem('Units:', units.length.toString());
+      const healthItem = this.createStatItem('Base Health:', `${base ? base.health : 0}/200`);
+      const energyItem = this.createStatItem('Energy:', player.energy.toString());
+      const resourcesItem = this.createStatItem('Resources:', (player.resourcesGathered || 0).toString());
+      
+      playerStatsDiv.appendChild(playerTitle);
+      playerStatsDiv.appendChild(unitsItem);
+      playerStatsDiv.appendChild(healthItem);
+      playerStatsDiv.appendChild(energyItem);
+      playerStatsDiv.appendChild(resourcesItem);
+      
+      elements.push(playerStatsDiv);
     }
 
-    return statsHtml;
+    return elements;
   }
 
   /**

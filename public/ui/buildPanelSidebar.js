@@ -1,3 +1,6 @@
+// Import HTMLSanitizer for secure DOM manipulation
+import '../js/utils/HTMLSanitizer.js';
+
 class BuildPanelSidebar {
   constructor(gameState, turnManager) {
     this.gameState = gameState;
@@ -95,27 +98,81 @@ class BuildPanelSidebar {
       const currentPlayer = this.gameState.getCurrentPlayer();
       const playerEnergy = currentPlayer ? currentPlayer.energy : 0;
 
-      this.element.innerHTML = `
-        <div class="build-unit-grid">
-          ${this.unitTypes.map(unit => `
-            <div class="build-unit-card ${playerEnergy < unit.cost ? 'insufficient-energy' : ''}" 
-                 data-type="${unit.type}" 
-                 data-cost="${unit.cost}">
-              <div class="build-unit-icon">${unit.icon}</div>
-              <div class="build-unit-info">
-                <div class="build-unit-name">${unit.name}</div>
-                <div class="build-unit-cost">${unit.cost} Energy</div>
-                <div class="build-unit-stats">
-                  HP:${unit.health} ATK:${unit.attack} MOV:${unit.movement}
-                </div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      `;
+      // Clear existing content
+      this.element.innerHTML = '';
+      
+      // Create build unit grid using safe DOM methods
+      const buildGrid = this.createBuildUnitGrid(playerEnergy);
+      this.element.appendChild(buildGrid);
     } catch (error) {
       console.error('Error rendering build options:', error);
     }
+  }
+
+  /**
+   * Create build unit grid using safe DOM methods
+   */
+  createBuildUnitGrid(playerEnergy) {
+    const buildGrid = htmlSanitizer.createElement('div', { class: 'build-unit-grid' });
+    
+    this.unitTypes.forEach(unit => {
+      const unitCard = this.createUnitCard(unit, playerEnergy);
+      buildGrid.appendChild(unitCard);
+    });
+    
+    return buildGrid;
+  }
+
+  /**
+   * Create a unit card element using safe DOM methods
+   */
+  createUnitCard(unit, playerEnergy) {
+    const insufficientEnergy = playerEnergy < unit.cost;
+    const cardClass = `build-unit-card ${insufficientEnergy ? 'insufficient-energy' : ''}`;
+    
+    const unitCard = htmlSanitizer.createElement('div', {
+      class: cardClass,
+      'data-type': unit.type,
+      'data-cost': unit.cost.toString()
+    });
+    
+    // Create unit icon
+    const iconDiv = htmlSanitizer.createElement('div', 
+      { class: 'build-unit-icon' }, 
+      unit.icon
+    );
+    
+    // Create unit info container
+    const infoDiv = htmlSanitizer.createElement('div', { class: 'build-unit-info' });
+    
+    // Create unit name
+    const nameDiv = htmlSanitizer.createElement('div', 
+      { class: 'build-unit-name' }, 
+      unit.name
+    );
+    
+    // Create unit cost
+    const costDiv = htmlSanitizer.createElement('div', 
+      { class: 'build-unit-cost' }, 
+      `${unit.cost} Energy`
+    );
+    
+    // Create unit stats
+    const statsDiv = htmlSanitizer.createElement('div', 
+      { class: 'build-unit-stats' }, 
+      `HP:${unit.health} ATK:${unit.attack} MOV:${unit.movement}`
+    );
+    
+    // Assemble the info section
+    infoDiv.appendChild(nameDiv);
+    infoDiv.appendChild(costDiv);
+    infoDiv.appendChild(statsDiv);
+    
+    // Assemble the card
+    unitCard.appendChild(iconDiv);
+    unitCard.appendChild(infoDiv);
+    
+    return unitCard;
   }
 
   setupEventListeners() {
@@ -207,10 +264,10 @@ class BuildPanelSidebar {
   }
 
   showNotification(message, type = 'info') {
-    // Create modern toast notification
-    const notification = document.createElement('div');
-    notification.className = `build-notification ${type}`;
-    notification.textContent = message;
+    // Create modern toast notification using safe DOM methods
+    const notification = htmlSanitizer.createElement('div', {
+      class: `build-notification ${type}`
+    }, message);
 
     // Determine colors based on type
     const colors = {
@@ -285,7 +342,7 @@ class BuildPanelSidebar {
         // Add visual indicator that build mode is active
         const header = this.element.querySelector('.panel-header h3');
         if (header && !header.textContent.includes('(Active)')) {
-          header.textContent += ' (Active)';
+          htmlSanitizer.setTextContent(header, header.textContent + ' (Active)');
         }
       }
 
@@ -307,7 +364,7 @@ class BuildPanelSidebar {
         // Remove the active indicator from header
         const header = this.element.querySelector('.panel-header h3');
         if (header) {
-          header.textContent = header.textContent.replace(' (Active)', '');
+          htmlSanitizer.setTextContent(header, header.textContent.replace(' (Active)', ''));
         }
 
         // Update display to show current state

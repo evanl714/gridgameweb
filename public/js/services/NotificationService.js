@@ -4,6 +4,9 @@
  * Handles all user notifications, messages, and temporary UI feedback
  * Eliminates scattered notification creation throughout the codebase
  */
+
+// Import HTMLSanitizer for secure DOM manipulation
+import '../utils/HTMLSanitizer.js';
 class NotificationService {
   constructor(domProvider, container = null) {
     this.domProvider = domProvider;
@@ -81,11 +84,15 @@ class NotificationService {
       'data-notification-id': notification.id
     });
 
-    // Set content
+    // Set content safely
     if (notification.options.html) {
-      element.innerHTML = notification.message;
+      // Sanitize HTML content to prevent XSS
+      htmlSanitizer.setHTMLContent(element, notification.message, {
+        allowedTags: ['strong', 'em', 'b', 'i', 'br', 'span'],
+        allowedAttributes: ['class']
+      });
     } else {
-      element.textContent = notification.message;
+      htmlSanitizer.setTextContent(element, notification.message);
     }
 
     // Add close button if closable
@@ -201,14 +208,18 @@ class NotificationService {
     const notification = this.notifications.get(id);
     if (!notification) return false;
 
-    // Update message
+    // Update message safely
     if (updates.message !== undefined) {
       notification.message = updates.message;
       if (notification.element) {
         if (notification.options.html) {
-          notification.element.innerHTML = updates.message;
+          // Sanitize HTML content to prevent XSS
+          htmlSanitizer.setHTMLContent(notification.element, updates.message, {
+            allowedTags: ['strong', 'em', 'b', 'i', 'br', 'span'],
+            allowedAttributes: ['class']
+          });
         } else {
-          notification.element.textContent = updates.message;
+          htmlSanitizer.setTextContent(notification.element, updates.message);
         }
       }
     }
@@ -267,30 +278,28 @@ class NotificationService {
      * @returns {string} Notification ID
      */
   confirm(message, onConfirm, onCancel, options = {}) {
-    const confirmElement = this.domProvider.createElement('div', {
-      className: 'notification-confirm'
+    // Create confirm dialog structure safely using HTMLSanitizer
+    const confirmElement = htmlSanitizer.createElement('div', {
+      class: 'notification-confirm'
     });
 
     // Message
-    const messageElement = this.domProvider.createElement('div', {
-      className: 'notification-message',
-      textContent: message
-    });
+    const messageElement = htmlSanitizer.createElement('div', {
+      class: 'notification-message'
+    }, message);
 
     // Buttons
-    const buttonContainer = this.domProvider.createElement('div', {
-      className: 'notification-buttons'
+    const buttonContainer = htmlSanitizer.createElement('div', {
+      class: 'notification-buttons'
     });
 
-    const confirmBtn = this.domProvider.createElement('button', {
-      className: 'notification-btn notification-btn-confirm',
-      textContent: options.confirmText || 'Confirm'
-    });
+    const confirmBtn = htmlSanitizer.createElement('button', {
+      class: 'notification-btn notification-btn-confirm'
+    }, options.confirmText || 'Confirm');
 
-    const cancelBtn = this.domProvider.createElement('button', {
-      className: 'notification-btn notification-btn-cancel',
-      textContent: options.cancelText || 'Cancel'
-    });
+    const cancelBtn = htmlSanitizer.createElement('button', {
+      class: 'notification-btn notification-btn-cancel'
+    }, options.cancelText || 'Cancel');
 
     const notificationId = this.generateId();
 
@@ -309,13 +318,59 @@ class NotificationService {
     confirmElement.appendChild(messageElement);
     confirmElement.appendChild(buttonContainer);
 
-    return this.show(confirmElement.outerHTML, 'confirm', {
-      html: true,
-      persistent: true,
-      closable: false,
-      position: 'center',
-      ...options
+    // Create the notification with the DOM element instead of HTML string
+    const id = this.generateId();
+    const notification = {
+      id,
+      message: confirmElement, // Pass the DOM element directly
+      type: 'confirm',
+      timestamp: Date.now(),
+      options: {
+        duration: 0,
+        position: options.position || 'center',
+        persistent: true,
+        closable: false,
+        html: false, // We're passing a DOM element, not HTML string
+        onClick: options.onClick,
+        onClose: options.onClose,
+        className: options.className || ''
+      }
+    };
+
+    this.createConfirmNotificationElement(notification);
+    this.notifications.set(id, notification);
+    this.enforceMaxNotifications();
+
+    return id;
+  }
+
+  /**
+   * Create confirmation notification element (special handling for DOM elements)
+   * @param {Object} notification - Notification data
+   */
+  createConfirmNotificationElement(notification) {
+    const element = this.domProvider.createElement('div', {
+      id: `notification-${notification.id}`,
+      className: `notification notification-${notification.type} ${notification.options.className}`.trim(),
+      'data-notification-id': notification.id
     });
+
+    // Append the confirmation DOM element
+    element.appendChild(notification.message);
+
+    // Set position
+    this.positionElement(element, notification.options.position);
+
+    // Add to container
+    this.container.appendChild(element);
+
+    // Trigger entrance animation
+    requestAnimationFrame(() => {
+      element.classList.add('notification-visible');
+    });
+
+    // Store element reference
+    notification.element = element;
   }
 
   /**
@@ -477,19 +532,13 @@ class NotificationService {
             }
         `;
 
-    // Create style element safely, fallback to document.createElement if domProvider is not available
-    let styleElement;
-    if (this.domProvider && typeof this.domProvider.createElement === 'function') {
-      styleElement = this.domProvider.createElement('style', {
-        id: 'notification-styles',
-        innerHTML: styles
-      });
-    } else {
-      // Fallback to native DOM methods
-      styleElement = document.createElement('style');
-      styleElement.id = 'notification-styles';
-      styleElement.innerHTML = styles;
-    }
+    // Create style element safely using HTMLSanitizer
+    const styleElement = htmlSanitizer.createElement('style', {
+      id: 'notification-styles'
+    });
+    
+    // Set CSS content safely
+    styleElement.textContent = styles;
 
     document.head.appendChild(styleElement);
   }
