@@ -195,8 +195,12 @@ export class VictoryScreen {
     }, '🔄 Play Again');
     
     playAgainBtn.addEventListener('click', async () => {
-      if (window.game) {
-        await window.game.newGame();
+      // Use services container for dependency injection
+      if (window.services) {
+        const game = window.services.container.get('game');
+        if (game) {
+          await game.newGame();
+        }
       }
     });
     
@@ -274,8 +278,11 @@ export class VictoryScreen {
       this.hide();
     } else if (event.key === 'Enter' || event.key === ' ') {
       // Start new game on Enter/Space
-      if (window.game) {
-        (async () => await window.game.newGame())();
+      if (window.services) {
+        const game = window.services.container.get('game');
+        if (game) {
+          (async () => await game.newGame())();
+        }
       }
     }
   }

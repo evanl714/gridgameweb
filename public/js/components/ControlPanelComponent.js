@@ -211,25 +211,14 @@ export class ControlPanelComponent extends UIComponent {
    * Set up watcher for game instance availability
    */
   setupGameInstanceWatcher() {
-    if (!this.gameInstance && window) {
-      const checkInterval = setInterval(() => {
-        if (window.game) {
-          this.gameInstance = window.game;
-          console.log('✅ ControlPanelComponent: Game instance detected');
-          this.updateButtonStates();
-          clearInterval(checkInterval);
-          this.emit('gameInstanceConnected', { gameInstance: this.gameInstance });
-        }
-      }, 100);
-
-      // Stop checking after 10 seconds
-      setTimeout(() => {
-        clearInterval(checkInterval);
-        if (!this.gameInstance) {
-          console.warn('ControlPanelComponent: Game instance not found after timeout');
-          this.disableAllButtons();
-        }
-      }, 10000);
+    // Game instance is now provided via constructor - no polling needed
+    if (this.gameInstance) {
+      console.log('✅ ControlPanelComponent: Game instance already available');
+      this.updateButtonStates();
+      this.emit('gameInstanceConnected', { gameInstance: this.gameInstance });
+    } else {
+      console.warn('ControlPanelComponent: Game instance not provided via constructor');
+      this.disableAllButtons();
     }
   }
 

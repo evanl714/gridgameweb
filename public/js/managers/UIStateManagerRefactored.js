@@ -551,7 +551,7 @@ export class UIStateManager {
 
     try {
       const updateData = {
-        gameInstance: window.game,
+        gameInstance: this.gameStateManager.gameInstance,
         refreshAvailability: true,
         refreshButtonStates: true
       };

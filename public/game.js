@@ -25,6 +25,9 @@ import { performanceMonitor } from './js/services/PerformanceMonitor.js';
 // Import service bootstrap
 import ServiceBootstrap from './js/services/ServiceBootstrap.js';
 
+// Import game interfaces
+import { GameActions } from './js/interfaces/GameActions.js';
+
 // Import design patterns
 import {
   PatternIntegrator,
@@ -63,8 +66,8 @@ class Game {
     // UI loading strategy (can be changed via settings)
     this.uiLoadingStrategy = 'progressive'; // progressive, eager, smart
 
-    // Make game accessible globally for victory screen buttons
-    window.game = this;
+    // Game instance will be managed by ServiceContainer
+    // No global assignment - use dependency injection instead
   }
 
   /**
@@ -94,11 +97,13 @@ class Game {
 
       // Initialize input controller after all components are ready
       const InputController = await lazyLoader.load('InputController');
+      const gameActions = new GameActions(this);
       this.inputController = new InputController(
         this.gameState, 
         this.turnManager, 
         this.uiManager, 
-        this.renderer
+        this.renderer,
+        gameActions
       );
 
       // Complete initialization
@@ -751,13 +756,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 Starting complete game initialization...');
     
     // Step 1: Create game instance
-    window.game = new Game();
-    await window.game.initialize();
+    const game = new Game();
+    await game.initialize();
     console.log('✅ Core game initialized');
     
     // Step 2: Initialize ServiceBootstrap with component system
     const bootstrap = new ServiceBootstrap();
-    const services = await bootstrap.initialize(window.game, {
+    const services = await bootstrap.initialize(game, {
       enableDebugMode: true,
       strictMode: false
     });

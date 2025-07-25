@@ -145,13 +145,15 @@ export class ComponentManager extends Observable {
       case 'gameBoard':
         // Wait for grid to be generated first
         await this.waitForGridGeneration();
-        return new ComponentClass('#gameBoard', window.game, {
+        const gameInstance = this.serviceContainer.get('game');
+        return new ComponentClass('#gameBoard', gameInstance, {
           useEventDelegation: true
         });
 
       case 'controlPanel':
-        return new ComponentClass(document.body, window.game, {
-          watchForGameInstance: true
+        const gameInstanceForControl = this.serviceContainer.get('game');
+        return new ComponentClass(document.body, gameInstanceForControl, {
+          watchForGameInstance: false // No longer needed since we have direct game instance
         });
 
       default:

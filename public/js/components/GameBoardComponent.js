@@ -138,24 +138,12 @@ export class GameBoardComponent extends UIComponent {
    * Set up watcher for game instance availability
    */
   setupGameInstanceWatcher() {
-    // If game instance is not available, watch for it
-    if (!this.gameInstance && window) {
-      const checkInterval = setInterval(() => {
-        if (window.game) {
-          this.gameInstance = window.game;
-          console.log('✅ GameBoardComponent: Game instance detected');
-          clearInterval(checkInterval);
-          this.emit('gameInstanceConnected', { gameInstance: this.gameInstance });
-        }
-      }, 100);
-
-      // Stop checking after 10 seconds
-      setTimeout(() => {
-        clearInterval(checkInterval);
-        if (!this.gameInstance) {
-          console.warn('GameBoardComponent: Game instance not found after timeout');
-        }
-      }, 10000);
+    // Game instance is now provided via constructor - no polling needed
+    if (this.gameInstance) {
+      console.log('✅ GameBoardComponent: Game instance already available');
+      this.emit('gameInstanceConnected', { gameInstance: this.gameInstance });
+    } else {
+      console.warn('GameBoardComponent: Game instance not provided via constructor');
     }
   }
 

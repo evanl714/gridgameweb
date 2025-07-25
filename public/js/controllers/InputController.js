@@ -7,12 +7,16 @@ import { GAME_STATES, GAME_CONFIG } from '../../shared/constants.js';
 import { GameActions } from '../interfaces/GameActions.js';
 
 export class InputController {
-  constructor(gameState, turnManager, uiManager, renderer, gameActions = null) {
+  constructor(gameState, turnManager, uiManager, renderer, gameActions) {
+    if (!gameActions) {
+      throw new Error('InputController requires gameActions parameter for dependency injection');
+    }
+    
     this.gameState = gameState;
     this.turnManager = turnManager;
     this.uiManager = uiManager;
     this.renderer = renderer;
-    this.gameActions = gameActions || new GameActions(window.game); // Fallback for backward compatibility
+    this.gameActions = gameActions;
 
     // UI state for input handling
     this.selectedCell = null;
