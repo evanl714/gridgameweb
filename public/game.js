@@ -188,6 +188,25 @@ class Game {
       getCurrentPlayer: () => this.gameState.getCurrentPlayer(),
       getState: () => this.gameState,
       initialized: true,
+      // Additional GameStateManager interface methods
+      getPlayerResources: () => {
+        const player = this.gameState.getCurrentPlayer();
+        return player ? {
+          wood: player.wood || 0,
+          stone: player.stone || 0,
+          food: player.food || 0,
+          energy: player.energy || 0
+        } : { wood: 0, stone: 0, food: 0, energy: 0 };
+      },
+      getGameStatus: () => {
+        return {
+          isStarted: this.gameState.initialized || false,
+          isPaused: false,
+          isGameOver: false,
+          winner: null,
+          players: this.gameState.players || []
+        };
+      },
       // EventEmitter interface
       _listeners: new Map(),
       on: function(event, callback) {
@@ -567,6 +586,25 @@ class Game {
       getCurrentPlayer: () => this.gameState.getCurrentPlayer(),
       getState: () => this.gameState,
       initialized: true,
+      // Additional GameStateManager interface methods
+      getPlayerResources: () => {
+        const player = this.gameState.getCurrentPlayer();
+        return player ? {
+          wood: player.wood || 0,
+          stone: player.stone || 0,
+          food: player.food || 0,
+          energy: player.energy || 0
+        } : { wood: 0, stone: 0, food: 0, energy: 0 };
+      },
+      getGameStatus: () => {
+        return {
+          isStarted: this.gameState.initialized || false,
+          isPaused: false,
+          isGameOver: false,
+          winner: null,
+          players: this.gameState.players || []
+        };
+      },
       // EventEmitter interface
       _listeners: new Map(),
       on: function(event, callback) {
