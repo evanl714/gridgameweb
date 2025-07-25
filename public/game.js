@@ -17,26 +17,16 @@ import { TurnManager } from './turnManager.js';
 import { ResourceManager } from './resourceManager.js';
 import { PersistenceManager } from './persistence.js';
 
-// Import UI components
-import { UIManager } from './ui/uiManager.js';
-import { ResourceDisplay } from './ui/resourceDisplay.js';
-import { TurnInterface } from './ui/turnInterface.js';
-import { GameStatus } from './ui/gameStatus.js';
-import { UnitDisplay } from './ui/unitDisplay.js';
-import { VictoryScreen } from './ui/victoryScreen.js';
-import { BuildPanelSidebar } from './ui/buildPanelSidebar.js';
-import { UnitInfoSidebar } from './ui/unitInfoSidebar.js';
+// Import lazy loading system
+import { lazyLoader } from './js/patterns/LazyLoader.js';
+import { UIContextLoader, UILoadingStrategies } from './js/patterns/UILazyLoader.js';
+import { performanceMonitor } from './js/services/PerformanceMonitor.js';
 
-// Import controllers, rendering, and managers
-import { InputController } from './js/controllers/InputController.js';
-import { GameRenderer } from './js/rendering/GameRenderer.js';
-import { UIStateManager } from './js/managers/UIStateManager.js';
+// Import service bootstrap
 import ServiceBootstrap from './js/services/ServiceBootstrap.js';
 
 // Import design patterns
 import {
-  CommandManager,
-  EntityFactory,
   PatternIntegrator,
   GameEventTypes
 } from './js/patterns/index.js';
@@ -49,59 +39,180 @@ class Game {
     this.gridSize = GAME_CONFIG.GRID_SIZE; // 25x25
     this.cellSize = GAME_CONFIG.CELL_SIZE; // 32 pixels per cell
 
-    // Input controller handles UI state and interaction
-    this.inputController = null; // Will be initialized after other components
-
     // Initialize game state management
     this.gameState = new GameState();
     this.turnManager = new TurnManager(this.gameState);
     this.resourceManager = new ResourceManager(this.gameState);
     this.persistenceManager = new PersistenceManager();
 
-    // Initialize UI system
-    this.uiManager = new UIManager(this.gameState, this.turnManager);
-    this.victoryScreen = new VictoryScreen(this.gameState);
-
-    // Initialize UI state manager
-    this.uiStateManager = new UIStateManager(this.gameState, this.turnManager);
-
-    // Initialize rendering system
-    this.renderer = new GameRenderer(this.gameState, this.resourceManager);
+    // Initialize performance monitoring
+    this.performanceMonitor = performanceMonitor;
+    
+    // UI components will be loaded lazily
+    this.uiManager = null;
+    this.victoryScreen = null;
+    this.uiStateManager = null;
+    this.renderer = null;
+    this.inputController = null;
 
     // Pattern-related properties will be initialized async
     this.commandManager = null;
     this.entityFactory = null;
     this.actionHandlers = null;
 
-    // Input controller will be initialized after patterns
-    this.inputController = null;
+    // UI loading strategy (can be changed via settings)
+    this.uiLoadingStrategy = 'progressive'; // progressive, eager, smart
 
     // Make game accessible globally for victory screen buttons
     window.game = this;
   }
 
   /**
-   * Async initialization of patterns and final setup
+   * Async initialization with lazy loading and performance monitoring
    */
   async initialize() {
     try {
+      // Start performance monitoring
+      this.performanceMonitor.startFrame();
+      
+      console.log('Starting game initialization with lazy loading...');
+
       // Initialize design patterns asynchronously
-      const patterns = await PatternIntegrator.setupPatterns(this);
+      const patterns = await this.performanceMonitor.profileOperation(
+        'pattern-setup',
+        () => PatternIntegrator.setupPatterns(this)
+      );
       this.commandManager = patterns.commandManager;
       this.entityFactory = patterns.entityFactory;
       this.actionHandlers = await PatternIntegrator.createActionHandlers(this, this.commandManager);
 
-      // Initialize input controller after patterns are ready
-      this.inputController = new InputController(this.gameState, this.turnManager, this.uiManager, this.renderer);
+      // Load UI components based on strategy
+      await this.performanceMonitor.profileOperation(
+        'ui-loading',
+        () => this.loadUIComponents()
+      );
+
+      // Initialize input controller after all components are ready
+      const InputController = await lazyLoader.load('InputController');
+      this.inputController = new InputController(
+        this.gameState, 
+        this.turnManager, 
+        this.uiManager, 
+        this.renderer
+      );
 
       // Complete initialization
       this.finishInitialization();
 
-      console.log('Grid Strategy Game initialized with patterns and InputController');
+      this.performanceMonitor.endFrame();
+      
+      // Log performance metrics
+      const report = this.performanceMonitor.getPerformanceReport();
+      console.log('Game initialization completed. Performance report:', report);
+      
+      console.log('Grid Strategy Game initialized with lazy loading');
     } catch (error) {
-      console.error('Failed to initialize game patterns:', error);
+      console.error('Failed to initialize game:', error);
+      this.performanceMonitor.endFrame();
       throw error;
     }
+  }
+
+  /**
+   * Load UI components based on selected strategy
+   */
+  async loadUIComponents() {
+    const strategy = UILoadingStrategies[this.uiLoadingStrategy];
+    
+    if (!strategy) {
+      console.warn(`Unknown UI loading strategy: ${this.uiLoadingStrategy}, falling back to progressive`);
+      await UILoadingStrategies.progressive.execute();
+    } else {
+      console.log(`Loading UI with strategy: ${strategy.name}`);
+      await strategy.execute(this.gameState);
+    }
+
+    // Load critical UI components that are always needed
+    await this.loadCriticalUIComponents();
+  }
+
+  /**
+   * Load critical UI components that are always needed
+   */
+  async loadCriticalUIComponents() {
+    // Load essential UI managers
+    const UIManager = await lazyLoader.load('UIManager');
+    this.uiManager = new UIManager(this.gameState, this.turnManager);
+
+    const UIStateManager = await lazyLoader.load('UIStateManager');
+    this.uiStateManager = new UIStateManager(this.gameState, this.turnManager);
+
+    const GameRenderer = await lazyLoader.load('GameRenderer');
+    this.renderer = new GameRenderer(this.gameState, this.resourceManager);
+
+    console.log('Critical UI components loaded');
+  }
+
+  /**
+   * Load UI component on demand with caching
+   */
+  async loadUIComponent(componentName) {
+    try {
+      const Component = await lazyLoader.load(componentName);
+      console.log(`UI component '${componentName}' loaded on demand`);
+      return Component;
+    } catch (error) {
+      console.error(`Failed to load UI component '${componentName}':`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Load victory screen when needed
+   */
+  async showVictoryScreen() {
+    if (!this.victoryScreen) {
+      const VictoryScreen = await this.loadUIComponent('VictoryScreen');
+      this.victoryScreen = new VictoryScreen(this.gameState);
+    }
+    
+    // Show the victory screen
+    if (this.victoryScreen && typeof this.victoryScreen.show === 'function') {
+      this.victoryScreen.show();
+    }
+  }
+
+  /**
+   * Load build panel when needed
+   */
+  async showBuildPanel() {
+    const BuildPanelSidebar = await this.loadUIComponent('BuildPanelSidebar');
+    
+    // Initialize if needed
+    if (!this.buildPanelSidebar) {
+      this.buildPanelSidebar = new BuildPanelSidebar(this.gameState, this.turnManager);
+    }
+    
+    return this.buildPanelSidebar;
+  }
+
+  /**
+   * Load unit info panel when needed
+   */
+  async showUnitInfo(unit) {
+    const UnitInfoSidebar = await this.loadUIComponent('UnitInfoSidebar');
+    
+    // Initialize if needed
+    if (!this.unitInfoSidebar) {
+      this.unitInfoSidebar = new UnitInfoSidebar(this.gameState);
+    }
+    
+    // Update with current unit info
+    if (this.unitInfoSidebar && typeof this.unitInfoSidebar.updateUnit === 'function') {
+      this.unitInfoSidebar.updateUnit(unit);
+    }
+    
+    return this.unitInfoSidebar;
   }
 
   finishInitialization() {
