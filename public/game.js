@@ -186,7 +186,16 @@ class Game {
     // Create EventEmitter bridge for gameStateManager mock
     const gameStateManagerBridge = {
       getCurrentPlayer: () => this.gameState.getCurrentPlayer(),
-      getState: () => this.gameState,
+      getState: () => {
+        // Ensure gameState has expected array properties for UIStateManager
+        const state = this.gameState;
+        return {
+          ...state,
+          units: state.units || [],
+          bases: state.bases || [],
+          players: state.players || []
+        };
+      },
       initialized: true,
       // Additional GameStateManager interface methods
       getPlayerResources: () => {
@@ -206,6 +215,12 @@ class Game {
           winner: null,
           players: this.gameState.players || []
         };
+      },
+      isGameActive: () => {
+        return this.gameState.initialized && !this.gameState.gameOver;
+      },
+      getUnits: () => {
+        return this.gameState.units || [];
       },
       // EventEmitter interface
       _listeners: new Map(),
@@ -584,7 +599,16 @@ class Game {
     // Create EventEmitter bridge for gameStateManager mock
     const gameStateManagerBridge = {
       getCurrentPlayer: () => this.gameState.getCurrentPlayer(),
-      getState: () => this.gameState,
+      getState: () => {
+        // Ensure gameState has expected array properties for UIStateManager
+        const state = this.gameState;
+        return {
+          ...state,
+          units: state.units || [],
+          bases: state.bases || [],
+          players: state.players || []
+        };
+      },
       initialized: true,
       // Additional GameStateManager interface methods
       getPlayerResources: () => {
@@ -604,6 +628,12 @@ class Game {
           winner: null,
           players: this.gameState.players || []
         };
+      },
+      isGameActive: () => {
+        return this.gameState.initialized && !this.gameState.gameOver;
+      },
+      getUnits: () => {
+        return this.gameState.units || [];
       },
       // EventEmitter interface
       _listeners: new Map(),
