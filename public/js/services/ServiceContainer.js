@@ -48,11 +48,8 @@ class ServiceContainer {
       throw new Error(`Service '${name}' not registered in container`);
     }
 
-    // Resolve dependencies
-    const dependencies = this.resolveDependencies(service.dependencies);
-
-    // Create instance
-    const instance = service.factory(...dependencies);
+    // Create instance - pass container to factory for dependency resolution
+    const instance = service.factory(this);
 
     // Store singleton if required
     if (service.singleton) {

@@ -120,12 +120,12 @@ class ServiceBootstrap {
      */
   async registerCoreServices() {
     // EventEmitter - Central event system
-    this.container.register('eventEmitter', () => {
+    this.container.register('eventEmitter', (container) => {
       return new EventEmitter();
     }, { singleton: true });
 
     // DOMProvider - DOM abstraction layer
-    this.container.register('domProvider', () => {
+    this.container.register('domProvider', (container) => {
       const provider = new DOMProvider();
       provider.initializeCommonElements();
       return provider;
@@ -271,7 +271,7 @@ class ServiceBootstrap {
   async validateServices() {
     const validations = [
       { name: 'eventEmitter', test: () => this.container.get('eventEmitter').emit },
-      { name: 'domProvider', test: () => this.container.get('domProvider').get },
+      { name: 'domProvider', test: () => typeof this.container.get('domProvider').get === 'function' },
       { name: 'notificationService', test: () => this.container.get('notificationService').show },
       { name: 'gameStateManager', test: () => this.container.get('gameStateManager').getState },
       { name: 'turnManagerService', test: () => this.container.get('turnManagerService').getCurrentTurnInfo },
