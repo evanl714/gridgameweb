@@ -97,7 +97,7 @@ class Game {
 
       // Initialize input controller after all components are ready
       const InputControllerModule = await lazyLoader.load('InputController');
-      const InputController = InputControllerModule.InputController;
+      const InputController = InputControllerModule.default || InputControllerModule.InputController || InputControllerModule;
       const gameActions = new GameActions(this);
       this.inputController = new InputController(
         this.gameState, 
@@ -148,11 +148,11 @@ class Game {
   async loadCriticalUIComponents() {
     // Load essential UI managers
     const UIManagerModule = await lazyLoader.load('UIManager');
-    const UIManager = UIManagerModule.UIManager;
+    const UIManager = UIManagerModule.default || UIManagerModule.UIManager || UIManagerModule;
     this.uiManager = new UIManager(this.gameState, this.turnManager);
 
     const UIStateManagerModule = await lazyLoader.load('UIStateManager');
-    const UIStateManager = UIStateManagerModule.UIStateManager;
+    const UIStateManager = UIStateManagerModule.default || UIStateManagerModule.UIStateManager || UIStateManagerModule;
     // Create basic services for UIStateManager compatibility
     const basicDOMProvider = {
       get: (id) => document.getElementById(id),
@@ -272,7 +272,7 @@ class Game {
     );
 
     const GameRendererModule = await lazyLoader.load('GameRenderer');
-    const GameRenderer = GameRendererModule.GameRenderer;
+    const GameRenderer = GameRendererModule.default || GameRendererModule.GameRenderer || GameRendererModule;
     this.renderer = new GameRenderer(this.gameState, this.resourceManager);
 
     console.log('Critical UI components loaded');
