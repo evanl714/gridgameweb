@@ -221,6 +221,21 @@ class Game {
           }
         }
         return this;
+      },
+      // Add missing TurnManagerService interface methods
+      getCurrentTurnInfo: () => {
+        const gameState = this.gameState;
+        const turnManager = this.turnManager;
+        return {
+          turn: turnManager.currentTurn || 1,
+          phase: turnManager.phases ? turnManager.phases[turnManager.currentPhaseIndex || 0] : 'resource',
+          phaseIndex: turnManager.currentPhaseIndex || 0,
+          player: gameState ? gameState.getCurrentPlayer() : null,
+          isProcessing: false,
+          isPaused: false,
+          turnDuration: 0,
+          phaseDuration: 0
+        };
       }
     };
 
@@ -261,6 +276,21 @@ class Game {
           }
         }
         return this;
+      },
+      // Add missing TurnManagerService interface methods
+      getCurrentTurnInfo: () => {
+        const gameState = this.gameState;
+        const turnManager = this.turnManager;
+        return {
+          turn: turnManager.currentTurn || 1,
+          phase: turnManager.phases ? turnManager.phases[turnManager.currentPhaseIndex || 0] : 'resource',
+          phaseIndex: turnManager.currentPhaseIndex || 0,
+          player: gameState ? gameState.getCurrentPlayer() : null,
+          isProcessing: false,
+          isPaused: false,
+          turnDuration: 0,
+          phaseDuration: 0
+        };
       }
     };
 
@@ -570,6 +600,21 @@ class Game {
           }
         }
         return this;
+      },
+      // Add missing TurnManagerService interface methods
+      getCurrentTurnInfo: () => {
+        const gameState = this.gameState;
+        const turnManager = this.turnManager;
+        return {
+          turn: turnManager.currentTurn || 1,
+          phase: turnManager.phases ? turnManager.phases[turnManager.currentPhaseIndex || 0] : 'resource',
+          phaseIndex: turnManager.currentPhaseIndex || 0,
+          player: gameState ? gameState.getCurrentPlayer() : null,
+          isProcessing: false,
+          isPaused: false,
+          turnDuration: 0,
+          phaseDuration: 0
+        };
       }
     };
 
@@ -610,6 +655,21 @@ class Game {
           }
         }
         return this;
+      },
+      // Add missing TurnManagerService interface methods
+      getCurrentTurnInfo: () => {
+        const gameState = this.gameState;
+        const turnManager = this.turnManager;
+        return {
+          turn: turnManager.currentTurn || 1,
+          phase: turnManager.phases ? turnManager.phases[turnManager.currentPhaseIndex || 0] : 'resource',
+          phaseIndex: turnManager.currentPhaseIndex || 0,
+          player: gameState ? gameState.getCurrentPlayer() : null,
+          isProcessing: false,
+          isPaused: false,
+          turnDuration: 0,
+          phaseDuration: 0
+        };
       }
     };
 
