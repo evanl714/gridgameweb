@@ -19,8 +19,12 @@ export class GridRenderStrategy extends RenderStrategy {
   }
 
   initialize() {
-    this.cacheGridCells();
-    console.log(`Grid renderer initialized with ${this.gridCells.length} cells`);
+    const cached = this.cacheGridCells();
+    if (cached) {
+      console.log(`Grid renderer initialized with ${this.gridCells.length} cells`);
+    } else {
+      console.log('Grid renderer initialized, grid cells will be cached when available');
+    }
   }
 
   render(inputController) {
@@ -58,8 +62,10 @@ export class GridRenderStrategy extends RenderStrategy {
     // Cache grid cells for efficient DOM rendering
     this.gridCells = Array.from(document.querySelectorAll('.grid-cell'));
     if (this.gridCells.length === 0) {
-      console.warn('No grid cells found for caching');
+      console.log('Grid cells not yet available, will cache on first render');
+      return false;
     }
+    return true;
   }
 
   clearGridCells() {

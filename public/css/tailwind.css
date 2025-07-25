@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+/* Custom game-specific styles */
+.game-board {
+  @apply grid gap-0 bg-gray-100 border border-gray-300;
+}
+
+.grid-cell {
+  @apply border border-gray-200 bg-white hover:bg-gray-50 cursor-pointer transition-colors duration-150;
+}
+
+.grid-cell.selected {
+  @apply bg-blue-100 border-blue-300;
+}
+
+.grid-cell.hovered {
+  @apply bg-gray-100;
+}
+
+.unit-card {
+  @apply bg-white border border-gray-200 rounded-lg p-3 cursor-pointer hover:shadow-md transition-shadow duration-150;
+}
+
+.unit-card.selected {
+  @apply border-blue-500 bg-blue-50;
+}
+
+.control-button {
+  @apply px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-150;
+}
+
+.section-card {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 p-4;
+}
+
+.main-container {
+  @apply min-h-screen bg-gray-50;
+}
+
+.left-sidebar {
+  @apply bg-white border-r border-gray-200;
+}
+
+.right-sidebar {
+  @apply bg-white border-l border-gray-200;
+}
+
+.game-area {
+  @apply flex-1 p-4;
+}

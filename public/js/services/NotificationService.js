@@ -477,10 +477,19 @@ class NotificationService {
             }
         `;
 
-    const styleElement = this.domProvider.createElement('style', {
-      id: 'notification-styles',
-      innerHTML: styles
-    });
+    // Create style element safely, fallback to document.createElement if domProvider is not available
+    let styleElement;
+    if (this.domProvider && typeof this.domProvider.createElement === 'function') {
+      styleElement = this.domProvider.createElement('style', {
+        id: 'notification-styles',
+        innerHTML: styles
+      });
+    } else {
+      // Fallback to native DOM methods
+      styleElement = document.createElement('style');
+      styleElement.id = 'notification-styles';
+      styleElement.innerHTML = styles;
+    }
 
     document.head.appendChild(styleElement);
   }
