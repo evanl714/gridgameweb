@@ -86,7 +86,7 @@ export class EventHandlerService {
    * Register game event handlers (canvas clicks, etc.)
    */
   registerGameEventHandlers() {
-    const domProvider = this.container.get('DOMProvider');
+    const domProvider = this.container.get('domProvider');
     
     // Canvas click handler for grid interactions
     const gameCanvas = domProvider.getElementById('gameCanvas');
@@ -113,7 +113,7 @@ export class EventHandlerService {
    * Register a DOM event handler
    */
   registerHandler(elementId, eventType, handler) {
-    const domProvider = this.container.get('DOMProvider');
+    const domProvider = this.container.get('domProvider');
     const element = domProvider.getElementById(elementId);
     
     if (element) {
@@ -318,7 +318,7 @@ export class EventHandlerService {
    * Cleanup all event handlers
    */
   cleanup() {
-    const domProvider = this.container.get('DOMProvider');
+    const domProvider = this.container.get('domProvider');
     
     for (const [elementId, handlerList] of this.handlers) {
       const element = domProvider.getElementById(elementId);

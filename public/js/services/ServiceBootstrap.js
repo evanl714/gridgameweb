@@ -254,7 +254,7 @@ class ServiceBootstrap {
   async connectGameInstance(gameInstance) {
     try {
       // Register game instance in ServiceContainer for dependency injection
-      this.container.register('game', gameInstance);
+      this.container.register('game', () => gameInstance, { singleton: true });
       console.log('🔗 Game instance registered in ServiceContainer');
       
       const gameStateManager = this.container.get('gameStateManager');

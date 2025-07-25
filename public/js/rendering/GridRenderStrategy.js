@@ -292,7 +292,16 @@ export class GridRenderStrategy extends RenderStrategy {
    * Detect base changes
    */
   detectBaseChanges() {
-    const currentBases = this.gameState.bases || [];
+    // Handle both Map and Array formats for bases
+    let currentBases = [];
+    if (this.gameState.bases instanceof Map) {
+      currentBases = Array.from(this.gameState.bases.values());
+    } else if (Array.isArray(this.gameState.bases)) {
+      currentBases = this.gameState.bases;
+    } else {
+      currentBases = [];
+    }
+    
     const previousBases = this.previousRenderState.get('bases') || [];
 
     if (currentBases.length !== previousBases.length) {
