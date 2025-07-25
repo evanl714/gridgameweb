@@ -241,7 +241,16 @@ export class GridRenderStrategy extends RenderStrategy {
    * Detect unit changes
    */
   detectUnitChanges() {
-    const currentUnits = this.gameState.units || [];
+    // Handle both Map and Array formats for units
+    let currentUnits = [];
+    if (this.gameState.units instanceof Map) {
+      currentUnits = Array.from(this.gameState.units.values());
+    } else if (Array.isArray(this.gameState.units)) {
+      currentUnits = this.gameState.units;
+    } else {
+      currentUnits = [];
+    }
+    
     const previousUnits = this.previousRenderState.get('units') || [];
 
     // Create maps for efficient comparison
@@ -714,7 +723,17 @@ export class GridRenderStrategy extends RenderStrategy {
    * Render bases only in the specified region
    */
   renderBasesToRegion(region) {
-    this.gameState.bases.forEach(base => {
+    // Handle both Map and Array formats for bases
+    let bases = [];
+    if (this.gameState.bases instanceof Map) {
+      bases = Array.from(this.gameState.bases.values());
+    } else if (Array.isArray(this.gameState.bases)) {
+      bases = this.gameState.bases;
+    } else {
+      bases = [];
+    }
+
+    bases.forEach(base => {
       if (this.isPositionInRegion(base, region)) {
         const baseIndex = base.y * this.gridSize + base.x;
         const baseElement = this.gridCells[baseIndex];
@@ -743,7 +762,17 @@ export class GridRenderStrategy extends RenderStrategy {
    * Render units only in the specified region
    */
   renderUnitsToRegion(region) {
-    this.gameState.units.forEach(unit => {
+    // Handle both Map and Array formats for units
+    let units = [];
+    if (this.gameState.units instanceof Map) {
+      units = Array.from(this.gameState.units.values());
+    } else if (Array.isArray(this.gameState.units)) {
+      units = this.gameState.units;
+    } else {
+      units = [];
+    }
+
+    units.forEach(unit => {
       if (this.isPositionInRegion(unit.position, region)) {
         const unitIndex = unit.position.y * this.gridSize + unit.position.x;
         const unitCell = this.gridCells[unitIndex];

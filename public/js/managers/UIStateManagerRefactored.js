@@ -444,18 +444,23 @@ export class UIStateManager {
      * @returns {number} Territory control percentage
      */
   calculateTerritoryControl(playerId) {
+    // Always get fresh state from the bridge to ensure arrays are available
     const gameState = this.gameStateManager.getState();
 
-    if (!gameState.units || !gameState.bases) return 0;
+    // Defensive checks with fallbacks
+    const units = Array.isArray(gameState.units) ? gameState.units : [];
+    const bases = Array.isArray(gameState.bases) ? gameState.bases : [];
+
+    if (units.length === 0 && bases.length === 0) return 0;
 
     // Calculate based on units and bases owned
-    const playerUnits = gameState.units.filter(unit => unit.playerId === playerId).length;
-    const playerBases = gameState.bases.filter(base =>
+    const playerUnits = units.filter(unit => unit.playerId === playerId).length;
+    const playerBases = bases.filter(base =>
       base.playerId === playerId && !base.isDestroyed
     ).length;
 
-    const totalUnits = gameState.units.length;
-    const totalBases = gameState.bases.filter(base => !base.isDestroyed).length;
+    const totalUnits = units.length;
+    const totalBases = bases.filter(base => !base.isDestroyed).length;
 
     if (totalUnits + totalBases === 0) return 0;
 
