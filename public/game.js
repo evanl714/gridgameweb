@@ -16,6 +16,7 @@ import { GameState } from './gameState.js';
 import { TurnManager } from './turnManager.js';
 import { ResourceManager } from './resourceManager.js';
 import { PersistenceManager } from './persistence.js';
+import { UIManager } from './ui/uiManager.js';
 
 // Import lazy loading system
 import { lazyLoader } from './js/patterns/LazyLoader.js';
