@@ -17,6 +17,7 @@ import { TurnManager } from './turnManager.js';
 import { ResourceManager } from './resourceManager.js';
 import { PersistenceManager } from './persistence.js';
 import { UIManager } from './ui/uiManager.js';
+import { VictoryScreen } from './ui/victoryScreen.js';
 
 // Import lazy loading system
 import { lazyLoader } from './js/patterns/LazyLoader.js';
