@@ -4,7 +4,7 @@ import { GameStatus } from './gameStatus.js';
 import { UnitDisplay } from './unitDisplay.js';
 import { BuildPanelSidebar } from './buildPanelSidebar.js';
 import { UnitInfoSidebar } from './unitInfoSidebar.js';
-import { TurnTransition } from './turnTransition.js';
+// import { TurnTransition } from './turnTransition.js';
 
 class UIManager {
   constructor(gameState, turnManager) {
@@ -56,7 +56,7 @@ class UIManager {
     this.components.set('build', new BuildPanelSidebar(this.gameState, this.turnManager));
     this.components.set('unitInfo', new UnitInfoSidebar(this.gameState));
     this.components.set('status', new GameStatus(this.gameState));
-    this.components.set('transition', new TurnTransition(this.gameState));
+    // this.components.set('transition', new TurnTransition(this.gameState));
 
     this.renderComponents();
   }

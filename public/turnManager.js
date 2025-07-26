@@ -115,14 +115,13 @@ export class TurnManager {
      * Advance to the next phase or end turn
      */
   nextPhase() {
-    this.currentPhaseIndex++;
-
-    if (this.currentPhaseIndex >= this.phases.length) {
+    if (this.currentPhaseIndex + 1 >= this.phases.length) {
       // All phases complete, end turn
       this.endTurn();
       return;
     }
 
+    this.currentPhaseIndex++;
     const newPhase = this.phases[this.currentPhaseIndex];
     this.gameState.currentPhase = newPhase;
 
