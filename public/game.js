@@ -196,6 +196,10 @@ class Game {
           players: state.players || []
         };
       },
+      removeAllListeners: function() {
+        this._listeners.clear();
+        return this;
+      },
       initialized: true,
       // Additional GameStateManager interface methods
       getPlayerResources: () => {
@@ -256,6 +260,10 @@ class Game {
         }
         return this;
       },
+      removeAllListeners: function() {
+        this._listeners.clear();
+        return this;
+      },
       // Add missing TurnManagerService interface methods
       getCurrentTurnInfo: () => {
         const gameState = this.gameState;
@@ -309,6 +317,10 @@ class Game {
             this._listeners.delete(event);
           }
         }
+        return this;
+      },
+      removeAllListeners: function() {
+        this._listeners.clear();
         return this;
       },
       // Add missing TurnManagerService interface methods
@@ -609,6 +621,10 @@ class Game {
           players: state.players || []
         };
       },
+      removeAllListeners: function() {
+        this._listeners.clear();
+        return this;
+      },
       initialized: true,
       // Additional GameStateManager interface methods
       getPlayerResources: () => {
@@ -669,6 +685,10 @@ class Game {
         }
         return this;
       },
+      removeAllListeners: function() {
+        this._listeners.clear();
+        return this;
+      },
       // Add missing TurnManagerService interface methods
       getCurrentTurnInfo: () => {
         const gameState = this.gameState;
@@ -722,6 +742,10 @@ class Game {
             this._listeners.delete(event);
           }
         }
+        return this;
+      },
+      removeAllListeners: function() {
+        this._listeners.clear();
         return this;
       },
       // Add missing TurnManagerService interface methods
